@@ -1,0 +1,123 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html{
+    scroll-padding-top: 160px;
+    scroll-behavior: smooth;
+}
+
+:root {
+    --cream: #F5E8DE;
+    --cream-light: #FBF3EC;
+    --nude: #E8D5C8;
+    --rose-mauve: #A56B82;
+    --rose-mauve-dark: #8B4A6B;
+    --copper: #C08870;
+    --copper-soft: #D4A391;
+    --text-dark: #2B2B2B;
+    --text-soft: #5E4D47;
+    --white: #FFFFFF;
+
+    --font-script: 'Allura', cursive;
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-sans: 'Poppins', sans-serif;
+}
+
+body{
+    background-color: var(--cream);
+    color: var(--text-dark);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+a{
+    color: var(--rose-mauve);
+    text-decoration: none;
+}
+
+a:hover{
+    color: var(--rose-mauve-dark);
+}
+
+ul{
+    list-style: none;
+}
+
+h1{
+    font-family: var(--font-script);
+    font-size: 80px;
+    color: var(--rose-mauve-dark);
+}
+
+h2{
+    font-family: var(--font-serif);
+    font-size: 48px;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+}
+
+header{
+    background-color: var(--cream);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--nude);
+}
+
+.logo h1{
+    font-family: var(--font-script);
+    font-size: 28px;
+    color: var(--rose-mauve-dark);
+    line-height: 1;
+}
+
+.logo p{
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--copper);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+nav ul{
+    display: flex;
+    gap: 32px;
+}
+
+nav a{
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+nav a:hover{
+    color: var(--rose-mauve);
+}
+
+main{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+section{
+    padding: 80px 0;
+    border-bottom: 1px solid var(--nude);
+}
+
+section:last-child{
+    border-bottom: none;
+}
+
+article{
+    margin-bottom: 32px;
+}
