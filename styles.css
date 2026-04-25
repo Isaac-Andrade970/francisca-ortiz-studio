@@ -123,8 +123,72 @@ article{
 }
 
 .hero{
-    text-align: center;
-    padding: 6rem 0;
+    padding: 5rem 0;
+}
+
+.hero-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-content .eyebrow{
+    text-align: left;
+}
+
+.hero h2{
+    font-size: 4rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero h2 .script{
+    font-family: var(--font-script);
+    color: var(--rose-mauve);
+    font-size: 5rem;
+    font-weight: 400;
+    display: block;
+}
+
+.hero-content .lead{
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+}
+
+.hero-actions{
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.hero-image{
+    aspect-ratio: 4 / 5;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(139, 74, 107, 0.15);
+}
+
+.hero-image img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 768px){
+    .hero-grid{
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .hero-image{
+        aspect-ratio: 4 / 3;
+        order: -1;
+    }
 }
 
 .eyebrow{
@@ -574,3 +638,27 @@ footer h4{
     }
 }
 
+/* APARTADO BOTON WSP */
+
+.whatsapp-float{
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.4);
+    z-index: 99;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.whatsapp-float:hover{
+    transform: scale(1.08);
+    box-shadow: 0 8px 32px rgba(37, 211, 102, 0.5);
+    color: var(--white);
+}
