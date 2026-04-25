@@ -11,8 +11,10 @@
 <body>
 
     <header>
-        <h1>Francisca Ortiz</h1>
-        <p>Peluqueria y Manicure</p>
+        <div class="logo">
+            <h1>Francisca Ortiz</h1>
+            <p>Peluqueria y Manicure</p>
+        </div>    
         <nav>
             <ul>
                 <li><a href="#inicio">Inicio</a></li>
@@ -24,9 +26,14 @@
     </header>
 
     <main>
-        <section id="inicio">
-            <h2>Tu belleza, nuestro arte</h2>
-            <p>Un espacio íntimo dedicado a ti. Cortes, color, manicure y tratamientos pensados para resaltar lo que ya te hace única.</p>
+        <section id="inicio" class="hero">
+            <p class="eyebrow">Peluquería y Manicure</p>
+            <h2>Tu belleza, <span class="script">nuestro arte</span></h2>
+            <p class="lead">Un espacio íntimo dedicado a ti. Cortes, color, manicure y tratamientos pensados para resaltar lo que ya te hace única.</p>
+            <div class="hero-actions">
+                <a href="#reservar" class="btn btn-primary">Reservar hora</a>
+                <a href="#servicios" class="btn btn-secondary">Ver servicios</a>
+            </div>
         </section>
 
         <section id="servicios">

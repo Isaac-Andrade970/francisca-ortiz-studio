@@ -121,3 +121,80 @@ section:last-child{
 article{
     margin-bottom: 32px;
 }
+
+.hero{
+    text-align: center;
+    padding: 6rem 0;
+}
+
+.eyebrow{
+    color: var(--copper);
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.hero h2{
+    font-size: 4rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero h2 .script{
+    font-family: var(--font-script);
+    color: var(--rose-mauve);
+    font-size: 5rem;
+    font-weight: 400;
+}
+
+.lead{
+    font-size: 1.125rem;
+    color: var(--text-soft);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+}
+
+.hero-actions{
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/*BOTONES ACA*/
+
+.btn{
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--rose-mauve);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--rose-mauve-dark);
+    color: var(--white);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--rose-mauve-dark);
+    border: 1.5px solid var(--rose-mauve);
+}
+
+.btn-secondary:hover {
+    background-color: var(--rose-mauve);
+    color: var(--white);
+}
+
