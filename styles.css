@@ -119,6 +119,11 @@ section:last-child{
     border-bottom: none;
 }
 
+.section-cta{
+    text-align: center;
+    margin-top: 3rem;
+}
+
 article{
     margin-bottom: 32px;
 }
@@ -752,3 +757,43 @@ footer h4{
     }
 }
 
+/* APARTADO DE PAGINAS INTERNAS */
+
+.page-header{
+    text-align: center;
+    padding: 4rem 0 3rem;
+}
+
+.services-page,
+.shop-page{
+    padding-bottom: 4rem;
+}
+
+.category-title{
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--rose-mauve-dark);
+    margin: 3rem 0 1.5rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--copper);
+}
+
+.category-title:first-of-type{
+    margin-top: 0;
+}
+
+.services-cta{
+    text-align: center;
+    margin-top: 5rem;
+    padding: 3rem;
+    background-color: var(--cream-light);
+    border-radius: 1.5rem;
+}
+
+.services-cta p{
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
