@@ -364,3 +364,122 @@ article{
         font-size: 3rem;
     }
 }
+
+/* APARTADO DE CONTACTO */
+
+.contact-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.contact-info h2{
+    margin-bottom: 1rem;
+}
+
+.contact-info .lead{
+    margin-bottom: 2.5rem;
+}
+
+.contact-list li{
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--nude);
+}
+
+.contact-list li:last-chil{
+    border-bottom: none;
+}
+
+.contact-label{
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+}
+
+.contact-list a{
+    font-size: 1.05rem;
+    color: var(--text-dark);
+}
+
+.contact-list a:hover{
+    color: var(--rose-mauve);
+}
+
+.hours-box{
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(139, 74, 107, 0.08);
+}
+
+.hours-box h3{
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.hours-box .script{
+    font-family: var(--font-script);
+    color: var(--rose-mauve);
+    font-size: 2.25rem;
+    font-weight: 400;
+}
+
+.hours-list li{
+    display: flex;
+    justify-content: space-between;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--cream);
+    font-size: 0.95rem;
+}
+
+.hours-list li:last-child{
+    border-bottom: none;
+}
+
+.hours-list li span:first-child{
+    color: var(--text-soft);
+}
+
+.hours-list li span:last-child{
+    color: var(--rose-mauve-dark);
+    font-weight: 500;
+}
+
+@media (max-width: 768px){
+    .contact-grid{
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+}
+
+/* APARTADO DEL MAPA */
+
+.map-wrapper{
+    margin-top: 4rem;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(139, 74, 107, 0.08);
+    aspect-ratio: 16 / 9;
+}
+
+.map-wrapper iframe{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+@media (max-width: 768px){
+    .map-wrapper{
+        margin-top: 2.5rem;
+        aspect-ratio: 4 / 3;
+    }
+}
