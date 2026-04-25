@@ -198,3 +198,68 @@ article{
     color: var(--white);
 }
 
+/* APARTADO DE SERVICIOS */
+
+.services-section {
+    text-align: center;
+}
+
+.services-section > .lead {
+    margin-bottom: 4rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+.service-card {
+    background-color: var(--white);
+    padding: 2rem;
+    border-radius: 1.25rem;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+}
+
+.service-card:hover {
+    border-color: var(--copper-soft);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(139, 74, 107, 0.08);
+}
+
+.service-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.service-card p {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.price {
+    color: var(--rose-mauve-dark);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.duration {
+    color: var(--copper);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
