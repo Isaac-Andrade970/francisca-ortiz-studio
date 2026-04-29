@@ -338,6 +338,9 @@ article{
 .products-section{
     text-align: center;
     background-color: var(--cream-light);
+    padding: 4rem 2rem;
+    border-radius: 2rem;
+    margin-bottom: 4rem;
 }
 
 .products-section > .lead{
@@ -375,11 +378,12 @@ article{
     font-size: 0.75rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+    width: 100%;
 }
 
-.product-card .product-band,
+.product-band,
 .product-card h3,
-.product-card .product-price{
+.product-price{
     padding-left: 1.25rem;
     padding-right: 1.25rem;
 }
@@ -757,7 +761,7 @@ footer h4{
     }
 }
 
-/* APARTADO DE PAGINAS INTERNAS */
+/* APARTADO DE PAGINA SERVICIOS */
 
 .page-header{
     text-align: center;
@@ -796,4 +800,85 @@ footer h4{
     font-size: 1.5rem;
     color: var(--text-dark);
     margin-bottom: 1.5rem;
+}
+
+/* APARTADO PAGINA TIENDA */
+
+.filters{
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+.filter-btn{
+    background-color: transparent;
+    color: var(--text-soft);
+    border: 1.5px solid var(--nude);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover{
+    border-color: var(--rose-mauve);
+    color: var(--rose-mauve-dark);
+}
+
+.filter-btn.active{
+    background-color: var(--rose-mauve);
+    color: var(--white);
+    border-color: var(--rose-mauve);
+}
+
+.shop-grid{
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.product-card.hidden{
+    display: none;
+}
+
+.shop-info{
+    margin-top: 5rem;
+    padding: 3rem;
+    background-color: var(--cream-light);
+    border-radius: 1.5rem;
+    text-align: center;
+}
+
+.shop-info h3{
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--rose-mauve-dark);
+}
+
+.shop-info p{
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px){
+    .shop-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px){
+    .products-section,
+    .shop-page{
+        padding: 2.5rem 1rem;
+    }
 }
