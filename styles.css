@@ -9,7 +9,7 @@ html{
     scroll-behavior: smooth;
 }
 
-:root {
+:root{
     --cream: #F5E8DE;
     --cream-light: #FBF3EC;
     --nude: #E8D5C8;
@@ -47,18 +47,14 @@ ul{
     list-style: none;
 }
 
-h1{
-    font-family: var(--font-script);
-    font-size: 80px;
-    color: var(--rose-mauve-dark);
-}
-
 h2{
     font-family: var(--font-serif);
     font-size: 48px;
     color: var(--text-dark);
     margin-bottom: 24px;
 }
+
+/* ===== HEADER ===== */
 
 header{
     background-color: var(--cream);
@@ -72,20 +68,15 @@ header{
     border-bottom: 1px solid var(--nude);
 }
 
-.logo h1{
-    font-family: var(--font-script);
-    font-size: 28px;
-    color: var(--rose-mauve-dark);
-    line-height: 1;
+.logo{
+    display: block;
+    line-height: 0;
 }
 
-.logo p{
-    font-size: 9px;
-    letter-spacing: 0.3em;
-    color: var(--copper);
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-top: 2px;
+.logo img{
+    height: 70px;
+    width: auto;
+    display: block;
 }
 
 nav ul{
@@ -128,6 +119,24 @@ article{
     margin-bottom: 32px;
 }
 
+.eyebrow{
+    color: var(--copper);
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.lead{
+    font-size: 1.125rem;
+    color: var(--text-soft);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+}
+
+/* ===== HERO ===== */
+
 .hero{
     padding: 5rem 0;
 }
@@ -143,13 +152,16 @@ article{
     text-align: left;
 }
 
-.hero h2{
+.hero h1{
+    font-family: var(--font-serif);
     font-size: 4rem;
     line-height: 1.1;
     margin-bottom: 1.5rem;
+    color: var(--text-dark);
+    font-weight: 400;
 }
 
-.hero h2 .script{
+.hero h1 .script{
     font-family: var(--font-script);
     color: var(--rose-mauve);
     font-size: 5rem;
@@ -185,55 +197,7 @@ article{
     display: block;
 }
 
-@media (max-width: 768px){
-    .hero-grid{
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-    }
-
-    .hero-image{
-        aspect-ratio: 4 / 3;
-        order: -1;
-    }
-}
-
-.eyebrow{
-    color: var(--copper);
-    font-size: 0.75rem;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-}
-
-.hero h2{
-    font-size: 4rem;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-}
-
-.hero h2 .script{
-    font-family: var(--font-script);
-    color: var(--rose-mauve);
-    font-size: 5rem;
-    font-weight: 400;
-}
-
-.lead{
-    font-size: 1.125rem;
-    color: var(--text-soft);
-    max-width: 600px;
-    margin: 0 auto 2.5rem;
-}
-
-.hero-actions{
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-/*BOTONES ACA*/
+/* ===== BOTONES ===== */
 
 .btn{
     display: inline-block;
@@ -268,7 +232,7 @@ article{
     color: var(--white);
 }
 
-/* APARTADO DE SERVICIOS */
+/* ===== APARTADO DE SERVICIOS ===== */
 
 .services-section{
     text-align: center;
@@ -327,13 +291,7 @@ article{
     font-weight: 500;
 }
 
-@media (max-width: 768px){
-    .services-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* APARTADO DE PRODUCTOS */
+/* ===== APARTADO DE PRODUCTOS ===== */
 
 .products-section{
     text-align: center;
@@ -349,7 +307,7 @@ article{
 
 .products-grid{
     display: grid;
-    grid-template-columns: repeat(4,1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
     text-align: left;
 }
@@ -381,14 +339,14 @@ article{
     width: 100%;
 }
 
-.product-band,
+.product-brand,
 .product-card h3,
 .product-price{
     padding-left: 1.25rem;
     padding-right: 1.25rem;
 }
 
-.product-band{
+.product-brand{
     font-size: 0.7rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -414,32 +372,7 @@ article{
     margin-top: auto;
 }
 
-@media (max-width: 768px){
-    .products-grid{
-        grid-template-columns: repeat(2,1fr);
-    }
-}
-
-@media (max-width: 768px){
-    header{
-        padding: 1rem 1.25rem;
-        flex-wrap: wrap;
-    }
-
-    nav ul{
-        gap: 1rem;
-    }
-
-    .hero h2{
-        font-size: 2.5rem;
-    }
-
-    .hero h2 .script{
-        font-size: 3rem;
-    }
-}
-
-/* APARTADO DE CONTACTO */
+/* ===== APARTADO DE CONTACTO ===== */
 
 .contact-grid{
     display: grid;
@@ -461,7 +394,7 @@ article{
     border-bottom: 1px solid var(--nude);
 }
 
-.contact-list li:last-chil{
+.contact-list li:last-child{
     border-bottom: none;
 }
 
@@ -527,14 +460,7 @@ article{
     font-weight: 500;
 }
 
-@media (max-width: 768px){
-    .contact-grid{
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-    }
-}
-
-/* APARTADO DEL MAPA */
+/* ===== APARTADO DEL MAPA ===== */
 
 .map-wrapper{
     margin-top: 4rem;
@@ -551,14 +477,7 @@ article{
     display: block;
 }
 
-@media (max-width: 768px){
-    .map-wrapper{
-        margin-top: 2.5rem;
-        aspect-ratio: 4 / 3;
-    }
-}
-
-/* APARTADO DE FOOTER */
+/* ===== APARTADO DE FOOTER ===== */
 
 footer{
     background-color: var(--rose-mauve-dark);
@@ -569,34 +488,26 @@ footer{
 
 .footer-grid{
     max-width: 1100px;
-    margin: 0 auto;
+    margin: 0 auto 3rem;
     padding: 0 24px;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
     gap: 4rem;
-    margin-bottom: 3rem;
 }
 
-footer .logo h2{
-    font-family: var(--font-script);
-    font-size: 2rem;
-    color: var(--cream);
-    line-height: 1;
-    font-weight: 400;
-    margin-bottom: 0;
+.footer-logo{
+    display: block;
+    line-height: 0;
 }
 
-footer .logo p{
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--copper-soft);
-    font-weight: 500;
-    margin-top: 0.25rem;
+.footer-logo img{
+    height: 80px;
+    width: auto;
+    display: block;
 }
 
 .footer-about{
-    color:  rgba(245, 232, 222, 0.7);
+    color: rgba(245, 232, 222, 0.7);
     margin-top: 1.5rem;
     font-size: 0.95rem;
     max-width: 320px;
@@ -641,14 +552,7 @@ footer h4{
     color: rgba(245, 232, 222, 0.5);
 }
 
-@media (max-width: 768px){
-    .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-}
-
-/* APARTADO BOTON WSP */
+/* ===== APARTADO BOTON WSP ===== */
 
 .whatsapp-float{
     position: fixed;
@@ -673,7 +577,7 @@ footer h4{
     color: var(--white);
 }
 
-/* ANIMACIONES DE PAGINA */
+/* ===== ANIMACIONES DE PAGINA ===== */
 
 .fade-in{
     opacity: 0;
@@ -686,7 +590,7 @@ footer h4{
     transform: translateY(0);
 }
 
-/* APARTADO DE GALERIA */
+/* ===== APARTADO DE GALERIA ===== */
 
 .gallery-section{
     text-align: center;
@@ -748,24 +652,27 @@ footer h4{
     border-color: var(--rose-mauve);
 }
 
-@media (max-width: 768px){
-    .gallery-grid{
-        grid-template-columns: repeat(2,1fr);
-        grid-template-rows: 180px 180px 180px 180px;
-    }
-
-    .gallery-item-1,
-    .gallery-item-4{
-        grid-row: auto;
-        grid-column: auto;
-    }
-}
-
-/* APARTADO DE PAGINA SERVICIOS */
+/* ===== APARTADO DE PAGINA SERVICIOS ===== */
 
 .page-header{
     text-align: center;
     padding: 4rem 0 3rem;
+}
+
+.page-header h1{
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    line-height: 1.1;
+    color: var(--text-dark);
+    font-weight: 400;
+    margin-bottom: 0;
+}
+
+.page-header h1 .script{
+    font-family: var(--font-script);
+    color: var(--rose-mauve);
+    font-size: 4.5rem;
+    font-weight: 400;
 }
 
 .services-page,
@@ -802,7 +709,7 @@ footer h4{
     margin-bottom: 1.5rem;
 }
 
-/* APARTADO PAGINA TIENDA */
+/* ===== APARTADO PAGINA TIENDA ===== */
 
 .filters{
     display: flex;
@@ -870,15 +777,88 @@ footer h4{
     margin-right: auto;
 }
 
-@media (max-width: 768px){
-    .shop-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+/* ===== MEDIA QUERIES (RESPONSIVE) ===== */
 
 @media (max-width: 768px){
+    header {
+        padding: 1rem 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    nav ul {
+        gap: 1rem;
+    }
+
+    .logo img {
+        height: 50px;
+    }
+
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .hero-image {
+        aspect-ratio: 4 / 3;
+        order: -1;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero h1 .script {
+        font-size: 3rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .page-header h1 .script {
+        font-size: 3rem;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .products-section,
-    .shop-page{
+    .shop-page {
         padding: 2.5rem 1rem;
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .map-wrapper {
+        margin-top: 2.5rem;
+        aspect-ratio: 4 / 3;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: 180px 180px 180px 180px;
+    }
+
+    .gallery-item-1,
+    .gallery-item-4 {
+        grid-row: auto;
+        grid-column: auto;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
