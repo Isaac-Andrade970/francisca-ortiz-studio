@@ -54,7 +54,7 @@ h2{
     margin-bottom: 24px;
 }
 
-/* ===== HEADER ===== */
+/* APARTADO DEL HEADER */
 
 header{
     background-color: var(--cream);
@@ -135,7 +135,7 @@ article{
     margin: 0 auto 2.5rem;
 }
 
-/* ===== HERO ===== */
+/* APARTADO DEL HERO */
 
 .hero{
     padding: 5rem 0;
@@ -197,7 +197,7 @@ article{
     display: block;
 }
 
-/* ===== BOTONES ===== */
+/* APARTADO DE BOTONES */
 
 .btn{
     display: inline-block;
@@ -232,7 +232,20 @@ article{
     color: var(--white);
 }
 
-/* ===== APARTADO DE SERVICIOS ===== */
+.btn-nav{
+    background-color: var(--rose-mauve);
+    color: var(--white) !important;
+    padding: 0.6rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 500;
+}
+
+.btn-nav:hover{
+    background-color: var(--rose-mauve-dark);
+    color: var(--white) !important;
+}
+
+/* APARTADO DE SERVICIOS */
 
 .services-section{
     text-align: center;
@@ -291,7 +304,7 @@ article{
     font-weight: 500;
 }
 
-/* ===== APARTADO DE PRODUCTOS ===== */
+/* APARTADO DE PRODUCTOS */
 
 .products-section{
     text-align: center;
@@ -372,7 +385,7 @@ article{
     margin-top: auto;
 }
 
-/* ===== APARTADO DE CONTACTO ===== */
+/* APARTADO DE CONTACTO */
 
 .contact-grid{
     display: grid;
@@ -460,7 +473,7 @@ article{
     font-weight: 500;
 }
 
-/* ===== APARTADO DEL MAPA ===== */
+/* APARTADO DEL MAPA */
 
 .map-wrapper{
     margin-top: 4rem;
@@ -477,7 +490,7 @@ article{
     display: block;
 }
 
-/* ===== APARTADO DE FOOTER ===== */
+/* APARTADO DE FOOTER */
 
 footer{
     background-color: var(--rose-mauve-dark);
@@ -552,7 +565,7 @@ footer h4{
     color: rgba(245, 232, 222, 0.5);
 }
 
-/* ===== APARTADO BOTON WSP ===== */
+/* APARTADO BOTON WSP */
 
 .whatsapp-float{
     position: fixed;
@@ -577,7 +590,7 @@ footer h4{
     color: var(--white);
 }
 
-/* ===== ANIMACIONES DE PAGINA ===== */
+/* ANIMACIONES DE PAGINA */
 
 .fade-in{
     opacity: 0;
@@ -590,7 +603,7 @@ footer h4{
     transform: translateY(0);
 }
 
-/* ===== APARTADO DE GALERIA ===== */
+/* APARTADO DE GALERIA */
 
 .gallery-section{
     text-align: center;
@@ -652,7 +665,7 @@ footer h4{
     border-color: var(--rose-mauve);
 }
 
-/* ===== APARTADO DE PAGINA SERVICIOS ===== */
+/* APARTADO DE PAGINA SERVICIOS */
 
 .page-header{
     text-align: center;
@@ -709,7 +722,7 @@ footer h4{
     margin-bottom: 1.5rem;
 }
 
-/* ===== APARTADO PAGINA TIENDA ===== */
+/* APARTADO PAGINA TIENDA */
 
 .filters{
     display: flex;
@@ -776,8 +789,6 @@ footer h4{
     margin-left: auto;
     margin-right: auto;
 }
-
-/* ===== MEDIA QUERIES (RESPONSIVE) ===== */
 
 @media (max-width: 768px){
     header {
@@ -860,5 +871,633 @@ footer h4{
 
     .shop-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* APARTADO PÁGINA RESERVAR */
+
+.booking-page{
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem;
+    padding-bottom: 4rem;
+    align-items: start;
+}
+
+.booking-stepper{
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--nude);
+    position: relative;
+}
+
+.booking-stepper::before{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 2px;
+    background-color: var(--nude);
+    z-index: 0;
+}
+
+.step{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1;
+    background-color: var(--cream);
+    padding: 0 1rem;
+}
+
+.step-number{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--white);
+    border: 2px solid var(--nude);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-soft);
+    transition: all 0.3s;
+}
+
+.step-label{
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    font-weight: 500;
+}
+
+.step.active .step-number{
+    background-color: var(--rose-mauve);
+    border-color: var(--rose-mauve);
+    color: var(--white);
+}
+
+.step.active .step-label{
+    color: var(--rose-mauve-dark);
+    font-weight: 600;
+}
+
+.step.completed .step-number{
+    background-color: var(--copper);
+    border-color: var(--copper);
+    color: var(--white);
+}
+
+/* APARTADO DE SELECCIÓN DE SERVICIO */
+
+.booking-step{
+    display: none;
+}
+
+.booking-step.active{
+    display: block;
+}
+
+.step-title{
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.step-description{
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.services-selection{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.service-option{
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 2px solid var(--nude);
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 0;
+}
+
+.service-option:hover{
+    border-color: var(--copper-soft);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 74, 107, 0.06);
+}
+
+.service-option.selected{
+    border-color: var(--rose-mauve);
+    background-color: var(--cream-light);
+    box-shadow: 0 4px 16px rgba(139, 74, 107, 0.12);
+}
+
+.service-option h3{
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.service-option p{
+    color: var(--text-soft);
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.service-meta{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+}
+
+.service-option .price{
+    color: var(--rose-mauve-dark);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.service-option .duration{
+    color: var(--copper);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* ACCIONES DE NAVEGACIÓN */
+
+.booking-actions{
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--nude);
+}
+
+.booking-actions .btn-secondary{
+    margin-right: auto;
+}
+
+.booking-actions .btn-primary{
+    margin-left: auto;
+}
+
+.btn:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* APARTADO DE CALENDARIO Y HORARIOS */
+
+.calendar-wrapper{
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--nude);
+    margin-bottom: 2rem;
+}
+
+.calendar-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-month{
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.calendar-nav{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--nude);
+    background-color: var(--white);
+    color: var(--rose-mauve-dark);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-nav:hover{
+    background-color: var(--cream-light);
+    border-color: var(--rose-mauve);
+}
+
+.calendar-weekdays{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-weekdays span{
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 500;
+    padding: 0.5rem 0;
+}
+
+.calendar-grid{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+}
+
+.calendar-day{
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    color: var(--text-dark);
+    transition: all 0.2s;
+    font-family: var(--font-sans);
+}
+
+.calendar-day:hover:not(.disabled):not(.empty){
+    background-color: var(--cream);
+    border-color: var(--copper-soft);
+}
+
+.calendar-day.empty{
+    cursor: default;
+}
+
+.calendar-day.disabled{
+    color: rgba(94, 77, 71, 0.25);
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.calendar-day.today{
+    border-color: var(--copper);
+    font-weight: 600;
+    color: var(--rose-mauve-dark);
+}
+
+.calendar-day.selected{
+    background-color: var(--rose-mauve);
+    color: var(--white);
+    border-color: var(--rose-mauve);
+    font-weight: 500;
+}
+
+.calendar-day.has-availability{
+    position: relative;
+}
+
+.calendar-day.has-availability::after{
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--copper);
+}
+
+.calendar-day.selected.has-availability::after{
+    background-color: var(--white);
+}
+
+/* APARTADO DE TIME SLOTS */
+
+.time-slots-wrapper{
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--nude);
+}
+
+.slots-title{
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.slots-help{
+    color: var(--text-soft);
+    font-size: 0.875rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.time-slots{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.time-slot{
+    padding: 0.75rem 0.5rem;
+    background-color: var(--white);
+    border: 1.5px solid var(--nude);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+}
+
+.time-slot:hover:not(.disabled){
+    border-color: var(--copper-soft);
+    background-color: var(--cream-light);
+}
+
+.time-slot.selected{
+    background-color: var(--rose-mauve);
+    color: var(--white);
+    border-color: var(--rose-mauve);
+    font-weight: 500;
+}
+
+.time-slot.disabled{
+    background-color: var(--cream-light);
+    color: rgba(94, 77, 71, 0.3);
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+@media (max-width: 768px){
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* APARTADO DE FORMULARIO */
+
+.booking-form{
+    margin-bottom: 2rem;
+}
+
+.form-field{
+    margin-bottom: 1.25rem;
+}
+
+.form-field label{
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-field input,
+.form-field textarea{
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 0.75rem;
+    background-color: var(--white);
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+}
+
+.form-field input:focus,
+.form-field textarea:focus{
+    outline: none;
+    border-color: var(--rose-mauve);
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder{
+    color: rgba(94, 77, 71, 0.4);
+}
+
+.form-field textarea{
+    resize: vertical;
+    min-height: 100px;
+    font-family: var(--font-sans);
+}
+
+.form-field-checkbox{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.form-field-checkbox input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    accent-color: var(--rose-mauve);
+    cursor: pointer;
+}
+
+.form-field-checkbox label{
+    font-size: 0.875rem;
+    color: var(--text-soft);
+    margin-bottom: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+/* APARTADO DE CONFIRMACIÓN */
+
+.booking-success{
+    text-align: center;
+    padding: 2rem;
+}
+
+.success-icon{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--rose-mauve);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.booking-success h2{
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.booking-success > p{
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+}
+
+.booking-summary{
+    background-color: var(--cream-light);
+    padding: 1.75rem;
+    border-radius: 1rem;
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto 2rem;
+}
+
+.booking-summary h3{
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.booking-summary ul{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.booking-summary li{
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--nude);
+    font-size: 0.95rem;
+}
+
+.booking-summary li:last-child{
+    border-bottom: none;
+}
+
+/* SIDEBAR DE RESUMEN EN VIVO */
+
+.booking-summary-sidebar{
+    background-color: var(--white);
+    padding: 1.75rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--nude);
+    position: sticky;
+    top: 100px;
+    align-self: start;
+}
+
+.booking-summary-sidebar h3{
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--nude);
+}
+
+.summary-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.summary-list li{
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0;
+}
+
+.summary-label{
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 500;
+}
+
+.summary-value{
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.summary-total{
+    margin-top: 1rem !important;
+    padding-top: 1rem;
+    border-top: 1px solid var(--nude);
+}
+
+.summary-total .summary-value{
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--rose-mauve-dark);
+    font-weight: 600;
+}
+
+/* APARTADO RESPONSIVE PARA RESERVAR */
+
+@media (max-width: 900px){
+    .booking-page{
+        grid-template-columns: 1fr;
+    }
+
+    .booking-summary-sidebar{
+        position: static;
+        order: -1;
+    }
+
+    .services-selection{
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px){
+    .booking-stepper{
+        gap: 0.5rem;
+    }
+
+    .step{
+        padding: 0 0.25rem;
+    }
+
+    .step-label{
+        font-size: 0.65rem;
+        display: none;
+    }
+
+    .step.active .step-label{
+        display: block;
     }
 }
