@@ -237,20 +237,63 @@ function irAPaso(numeroPaso) {
     }
 
     
-    document.getElementById('confirm-booking')?.addEventListener('click', () => {
+        document.getElementById('confirm-booking')?.addEventListener('click', async () => {
         const form = document.getElementById('booking-form');
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
 
-        
-        document.getElementById('summary-service').textContent = reserva.servicioNombre;
-        document.getElementById('summary-date').textContent = reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-        document.getElementById('summary-time').textContent = reserva.hora;
-        document.getElementById('summary-name').textContent = document.getElementById('client-name').value;
+        const boton = document.getElementById('confirm-booking');
+        boton.disabled = true;
+        boton.textContent = 'Procesando...';
 
-        irAPaso(4);
+        const [horas, minutos] = reserva.hora.split(':').map(Number);
+        const fechaInicio = new Date(reserva.fecha);
+        fechaInicio.setHours(horas, minutos, 0, 0);
+
+        const fechaFin = new Date(fechaInicio);
+        fechaFin.setMinutes(fechaFin.getMinutes() + reserva.duracion);
+
+        const datosReserva = {
+            cliente: document.getElementById('client-name').value,
+            telefono: document.getElementById('client-phone').value,
+            email: document.getElementById('client-email').value,
+            servicio: reserva.servicioNombre,
+            notas: document.getElementById('client-notes').value,
+            inicio: fechaInicio.toISOString(),
+            fin: fechaFin.toISOString()
+        };
+
+        try {
+            const respuesta = await fetch('http://localhost:3000/api/reservas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datosReserva)
+            });
+
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok) {
+                throw new Error(resultado.error || 'Error al crear la reserva');
+            }
+
+            document.getElementById('summary-service').textContent = reserva.servicioNombre;
+            document.getElementById('summary-date').textContent = reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('summary-time').textContent = reserva.hora;
+            document.getElementById('summary-name').textContent = datosReserva.cliente;
+
+            irAPaso(4);
+
+        } catch (error) {
+            console.error('Error al confirmar reserva:', error);
+            alert('Hubo un problema al confirmar tu reserva. Por favor intenta de nuevo o contáctanos por WhatsApp.');
+
+            boton.disabled = false;
+            boton.textContent = 'Confirmar reserva';
+        }
     });
 
 }
