@@ -172,16 +172,47 @@ function irAPaso(numeroPaso) {
         renderCalendario();
     });
 
-    function seleccionarDia(fecha, celda) {
+    async function seleccionarDia(fecha, celda) {
         document.querySelectorAll('.calendar-day').forEach((d) => d.classList.remove('selected'));
         celda.classList.add('selected');
 
         reserva.fecha = fecha;
+
+        const slotsContainer = document.getElementById('time-slots');
+        const helpText = document.querySelector('.slots-help');
+        helpText.textContent = 'Consultando disponibilidad...';
+        slotsContainer.innerHTML = '';
+
+        const HorariosOcupados = await obtenerHorariosOcupados(fecha);
         renderHorarios(fecha);
         actualizarSidebar();
     }
 
-    function renderHorarios(fecha) {
+    async function obtenerHorariosOcupados(fecha) {
+        try{
+            const año = fecha.getFullYear();
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const fechaTexto = `${año}-${mes}-${dia}`;
+
+            const url = `http://localhost:3000/api/reservas/disponibilidad?fecha=${fechaTexto}`;
+            const respuesta = await fetch(url);
+
+            if (!respuesta.ok){
+                console.error('Error al consultar disponibilidad');
+                return[];
+            }
+
+            const datos = await respuesta.json();
+            return datos.ocupados || [];
+
+        } catch (error){
+            console.error('Error de red al consultar disponibilidad:', error);
+            return[];
+        }
+    }
+
+    function renderHorarios(fecha, horariosOcupados = []) {
         const slotsContainer = document.getElementById('time-slots');
         const helpText = document.querySelector('.slots-help');
 
@@ -191,29 +222,63 @@ function irAPaso(numeroPaso) {
         slotsContainer.innerHTML = '';
 
         if (!horario) {
-            helpText.textContent = 'Este día no atendemos.';
-            return;
+        helpText.textContent = 'Este día no atendemos.';
+        return;
         }
 
-        helpText.textContent = `Horarios disponibles para ${fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })}.`;
+        const ocupados = horariosOcupados.map((evento) => ({
+            inicio: new Date(evento.inicio),
+            fin: new Date(evento.fin)
+        }));
 
-        for (let h = horario.inicio; h < horario.fin; h += 0.5) {
-            const horaTermino = h + (reserva.duracion / 60);
-            if (horaTermino > horario.fin) break;
+        const duracionBloque = Math.max(reserva.duracion, 120);
+        const incrementoSlot = duracionBloque / 60;
 
-            const horas = Math.floor(h);
-            const minutos = (h % 1) * 60;
-            const horaTexto = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
+        let slotsCreados = 0;
 
-            const slot = document.createElement('div');
-            slot.classList.add('time-slot');
-            slot.textContent = horaTexto;
+        for (let h = horario.inicio; h < horario.fin; h += incrementoSlot) {
 
+        const horaTerminoNumero = h + incrementoSlot;
+
+        if (horaTerminoNumero > horario.fin) break;
+
+        const horas = Math.floor(h);
+        const minutos = (h % 1) * 60;
+        const horaTexto = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
+
+        const inicioSlot = new Date(fecha);
+        inicioSlot.setHours(horas, minutos, 0, 0);
+
+        const finSlot = new Date(inicioSlot);
+        finSlot.setMinutes(finSlot.getMinutes() + duracionBloque);
+
+        const ocupado = ocupados.some((evento) => {
+                return inicioSlot < evento.fin && finSlot > evento.inicio;
+        });
+
+        const slot = document.createElement('div');
+        slot.classList.add('time-slot');
+        slot.textContent = horaTexto;
+
+        if (ocupado) {
+            slot.classList.add('disabled');
+        } else {
             slot.addEventListener('click', () => seleccionarHora(horaTexto, slot));
+        }
 
-            slotsContainer.appendChild(slot);
+        slotsContainer.appendChild(slot);
+        slotsCreados++;
+        }
+
+    
+        if (slotsCreados === 0) {
+            helpText.textContent = 'No hay horarios disponibles este día para este servicio.';
+        } else {
+            const fechaFormateada = fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' });
+            helpText.textContent = `Horarios disponibles para ${fechaFormateada}.`;
         }
     }
+        
 
     
     function seleccionarHora(hora, celda) {
@@ -253,7 +318,8 @@ function irAPaso(numeroPaso) {
         fechaInicio.setHours(horas, minutos, 0, 0);
 
         const fechaFin = new Date(fechaInicio);
-        fechaFin.setMinutes(fechaFin.getMinutes() + reserva.duracion);
+        const duracionBloque = Math.max(reserva.duracion, 120);
+        fechaFin.setMinutes(fechaFin.getMinutes() + duracionBloque);
 
         const datosReserva = {
             cliente: document.getElementById('client-name').value,
