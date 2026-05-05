@@ -56,11 +56,11 @@ if (document.querySelector('.booking-page')) {
     const HORARIOS = {
         0: null,
         1: null,
-        2: { inicio: 9, fin: 17 },
-        3: { inicio: 9, fin: 17 },
-        4: { inicio: 9, fin: 17 },
-        5: { inicio: 9, fin: 17 },
-        6: { inicio: 9.5, fin: 15 }
+        2: ['09:00', '11:00', '14:00', '16:00', '18:00'],       
+        3: ['09:00', '11:00', '14:00', '16:00'],                 
+        4: ['09:00', '11:00', '14:00', '16:00', '18:00'],        
+        5: ['09:00', '11:00', '14:00', '16:00'],                
+        6: ['09:00', '11:00', '15:00'] 
     };
 
     let mesActual = new Date();
@@ -217,13 +217,13 @@ function irAPaso(numeroPaso) {
         const helpText = document.querySelector('.slots-help');
 
         const diaSemana = fecha.getDay();
-        const horario = HORARIOS[diaSemana];
+        const horasDelDia = HORARIOS[diaSemana];
 
         slotsContainer.innerHTML = '';
 
-        if (!horario) {
-        helpText.textContent = 'Este día no atendemos.';
-        return;
+        if (!horasDelDia) {
+            helpText.textContent = 'Este día no atendemos.';
+            return;
         }
 
         const ocupados = horariosOcupados.map((evento) => ({
@@ -232,45 +232,36 @@ function irAPaso(numeroPaso) {
         }));
 
         const duracionBloque = Math.max(reserva.duracion, 120);
-        const incrementoSlot = duracionBloque / 60;
 
         let slotsCreados = 0;
 
-        for (let h = horario.inicio; h < horario.fin; h += incrementoSlot) {
+        horasDelDia.forEach((horaTexto) => {
+            const [horas, minutos] = horaTexto.split(':').map(Number);
 
-        const horaTerminoNumero = h + incrementoSlot;
+            const inicioSlot = new Date(fecha);
+            inicioSlot.setHours(horas, minutos, 0, 0);
 
-        if (horaTerminoNumero > horario.fin) break;
+            const finSlot = new Date(inicioSlot);
+            finSlot.setMinutes(finSlot.getMinutes() + duracionBloque);
 
-        const horas = Math.floor(h);
-        const minutos = (h % 1) * 60;
-        const horaTexto = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
-
-        const inicioSlot = new Date(fecha);
-        inicioSlot.setHours(horas, minutos, 0, 0);
-
-        const finSlot = new Date(inicioSlot);
-        finSlot.setMinutes(finSlot.getMinutes() + duracionBloque);
-
-        const ocupado = ocupados.some((evento) => {
+            const ocupado = ocupados.some((evento) => {
                 return inicioSlot < evento.fin && finSlot > evento.inicio;
+            });
+
+            const slot = document.createElement('div');
+            slot.classList.add('time-slot');
+            slot.textContent = horaTexto;
+
+            if (ocupado) {
+                slot.classList.add('disabled');
+            } else {
+                slot.addEventListener('click', () => seleccionarHora(horaTexto, slot));
+            }
+
+            slotsContainer.appendChild(slot);
+            slotsCreados++;
         });
 
-        const slot = document.createElement('div');
-        slot.classList.add('time-slot');
-        slot.textContent = horaTexto;
-
-        if (ocupado) {
-            slot.classList.add('disabled');
-        } else {
-            slot.addEventListener('click', () => seleccionarHora(horaTexto, slot));
-        }
-
-        slotsContainer.appendChild(slot);
-        slotsCreados++;
-        }
-
-    
         if (slotsCreados === 0) {
             helpText.textContent = 'No hay horarios disponibles este día para este servicio.';
         } else {
