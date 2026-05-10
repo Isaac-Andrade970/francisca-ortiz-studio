@@ -234,6 +234,8 @@ function irAPaso(numeroPaso) {
         const duracionBloque = Math.max(reserva.duracion, 120);
 
         let slotsCreados = 0;
+        
+        const ahora = new Date();
 
         horasDelDia.forEach((horaTexto) => {
             const [horas, minutos] = horaTexto.split(':').map(Number);
@@ -244,6 +246,10 @@ function irAPaso(numeroPaso) {
             const finSlot = new Date(inicioSlot);
             finSlot.setMinutes(finSlot.getMinutes() + duracionBloque);
 
+            const margenMinimo = new Date(ahora);
+            margenMinimo.setHours(margenMinimo.getHours() + 1);
+            const yaPaso = inicioSlot < margenMinimo;
+
             const ocupado = ocupados.some((evento) => {
                 return inicioSlot < evento.fin && finSlot > evento.inicio;
             });
@@ -252,7 +258,7 @@ function irAPaso(numeroPaso) {
             slot.classList.add('time-slot');
             slot.textContent = horaTexto;
 
-            if (ocupado) {
+            if (ocupado || yaPaso) {
                 slot.classList.add('disabled');
             } else {
                 slot.addEventListener('click', () => seleccionarHora(horaTexto, slot));
