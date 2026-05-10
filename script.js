@@ -360,3 +360,82 @@ function irAPaso(numeroPaso) {
     });
 
 }
+
+// CARRUSEL DE PRODUCTOS \\
+
+const carouselTrack = document.getElementById('productos-carousel');
+const btnPrev = document.querySelector('.carousel-btn-prev');
+const btnNext = document.querySelector('.carousel-btn-next');
+
+if (carouselTrack && btnPrev && btnNext) {
+    const cardWidth = 280 + 24;
+    let intervaloAutoScroll;
+    let pausado = false;
+
+    // Funciones de movimiento
+    function moverIzquierda() {
+        carouselTrack.scrollBy({
+            left: -cardWidth,
+            behavior: 'smooth'
+        });
+    }
+
+    function moverDerecha() {
+        // Si llegó al final, vuelve al inicio
+        const maxScroll = carouselTrack.scrollWidth - carouselTrack.clientWidth;
+        if (carouselTrack.scrollLeft >= maxScroll - 10) {
+            carouselTrack.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            carouselTrack.scrollBy({
+                left: cardWidth,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    // Botones de flecha
+    btnPrev.addEventListener('click', () => {
+        moverIzquierda();
+        reiniciarAutoScroll();
+    });
+
+    btnNext.addEventListener('click', () => {
+        moverDerecha();
+        reiniciarAutoScroll();
+    });
+
+    // Auto-scroll
+    function iniciarAutoScroll() {
+        intervaloAutoScroll = setInterval(() => {
+            if (!pausado) {
+                moverDerecha();
+            }
+        }, 3000); // Cada 5 segundos
+    }
+
+    function reiniciarAutoScroll() {
+        clearInterval(intervaloAutoScroll);
+        iniciarAutoScroll();
+    }
+
+    // Pausar al pasar el mouse
+    carouselTrack.addEventListener('mouseenter', () => {
+        pausado = true;
+    });
+
+    carouselTrack.addEventListener('mouseleave', () => {
+        pausado = false;
+    });
+
+    // Pausar también si el usuario está deslizando manualmente (móvil)
+    carouselTrack.addEventListener('touchstart', () => {
+        pausado = true;
+    });
+
+    carouselTrack.addEventListener('touchend', () => {
+        setTimeout(() => { pausado = false; }, 3000); // 3s de pausa después de tocar
+    });
+
+    // Iniciar todo
+    iniciarAutoScroll();
+}
