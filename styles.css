@@ -1501,3 +1501,40 @@ footer h4{
         display: block;
     }
 }
+
+/* CUENTA DE PAGO EN CONFIRMACION */
+
+.payment-cta {
+    background-color: var(--cream-light);
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    margin: 2rem auto;
+    max-width: 400px;
+    border: 2px solid var(--rose-mauve);
+}
+
+.payment-cta h3 {
+    font-family: var(--font-serif);
+    color: var(--rose-mauve-dark);
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.payment-cta p {
+    color: var(--text-soft);
+    margin-bottom: 1.5rem;
+}
+
+.btn-payment {
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+}
+
+.payment-note {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    margin-top: 1rem;
+    margin-bottom: 0;
+    font-style: italic;
+}
