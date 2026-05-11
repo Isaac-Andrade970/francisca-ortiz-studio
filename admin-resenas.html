@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Reseñas | Francisca Ortiz</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="container">
+            <h1>Panel de Administración · Reseñas</h1>
+            <p>Aprueba o rechaza las reseñas de tus clientas</p>
+        </div>
+    </header>
+
+    <main class="container admin-main">
+        <section class="admin-section">
+            <div class="admin-section-header">
+                <h2>Pendientes de aprobación</h2>
+                <span class="badge" id="count-pendientes">0</span>
+            </div>
+
+            <div id="loading-pendientes" class="admin-loading">
+                Cargando reseñas...
+            </div>
+
+            <div id="lista-pendientes" class="admin-list"></div>
+
+            <div id="empty-pendientes" class="admin-empty" style="display: none;">
+                <p>No hay reseñas pendientes 🎉</p>
+            </div>
+        </section>
+
+        <section class="admin-section">
+            <div class="admin-section-header">
+                <h2>Reseñas publicadas</h2>
+                <span class="badge" id="count-publicadas">0</span>
+            </div>
+
+            <div id="loading-publicadas" class="admin-loading">
+                Cargando reseñas...
+            </div>
+
+            <div id="lista-publicadas" class="admin-list"></div>
+
+            <div id="empty-publicadas" class="admin-empty" style="display: none;">
+                <p>Aún no hay reseñas publicadas</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="admin-resenas.js"></script>
+</body>
+</html>
