@@ -439,3 +439,52 @@ if (carouselTrack && btnPrev && btnNext) {
     // Iniciar todo
     iniciarAutoScroll();
 }
+
+// CARGAR RESEÑAS APROBADAS EN EL HOME \\
+
+async function cargarResenas() {
+    const grid = document.getElementById('resenas-grid');
+    if (!grid) return; // No estamos en el home
+
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/resenas');
+        if (!respuesta.ok) throw new Error('Error al cargar');
+
+        const datos = await respuesta.json();
+
+        if (datos.resenas.length === 0) {
+            grid.innerHTML = '<p class="resenas-loading">Aún no tenemos reseñas publicadas. ¡Sé la primera!</p>';
+            return;
+        }
+
+        grid.innerHTML = '';
+
+        datos.resenas.forEach((resena) => {
+            const card = document.createElement('article');
+            card.classList.add('resena-publica');
+
+            // Generar estrellas
+            let estrellas = '';
+            for (let i = 1; i <= 5; i++) {
+                estrellas += i <= resena.calificacion ? '★' : '☆';
+            }
+
+            card.innerHTML = `
+                <div class="stars">${estrellas}</div>
+                <p class="comentario">${resena.comentario}</p>
+                <div class="footer-resena">
+                    <p class="cliente">${resena.cliente}</p>
+                    <p class="servicio">${resena.servicio}</p>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar reseñas:', error);
+        grid.innerHTML = '<p class="resenas-loading">No se pudieron cargar las reseñas en este momento.</p>';
+    }
+}
+
+cargarResenas();

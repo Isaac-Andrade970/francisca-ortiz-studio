@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Califica tu servicio | Francisca Ortiz Studio</title>
+    <meta name="description" content="Comparte tu opinión sobre el servicio de Francisca Ortiz Studio">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="index.html" class="logo-link">
+                <img src="images/logo-fo.png" alt="Francisca Ortiz Studio" class="logo-img">
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="servicios.html">Servicios</a></li>
+                    <li><a href="tienda.html">Tienda</a></li>
+                    <li><a href="index.html#galeria">Galería</a></li>
+                    <li><a href="index.html#contacto">Contacto</a></li>
+                    <li><a href="reservar.html" class="btn-nav">Reservar</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container resena-page">
+        <section class="resena-wrapper">
+            <!-- Estado: Cargando -->
+            <div id="resena-loading" class="resena-state">
+                <p>Verificando tu información...</p>
+            </div>
+
+            <!-- Estado: Error de token -->
+            <div id="resena-error" class="resena-state" style="display: none;">
+                <h1>Link no válido</h1>
+                <p>El link que usaste no es válido o ya expiró. Si necesitas ayuda, escríbenos por WhatsApp.</p>
+                <a href="index.html" class="btn btn-primary">Volver al inicio</a>
+            </div>
+
+            <!-- Estado: Formulario -->
+            <div id="resena-form" class="resena-state" style="display: none;">
+                <p class="eyebrow">Tu opinión es importante</p>
+                <h1>Hola <span id="cliente-nombre"></span>, ¿qué te pareció?</h1>
+                <p class="lead">Servicio recibido: <strong id="servicio-nombre"></strong></p>
+
+                <div class="rating-section">
+                    <p class="rating-label">Califica del 1 al 5</p>
+                    <div class="stars-input" id="stars-input">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <p class="rating-feedback" id="rating-feedback">Selecciona estrellas</p>
+                </div>
+
+                <div class="form-field">
+                    <label for="comentario">Cuéntanos tu experiencia</label>
+                    <textarea
+                        id="comentario"
+                        rows="6"
+                        placeholder="¿Cómo te quedaste? ¿Qué te gustó más? Tu opinión ayuda mucho..."
+                        maxlength="500"
+                    ></textarea>
+                    <p class="char-counter"><span id="char-count">0</span> / 500</p>
+                </div>
+
+                <button id="enviar-resena" class="btn btn-primary" disabled>
+                    Enviar reseña
+                </button>
+            </div>
+
+            <!-- Estado: Éxito -->
+            <div id="resena-success" class="resena-state" style="display: none;">
+                <div class="success-icon">✓</div>
+                <h1>¡Gracias por tu reseña!</h1>
+                <p>Tu opinión es muy valiosa para nosotros. La revisaremos pronto.</p>
+                <a href="index.html" class="btn btn-primary">Volver al inicio</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <img src="images/logo-fo-blanco.png" alt="Francisca Ortiz Studio">
+                <p>Tu mejor versión, en cada visita</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="califica.js"></script>
+</body>
+</html>
