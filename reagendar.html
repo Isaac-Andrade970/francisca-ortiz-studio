@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reagendar mi cita | Francisca Ortiz Studio</title>
+    <meta name="description" content="Reagenda tu cita en Francisca Ortiz Studio">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="index.html" class="logo-link">
+                <img src="images/logo-fo.png" alt="Francisca Ortiz Studio" class="logo-img">
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="servicios.html">Servicios</a></li>
+                    <li><a href="tienda.html">Tienda</a></li>
+                    <li><a href="index.html#galeria">Galería</a></li>
+                    <li><a href="index.html#contacto">Contacto</a></li>
+                    <li><a href="reservar.html" class="btn-nav">Reservar</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container reagendar-page">
+        <!-- Estado: Cargando -->
+        <div id="estado-cargando" class="reagendar-state">
+            <p>Verificando tu reserva...</p>
+        </div>
+
+        <!-- Estado: Error de token -->
+        <div id="estado-error" class="reagendar-state" style="display: none;">
+            <div class="reagendar-wrapper">
+                <h1>Link no válido</h1>
+                <p>El link que usaste no es válido o ya expiró. Si necesitas reagendar, contáctanos por WhatsApp.</p>
+                <a href="https://wa.me/56912345678" target="_blank" class="btn btn-primary">💬 Escribir por WhatsApp</a>
+            </div>
+        </div>
+
+        <!-- Estado: No puede reagendar -->
+        <div id="estado-no-puede" class="reagendar-state" style="display: none;">
+            <div class="reagendar-wrapper">
+                <h1>No es posible reagendar</h1>
+                <p id="motivo-no-puede"></p>
+                <p>Si necesitas ayuda, contáctanos por WhatsApp.</p>
+                <a href="https://wa.me/56912345678" target="_blank" class="btn btn-primary">💬 Escribir por WhatsApp</a>
+            </div>
+        </div>
+
+        <!-- Estado: Formulario para reagendar -->
+        <div id="estado-formulario" class="reagendar-state" style="display: none;">
+            <div class="reagendar-wrapper-wide">
+                <header class="reagendar-header">
+                    <p class="eyebrow">Reagendar reserva</p>
+                    <h1>Hola <span id="cliente-nombre"></span></h1>
+                    <p class="lead">Tu cita actual: <strong id="fecha-actual"></strong></p>
+                    <p class="lead-small">Servicio: <span id="servicio-nombre"></span></p>
+                </header>
+
+                <div class="reagendar-contenido">
+                    <!-- Calendario y horarios -->
+                    <div class="reagendar-selection">
+                        <h2>Elige nueva fecha y hora</h2>
+
+                        <div class="calendar-wrapper">
+                            <div class="calendar-header">
+                                <button class="calendar-nav" id="prev-month">‹</button>
+                                <h3 class="calendar-month" id="calendar-month">Mes Año</h3>
+                                <button class="calendar-nav" id="next-month">›</button>
+                            </div>
+
+                            <div class="calendar-weekdays">
+                                <span>Lun</span>
+                                <span>Mar</span>
+                                <span>Mié</span>
+                                <span>Jue</span>
+                                <span>Vie</span>
+                                <span>Sáb</span>
+                                <span>Dom</span>
+                            </div>
+
+                            <div class="calendar-grid" id="calendar-grid"></div>
+                        </div>
+
+                        <div class="time-slots-wrapper">
+                            <h3 class="slots-title">Horarios disponibles</h3>
+                            <p class="slots-help">Selecciona primero un día</p>
+                            <div class="time-slots" id="time-slots"></div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar de resumen -->
+                    <aside class="reagendar-summary">
+                        <h3>Tu nueva reserva</h3>
+                        <ul class="summary-list">
+                            <li>
+                                <span class="summary-label">Fecha nueva</span>
+                                <span class="summary-value" id="sidebar-date">Por elegir</span>
+                            </li>
+                            <li>
+                                <span class="summary-label">Hora nueva</span>
+                                <span class="summary-value" id="sidebar-time">Por elegir</span>
+                            </li>
+                        </ul>
+
+                        <button id="confirmar-reagendamiento" class="btn btn-primary" disabled>
+                            Confirmar reagendamiento
+                        </button>
+
+                        <p class="warning-text">
+                            ⚠️ Solo puedes reagendar 1 vez. Después de esto, no se podrá hacer otro cambio.
+                        </p>
+                    </aside>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado: Éxito -->
+        <div id="estado-exito" class="reagendar-state" style="display: none;">
+            <div class="reagendar-wrapper">
+                <div class="success-icon">✓</div>
+                <h1>¡Reagendamiento confirmado!</h1>
+                <p>Tu cita fue actualizada exitosamente.</p>
+                <div class="exito-resumen">
+                    <p><strong>Nueva fecha:</strong> <span id="exito-fecha"></span></p>
+                    <p><strong>Nueva hora:</strong> <span id="exito-hora"></span></p>
+                </div>
+                <p>Recibirás un email de confirmación con los nuevos datos.</p>
+                <a href="index.html" class="btn btn-primary">Volver al inicio</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <img src="images/logo-fo-blanco.png" alt="Francisca Ortiz Studio">
+                <p>Tu mejor versión, en cada visita</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="reagendar.js"></script>
+</body>
+</html>

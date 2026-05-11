@@ -2044,3 +2044,140 @@ footer h4{
     letter-spacing: 0.05em;
 }
 
+/* PAGINA REAGENDAR */
+
+.reagendar-page {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    min-height: 60vh;
+}
+
+.reagendar-state {
+    width: 100%;
+}
+
+.reagendar-wrapper {
+    max-width: 600px;
+    margin: 2rem auto;
+    background-color: var(--white);
+    padding: 3rem 2.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--nude);
+    text-align: center;
+}
+
+.reagendar-wrapper-wide {
+    max-width: 1100px;
+    margin: 2rem auto;
+}
+
+.reagendar-wrapper h1,
+.reagendar-wrapper-wide h1 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.reagendar-header {
+    background-color: var(--white);
+    padding: 2.5rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+    border: 1px solid var(--nude);
+    border-bottom: none;
+    text-align: center;
+}
+
+.reagendar-header .eyebrow {
+    color: var(--copper);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.reagendar-header .lead {
+    color: var(--text-soft);
+    margin-bottom: 0.25rem;
+}
+
+.lead-small {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.reagendar-contenido {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    background-color: var(--white);
+    padding: 2rem;
+    border-radius: 0 0 1.25rem 1.25rem;
+    border: 1px solid var(--nude);
+    border-top: none;
+}
+
+.reagendar-selection h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.reagendar-summary {
+    background-color: var(--cream-light);
+    padding: 1.75rem;
+    border-radius: 1rem;
+    align-self: start;
+    position: sticky;
+    top: 100px;
+}
+
+.reagendar-summary h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--text-dark);
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--nude);
+    font-weight: 500;
+}
+
+.reagendar-summary .btn {
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+.warning-text {
+    color: var(--copper);
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    line-height: 1.5;
+}
+
+.exito-resumen {
+    background-color: var(--cream-light);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.exito-resumen p {
+    margin: 0.5rem 0;
+}
+
+@media (max-width: 900px) {
+    .reagendar-contenido {
+        grid-template-columns: 1fr;
+    }
+
+    .reagendar-summary {
+        position: static;
+        order: -1;
+    }
+}
