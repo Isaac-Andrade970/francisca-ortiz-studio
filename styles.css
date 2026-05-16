@@ -2181,3 +2181,75 @@ footer h4{
         order: -1;
     }
 }
+
+/* PANTALLA DE LOGIN ADMIN */
+
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cream-light);
+    padding: 2rem;
+}
+
+.login-box {
+    background-color: var(--white);
+    padding: 3rem 2.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--nude);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+.login-box h1 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.login-box p {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-field {
+    margin-bottom: 1rem;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 0.75rem;
+    background-color: var(--white);
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+}
+
+.login-field input:focus {
+    outline: none;
+    border-color: var(--rose-mauve);
+}
+
+.login-error {
+    color: #c0392b;
+    font-size: 0.85rem;
+    margin-bottom: 1rem !important;
+}
+
+.login-box .btn {
+    width: 100%;
+}
