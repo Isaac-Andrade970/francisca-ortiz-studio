@@ -15,6 +15,30 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin-body">
+    <!-- Pantalla de login -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <img src="images/logo-fo.png" alt="Francisca Ortiz" class="login-logo">
+            <h1>Panel de Administración</h1>
+            <p>Ingresa tu contraseña para continuar</p>
+
+            <div class="login-field">
+                <input
+                    type="password"
+                    id="login-password"
+                    placeholder="Contraseña"
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <p id="login-error" class="login-error" style="display: none;">
+                Contraseña incorrecta
+            </p>
+
+            <button id="login-btn" class="btn btn-primary">Ingresar</button>
+        </div>
+    </div>
+    <div id="admin-content" style="display: none;">
     <header class="admin-header">
         <div class="container">
             <h1>Panel de Administración · Reseñas</h1>
@@ -57,6 +81,7 @@
             </div>
         </section>
     </main>
+    </div>
 
     <script src="admin-resenas.js"></script>
 </body>

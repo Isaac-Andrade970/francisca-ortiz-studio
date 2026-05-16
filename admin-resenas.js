@@ -2,6 +2,63 @@
 
 const API_URL = 'http://localhost:3000/api/resenas';
 
+// AUTENTICACION \\
+
+// El token vive solo en memoria (variable), no en localStorage
+let tokenSesion = null;
+
+function mostrarPanel() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+}
+
+async function hacerLogin() {
+    const password = document.getElementById('login-password').value;
+    const errorMsg = document.getElementById('login-error');
+    const boton = document.getElementById('login-btn');
+
+    if (!password) {
+        errorMsg.textContent = 'Escribe la contraseña';
+        errorMsg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Verificando...';
+    errorMsg.style.display = 'none';
+
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password })
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            errorMsg.textContent = datos.error || 'Contraseña incorrecta';
+            errorMsg.style.display = 'block';
+            boton.disabled = false;
+            boton.textContent = 'Ingresar';
+            return;
+        }
+
+        // Login exitoso: guardar token y mostrar panel
+        tokenSesion = datos.token;
+        mostrarPanel();
+        cargarPendientes();
+        cargarPublicadas();
+
+    } catch (error) {
+        console.error('Error de login:', error);
+        errorMsg.textContent = 'Error de conexión con el servidor';
+        errorMsg.style.display = 'block';
+        boton.disabled = false;
+        boton.textContent = 'Ingresar';
+    }
+}
+
 // GENERAR HTML DE ESTRELLAS \\
 
 function generarEstrellas(calificacion) {
@@ -73,7 +130,9 @@ async function cargarPendientes() {
     const count = document.getElementById('count-pendientes');
 
     try {
-        const respuesta = await fetch(`${API_URL}/admin/pendientes`);
+        const respuesta = await fetch(`${API_URL}/admin/pendientes`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+            });
         const datos = await respuesta.json();
 
         loading.style.display = 'none';
@@ -150,7 +209,8 @@ async function aprobarResena(id) {
 
     try {
         const respuesta = await fetch(`${API_URL}/admin/${id}/aprobar`, {
-            method: 'PATCH'
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
         });
 
         if (!respuesta.ok) throw new Error('Error al aprobar');
@@ -172,7 +232,8 @@ async function rechazarResena(id) {
 
     try {
         const respuesta = await fetch(`${API_URL}/admin/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
         });
 
         if (!respuesta.ok) throw new Error('Error al rechazar');
@@ -188,6 +249,11 @@ async function rechazarResena(id) {
 // INICIO \\
 
 document.addEventListener('DOMContentLoaded', () => {
-    cargarPendientes();
-    cargarPublicadas();
+    // Conectar el botón de login
+    document.getElementById('login-btn').addEventListener('click', hacerLogin);
+
+    // Permitir login con Enter
+    document.getElementById('login-password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') hacerLogin();
+    });
 });
