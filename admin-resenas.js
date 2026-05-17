@@ -115,7 +115,11 @@ function crearCardResena(resena, esPublicada = false) {
                 <button class="btn-aprobar" data-id="${resena.id}">✓ Aprobar y publicar</button>
                 <button class="btn-rechazar" data-id="${resena.id}">✗ Rechazar</button>
             </div>
-        ` : ''}
+        ` : `
+            <div class="resena-actions">
+                <button class="btn-eliminar" data-id="${resena.id}">Eliminar reseña</button>
+            </div>
+        `}
     `;
 
     return card;
@@ -196,6 +200,11 @@ async function cargarPublicadas() {
             lista.appendChild(card);
         });
 
+        // Conectar botones de eliminar
+        document.querySelectorAll('#lista-publicadas .btn-eliminar').forEach((boton) => {
+            boton.addEventListener('click', () => eliminarResenaPublicada(boton.getAttribute('data-id')));
+        });
+
     } catch (error) {
         console.error('Error al cargar publicadas:', error);
         loading.textContent = 'Error al cargar reseñas';
@@ -243,6 +252,33 @@ async function rechazarResena(id) {
     } catch (error) {
         console.error('Error:', error);
         alert('Hubo un problema al rechazar la reseña');
+    }
+}
+
+// ELIMINAR RESEÑA \\
+
+async function eliminarResenaPublicada(id) {
+
+    if (!confirm('¿Eliminar esta reseña publicada? Desaparecerá del sitio web permanentemente.')) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_URL}/admin/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json();
+            throw new Error('Error al eliminar');
+        }
+
+        cargarPublicadas();
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Hubo un problema al eliminar la reseña');
     }
 }
 
