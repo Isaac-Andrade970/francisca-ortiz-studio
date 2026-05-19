@@ -36,31 +36,6 @@ elementosAnimados.forEach((elemento) => {
     observer.observe(elemento);
 });
 
-// FILTROS TIENDA \\
-
-const filterButtons = document.querySelectorAll('.filter-btn');
-const productCards = document.querySelectorAll('.product-card');
-
-filterButtons.forEach((button) => {
-        button.addEventListener('click', () =>{
-        const filter = button.getAttribute('data-filter');
-
-        filterButtons.forEach((btn) => btn.classList.remove('active'));
-        button.classList.add('active');
-
-        productCards.forEach((card) => {
-            const category = card.getAttribute('data-category');
-
-            if (filter === 'all' || category === filter) {
-            card.classList.remove('hidden');
-            } else{
-                card.classList.add('hidden');
-            }
-        });
-    });
-});
-
-
 // LÓGICA DE LA PÁGINA RESERVAR \\
 
 if (document.querySelector('.booking-page')) {
@@ -509,3 +484,69 @@ async function cargarResenas() {
 }
 
 cargarResenas();
+
+// CATÁLOGO DE PRODUCTOS \\
+
+// Genera el HTML de una tarjeta de producto
+function crearTarjetaProducto(producto) {
+    return `
+        <article class="product-card" data-category="${producto.categoria}">
+            <div class="product-image">
+                <img src="${producto.imagen}" alt="${producto.nombre}"
+                     onerror="this.parentElement.classList.add('sin-imagen'); this.remove();">
+            </div>
+            <p class="product-brand">${producto.marca}</p>
+            <h3>${producto.nombre}</h3>
+            <p class="product-descripcion">${producto.descripcion}</p>
+            <p class="product-price">${producto.precio}</p>
+        </article>
+    `;
+}
+
+// Llena la tienda con TODOS los productos
+function cargarTiendaCompleta() {
+    const grid = document.getElementById('shop-grid');
+    if (!grid) return; // No estamos en la tienda
+
+    grid.innerHTML = PRODUCTOS.map(crearTarjetaProducto).join('');
+
+    // Reconectar los filtros (porque las tarjetas son nuevas)
+    conectarFiltros();
+}
+
+// Llena el carrusel del home solo con destacados
+function cargarCarruselDestacados() {
+    const track = document.getElementById('productos-carousel');
+    if (!track) return; // No estamos en el home
+
+    const destacados = PRODUCTOS.filter((p) => p.destacado);
+    track.innerHTML = destacados.map(crearTarjetaProducto).join('');
+}
+
+// Conecta los botones de filtro con las tarjetas
+function conectarFiltros() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+
+    filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const filter = button.getAttribute('data-filter');
+
+            filterButtons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            productCards.forEach((card) => {
+                const category = card.getAttribute('data-category');
+                if (filter === 'all' || category === filter) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    });
+}
+
+// Ejecutar al cargar
+cargarTiendaCompleta();
+cargarCarruselDestacados();
