@@ -1,3 +1,24 @@
+// SPLASH SCREEN \\
+
+(function () {
+    const splash = document.getElementById('splash-screen');
+    if (!splash) return;
+
+    // Solo mostrar la primera vez en esta sesión
+    if (sessionStorage.getItem('splashMostrado')) {
+        splash.classList.add('hidden');
+        return;
+    }
+
+    // Marcar que ya se mostró
+    sessionStorage.setItem('splashMostrado', 'true');
+
+    // Quitar el splash del DOM después de la animación
+    setTimeout(() => {
+        splash.classList.add('hidden');
+    }, 3400);
+})();
+
 const elementosAnimados = document.querySelectorAll('.fade-in');
 
 const observer = new IntersectionObserver((entries) => {

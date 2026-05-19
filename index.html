@@ -23,6 +23,18 @@
 </head>
 <body>
 
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="images/logo-splash.png" alt="Francisca Ortiz" class="splash-logo">
+            <p class="splash-tagline">Tu belleza, nuestro arte</p>
+            <div class="splash-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
@@ -32,13 +44,18 @@
         <a href="index.html" class="logo">
             <img src="images/logo-fo.png" alt="Francisca Ortiz - Peluquería y Manicure">
         </a>
-        <nav>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav id="main-nav">
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="servicios.html">Servicios</a></li>
                 <li><a href="tienda.html">Tienda</a></li>
                 <li><a href="index.html#galeria">Galería</a></li>
-                <li><a href="#footer-contacto">Contacto</a></li>
+                <li><a href="index.html#footer-contacto">Contacto</a></li>
                 <li><a href="reservar.html" class="btn-nav">Reservar</a></li>
             </ul>
         </nav>
@@ -262,6 +279,7 @@
         </svg>
     </a>
 
+    <script src="menu.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
