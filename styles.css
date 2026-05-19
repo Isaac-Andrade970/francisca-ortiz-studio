@@ -57,15 +57,15 @@ h2{
 /* APARTADO DEL HEADER */
 
 header{
-    background-color: var(--cream);
-    padding: 20px 40px;
+    background-color: var(--rose-mauve-dark);
+    padding: 8px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 1px solid var(--nude);
+    border-bottom: 1px solid rgba(245, 232, 222, 0.15);
 }
 
 .logo{
@@ -74,7 +74,7 @@ header{
 }
 
 .logo img{
-    height: 70px;
+    height: 110px;
     width: auto;
     display: block;
 }
@@ -82,17 +82,18 @@ header{
 nav ul{
     display: flex;
     gap: 32px;
+    align-items: center;
 }
 
 nav a{
     font-size: 13px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--text-dark);
+    color: var(--cream);
 }
 
 nav a:hover{
-    color: var(--rose-mauve);
+    color: var(--copper-soft);
 }
 
 main{
@@ -138,7 +139,7 @@ article{
 /* APARTADO DEL HERO */
 
 .hero{
-    padding: 5rem 0;
+    padding: 2.5rem 0 4rem;
 }
 
 .hero-grid{
@@ -184,7 +185,7 @@ article{
 }
 
 .hero-image{
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 4 / 3;
     border-radius: 1.5rem;
     overflow: hidden;
     box-shadow: 0 16px 48px rgba(139, 74, 107, 0.15);
@@ -492,6 +493,8 @@ article{
 
 /* APARTADO DE FOOTER */
 
+/* APARTADO DE FOOTER */
+
 footer{
     background-color: var(--rose-mauve-dark);
     color: var(--cream);
@@ -504,8 +507,15 @@ footer{
     margin: 0 auto 3rem;
     padding: 0 24px;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr;
     gap: 4rem;
+    align-items: start;
+}
+
+.footer-brand{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .footer-logo{
@@ -514,7 +524,7 @@ footer{
 }
 
 .footer-logo img{
-    height: 80px;
+    height: 130px;
     width: auto;
     display: block;
 }
@@ -523,7 +533,7 @@ footer{
     color: rgba(245, 232, 222, 0.7);
     margin-top: 1.5rem;
     font-size: 0.95rem;
-    max-width: 320px;
+    max-width: 280px;
 }
 
 footer h4{
@@ -535,21 +545,65 @@ footer h4{
     font-weight: 500;
 }
 
-.footer-links ul li,
-.footer-social ul li{
-    margin-bottom: 0.75rem;
+.footer-map{
+    border-radius: 0.75rem;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(245, 232, 222, 0.15);
 }
 
-.footer-links a,
-.footer-social a{
+.footer-map iframe{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.footer-address{
     color: rgba(245, 232, 222, 0.85);
-    font-size: 0.95rem;
-    transition: color 0.2s;
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
-.footer-links a:hover,
-.footer-social a:hover{
+.footer-contact-list{
+    margin-bottom: 1.5rem;
+}
+
+.footer-contact-list li{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.875rem;
+}
+
+.contact-icon{
+    font-size: 1rem;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.footer-contact-list a{
+    color: rgba(245, 232, 222, 0.85);
+    font-size: 0.9rem;
+    transition: color 0.2s;
+    word-break: break-word;
+}
+
+.footer-contact-list a:hover{
     color: var(--cream);
+}
+
+.footer-hours{
+    border-top: 1px solid rgba(245, 232, 222, 0.15);
+    padding-top: 1.25rem;
+}
+
+.footer-hours p{
+    color: rgba(245, 232, 222, 0.7);
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
 }
 
 .footer-bottom{
@@ -855,7 +909,16 @@ footer h4{
 
     .footer-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 2.5rem;
+    }
+
+    .footer-brand {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-about {
+        max-width: 100%;
     }
 
     .gallery-grid {
@@ -1553,7 +1616,7 @@ footer h4{
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    padding: 1.5rem 2.5rem;
+    padding: 1.5rem 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -1563,7 +1626,7 @@ footer h4{
 }
 
 .carousel-track .product-card {
-    flex: 0 0 280px;
+    flex: 0 0 calc((100% - 3rem) / 3);
     scroll-snap-align: start;
     margin-bottom: 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1612,16 +1675,16 @@ footer h4{
 }
 
 .carousel-btn-prev {
-    left: 0;
+    left: -22px;
 }
 
 .carousel-btn-next {
-    right: 0;
+    right: -22px;
 }
 
 @media (max-width: 768px) {
     .carousel-track .product-card {
-        flex: 0 0 240px;
+        flex: 0 0 calc(100% - 1rem);
     }
 
     .carousel-track {
@@ -1673,7 +1736,7 @@ footer h4{
     font-weight: 500;
 }
 
-/* Sección de estrellas */
+/* SECCION DE ESTRELLAS */
 .rating-section {
     margin: 2.5rem 0;
     padding: 2rem;
@@ -1716,7 +1779,7 @@ footer h4{
     margin-bottom: 0;
 }
 
-/* Formulario */
+/* FORMULARIO */
 .resena-page .form-field {
     text-align: left;
     margin-bottom: 1.5rem;
@@ -1756,7 +1819,7 @@ footer h4{
     margin: 0.5rem 0 0 0;
 }
 
-/* Estado éxito */
+/* ESTADO EXITO */
 .success-icon {
     width: 80px;
     height: 80px;
@@ -1783,85 +1846,130 @@ footer h4{
 /* PANEL ADMIN */
 
 .admin-body {
-    background-color: var(--cream-light);
+    background-color: var(--cream);
+    min-height: 100vh;
 }
 
 .admin-header {
-    background-color: var(--rose-mauve);
-    color: var(--white);
-    padding: 2.5rem 0;
-    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--rose-mauve-dark) 0%, var(--rose-mauve) 100%);
+    color: var(--cream);
+    padding: 3rem 0;
+    margin-bottom: 3rem;
+}
+
+.admin-header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.admin-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--copper-soft);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
 }
 
 .admin-header h1 {
     font-family: var(--font-serif);
-    font-size: 1.75rem;
-    margin: 0;
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
     font-weight: 500;
+    color: var(--cream);
 }
 
-.admin-header p {
-    margin: 0.5rem 0 0 0;
+.admin-header h1 .script {
+    font-family: var(--font-script);
+    color: var(--copper-soft);
+    font-size: 2.5rem;
+}
+
+.admin-subtitle {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 1rem;
+}
+
+.admin-header-logo {
+    height: 90px;
+    width: auto;
     opacity: 0.9;
-    font-size: 0.9rem;
 }
 
 .admin-main {
-    padding-bottom: 4rem;
+    padding-bottom: 5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .admin-section {
     background-color: var(--white);
-    padding: 2rem;
-    border-radius: 1rem;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
     border: 1px solid var(--nude);
     margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(139, 74, 107, 0.06);
 }
 
 .admin-section-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--nude);
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid var(--cream);
 }
 
 .admin-section-header h2 {
     font-family: var(--font-serif);
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: var(--text-dark);
     margin: 0;
     font-weight: 500;
 }
 
 .badge {
-    background-color: var(--rose-mauve);
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--copper) 100%);
     color: var(--white);
-    padding: 0.25rem 0.75rem;
+    padding: 0.3rem 0.9rem;
     border-radius: 50px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    min-width: 32px;
+    text-align: center;
 }
 
 .admin-loading,
 .admin-empty {
     text-align: center;
-    padding: 2rem;
+    padding: 3rem;
     color: var(--text-soft);
+    font-style: italic;
 }
 
 .admin-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
 .resena-card {
     border: 1px solid var(--nude);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+    border-radius: 1rem;
+    padding: 1.75rem;
     background-color: var(--cream-light);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.resena-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 74, 107, 0.08);
 }
 
 .resena-card-header {
@@ -1877,18 +1985,23 @@ footer h4{
     margin: 0;
     color: var(--text-dark);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
+    font-family: var(--font-serif);
 }
 
 .resena-servicio {
-    color: var(--text-soft);
-    font-size: 0.875rem;
+    color: var(--copper);
+    font-size: 0.8rem;
     margin: 0.25rem 0 0 0;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
 .resena-stars {
     color: var(--copper);
-    font-size: 1.25rem;
+    font-size: 1.35rem;
+    letter-spacing: 0.1em;
 }
 
 .resena-stars .empty {
@@ -1897,9 +2010,10 @@ footer h4{
 
 .resena-comentario {
     color: var(--text-dark);
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 1rem 0;
     font-style: italic;
+    font-size: 1.05rem;
 }
 
 .resena-fecha {
@@ -1911,30 +2025,32 @@ footer h4{
 .resena-actions {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .btn-aprobar {
-    background-color: var(--rose-mauve);
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
     color: var(--white);
     border: none;
-    padding: 0.6rem 1.25rem;
+    padding: 0.7rem 1.5rem;
     border-radius: 50px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     font-size: 0.875rem;
 }
 
 .btn-aprobar:hover {
-    background-color: var(--rose-mauve-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 74, 107, 0.25);
 }
 
 .btn-rechazar {
     background-color: transparent;
     color: var(--text-soft);
-    border: 1px solid var(--nude);
-    padding: 0.6rem 1.25rem;
+    border: 1.5px solid var(--nude);
+    padding: 0.7rem 1.5rem;
     border-radius: 50px;
     font-weight: 500;
     cursor: pointer;
@@ -1943,15 +2059,15 @@ footer h4{
 }
 
 .btn-rechazar:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--nude);
     color: var(--text-dark);
 }
 
 .btn-eliminar {
     background-color: transparent;
     color: #c0392b;
-    border: 1px solid #e8c5c5;
-    padding: 0.6rem 1.25rem;
+    border: 1.5px solid #e8c5c5;
+    padding: 0.7rem 1.5rem;
     border-radius: 50px;
     font-weight: 500;
     cursor: pointer;
@@ -1967,6 +2083,26 @@ footer h4{
 
 .resena-publicada {
     border-left: 4px solid var(--rose-mauve);
+}
+
+@media (max-width: 768px) {
+    .admin-header-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .admin-header h1 {
+        font-size: 2rem;
+    }
+
+    .admin-header-logo {
+        height: 70px;
+    }
+
+    .admin-section {
+        padding: 1.5rem;
+    }
 }
 
 /* SECCION DE RESEÑAS EN HOME */
@@ -2207,29 +2343,40 @@ footer h4{
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--cream-light);
     padding: 2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .login-box {
     background-color: var(--white);
-    padding: 3rem 2.5rem;
-    border-radius: 1.5rem;
+    padding: 3.5rem 3rem;
+    border-radius: 2rem;
     border: 1px solid var(--nude);
     text-align: center;
-    max-width: 400px;
+    max-width: 420px;
     width: 100%;
+    box-shadow: 0 20px 60px rgba(139, 74, 107, 0.15);
 }
 
 .login-logo {
-    width: 80px;
+    width: 110px;
     height: auto;
     margin-bottom: 1.5rem;
 }
 
+.login-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
 .login-box h1 {
     font-family: var(--font-serif);
-    font-size: 1.5rem;
+    font-size: 1.85rem;
     color: var(--text-dark);
     margin-bottom: 0.5rem;
     font-weight: 500;
@@ -2237,8 +2384,8 @@ footer h4{
 
 .login-box p {
     color: var(--text-soft);
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.75rem;
 }
 
 .login-field {
@@ -2247,19 +2394,21 @@ footer h4{
 
 .login-field input {
     width: 100%;
-    padding: 0.875rem 1rem;
+    padding: 1rem 1.25rem;
     border: 1.5px solid var(--nude);
     border-radius: 0.75rem;
-    background-color: var(--white);
+    background-color: var(--cream-light);
     font-size: 1rem;
     font-family: var(--font-sans);
     color: var(--text-dark);
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    text-align: center;
 }
 
 .login-field input:focus {
     outline: none;
     border-color: var(--rose-mauve);
+    background-color: var(--white);
 }
 
 .login-error {
@@ -2270,4 +2419,76 @@ footer h4{
 
 .login-box .btn {
     width: 100%;
+    padding: 1rem 2rem;
 }
+
+/* APARTADO FONDO DECORATIVO */
+
+body {
+    position: relative;
+    overflow-x: hidden;
+}
+
+.blob {
+    position: fixed;
+    border-radius: 50% 40% 60% 50% / 50% 60% 40% 50%;
+    filter: blur(70px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.blob-1 {
+    width: 550px;
+    height: 550px;
+    background-color: var(--copper);
+    top: -120px;
+    right: -120px;
+    opacity: 0.55;
+}
+
+.blob-2 {
+    width: 650px;
+    height: 650px;
+    background-color: var(--rose-mauve);
+    top: 35%;
+    left: -280px;
+    opacity: 0.45;
+}
+
+.blob-3 {
+    width: 500px;
+    height: 500px;
+    background-color: var(--copper-soft);
+    bottom: 5%;
+    right: -130px;
+    opacity: 0.6;
+}
+
+.blob-4 {
+    width: 400px;
+    height: 400px;
+    background-color: var(--rose-mauve);
+    top: 70%;
+    left: 30%;
+    opacity: 0.3;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+@media (max-width: 768px) {
+    .blob {
+        filter: blur(55px);
+    }
+
+    .blob-1 { 
+        width: 320px; height: 320px; }
+
+    .blob-2 { 
+        width: 380px; height: 380px; }
+
+    .blob-3 { 
+        width: 300px; height: 300px; }
+
+    .blob-4 { 
+        width: 250px; height: 250px; }
+}
+

@@ -15,18 +15,24 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin-body">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
     <!-- Pantalla de login -->
     <div id="login-screen" class="login-screen">
         <div class="login-box">
             <img src="images/logo-fo.png" alt="Francisca Ortiz" class="login-logo">
-            <h1>Panel de Administración</h1>
-            <p>Ingresa tu contraseña para continuar</p>
+            <p class="login-eyebrow">Panel privado</p>
+            <h1>Bienvenida, Francisca</h1>
+            <p>Ingresa tu contraseña para gestionar tus reseñas y reservas</p>
 
             <div class="login-field">
                 <input
                     type="password"
                     id="login-password"
-                    placeholder="Contraseña"
+                    placeholder="Tu contraseña"
                     autocomplete="current-password"
                 >
             </div>
@@ -35,52 +41,57 @@
                 Contraseña incorrecta
             </p>
 
-            <button id="login-btn" class="btn btn-primary">Ingresar</button>
+            <button id="login-btn" class="btn btn-primary">Ingresar al panel</button>
         </div>
     </div>
+
     <div id="admin-content" style="display: none;">
-    <header class="admin-header">
-        <div class="container">
-            <h1>Panel de Administración · Reseñas</h1>
-            <p>Aprueba o rechaza las reseñas de tus clientas</p>
-        </div>
-    </header>
-
-    <main class="container admin-main">
-        <section class="admin-section">
-            <div class="admin-section-header">
-                <h2>Pendientes de aprobación</h2>
-                <span class="badge" id="count-pendientes">0</span>
+        <header class="admin-header">
+            <div class="admin-header-inner">
+                <div>
+                    <p class="admin-eyebrow">Panel de administración</p>
+                    <h1>Hola, Francisca <span class="script">✦</span></h1>
+                    <p class="admin-subtitle">Gestiona las reseñas y reservas de tu estudio</p>
+                </div>
+                <img src="images/logo-fo-blanco.png" alt="Francisca Ortiz" class="admin-header-logo">
             </div>
+        </header>
 
-            <div id="loading-pendientes" class="admin-loading">
-                Cargando reseñas...
-            </div>
+        <main class="container admin-main">
+            <section class="admin-section">
+                <div class="admin-section-header">
+                    <h2>Pendientes de aprobación</h2>
+                    <span class="badge" id="count-pendientes">0</span>
+                </div>
 
-            <div id="lista-pendientes" class="admin-list"></div>
+                <div id="loading-pendientes" class="admin-loading">
+                    Cargando reseñas...
+                </div>
 
-            <div id="empty-pendientes" class="admin-empty" style="display: none;">
-                <p>No hay reseñas pendientes 🎉</p>
-            </div>
-        </section>
+                <div id="lista-pendientes" class="admin-list"></div>
 
-        <section class="admin-section">
-            <div class="admin-section-header">
-                <h2>Reseñas publicadas</h2>
-                <span class="badge" id="count-publicadas">0</span>
-            </div>
+                <div id="empty-pendientes" class="admin-empty" style="display: none;">
+                    <p>No hay reseñas pendientes 🎉</p>
+                </div>
+            </section>
 
-            <div id="loading-publicadas" class="admin-loading">
-                Cargando reseñas...
-            </div>
+            <section class="admin-section">
+                <div class="admin-section-header">
+                    <h2>Reseñas publicadas</h2>
+                    <span class="badge" id="count-publicadas">0</span>
+                </div>
 
-            <div id="lista-publicadas" class="admin-list"></div>
+                <div id="loading-publicadas" class="admin-loading">
+                    Cargando reseñas...
+                </div>
 
-            <div id="empty-publicadas" class="admin-empty" style="display: none;">
-                <p>Aún no hay reseñas publicadas</p>
-            </div>
-        </section>
-    </main>
+                <div id="lista-publicadas" class="admin-list"></div>
+
+                <div id="empty-publicadas" class="admin-empty" style="display: none;">
+                    <p>Aún no hay reseñas publicadas</p>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script src="admin-resenas.js"></script>
