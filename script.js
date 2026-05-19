@@ -550,3 +550,48 @@ function conectarFiltros() {
 // Ejecutar al cargar
 cargarTiendaCompleta();
 cargarCarruselDestacados();
+
+// MODAL DE TERMINOS Y CONDICIONES \\
+
+(function () {
+    const overlay = document.getElementById('modal-terminos');
+    const btnAbrir = document.getElementById('abrir-terminos');
+    const btnCerrar = document.getElementById('cerrar-terminos');
+    const btnAceptar = document.getElementById('aceptar-terminos');
+    const checkbox = document.getElementById('client-terms');
+
+    if (!overlay || !btnAbrir) return; // No estamos en reservar
+
+    function abrirModal() {
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-abierto');
+    }
+
+    function cerrarModal() {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-abierto');
+    }
+
+    btnAbrir.addEventListener('click', abrirModal);
+    btnCerrar.addEventListener('click', cerrarModal);
+
+    // El botón "Entendido" cierra el modal Y marca el checkbox automáticamente
+    btnAceptar.addEventListener('click', () => {
+        if (checkbox) checkbox.checked = true;
+        cerrarModal();
+    });
+
+    // Cerrar haciendo clic en el fondo oscuro (fuera del modal)
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarModal();
+    });
+
+    // Cerrar con la tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+            cerrarModal();
+        }
+    });
+})();
