@@ -2685,3 +2685,59 @@ body {
         font-size: 1rem;
     }
 }
+
+/* APARTADO BANNER DE CATEGORIA EN SERVICIOS */
+
+.category-banner {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    margin: 3rem 0 2rem;
+    box-shadow: 0 8px 32px rgba(139, 74, 107, 0.12);
+}
+
+.category-banner:first-of-type {
+    margin-top: 0;
+}
+
+.category-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.category-banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(139, 74, 107, 0.75) 0%, rgba(165, 107, 130, 0.55) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-banner-overlay h3 {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    color: var(--white);
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+    .category-banner {
+        height: 160px;
+        border-radius: 1rem;
+    }
+
+    .category-banner-overlay h3 {
+        font-size: 1.8rem;
+    }
+}
