@@ -363,50 +363,105 @@ const PRODUCTOS = [
 
     // ===== CLOE PROFESSIONAL - PROTECTORES Y FINALIZADORES =====
     {
-        id: 'cloe-hotglow',
-        nombre: 'Hot Glow Protector Térmico 250ml',
+        id: 'cloe-hotglow-exotic',
+        nombre: 'Hot Glow Protector Térmico (aroma frutos rojos) 250ml',
         marca: 'Cloe Professional',
         categoria: 'cloe',
         precio: '$14.500',
         descripcion: 'Protector térmico capilar ultra liviano con efecto desenredante, Shield Active y Filtro UV. Protege del calor de herramientas y radiación solar.',
-        imagen: 'images/productos/cloe-hotglow.jpg',
+        imagen: 'images/productos/cloe-hotglow-exotic.jpg',
         destacado: false
     },
-    //agregar otros 2
     {
-        id: 'cloe-shineon',
-        nombre: 'Shine On Spray de Brillo 150ml',
+        id: 'cloe-hotglow-sunny',
+        nombre: 'Hot Glow Protector Térmico (aroma coco tostado) 250ml',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$14.500',
+        descripcion: 'Protector térmico capilar ultra liviano con efecto desenredante, Shield Active y Filtro UV. Protege del calor de herramientas y radiación solar.',
+        imagen: 'images/productos/cloe-hotglow-sunny.jpg',
+        destacado: false
+    },
+    {
+        id: 'cloe-hotglow-kiss',
+        nombre: 'Hot Glow Protector Térmico (aroma piña y citricos) 250ml',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$14.500',
+        descripcion: 'Protector térmico capilar ultra liviano con efecto desenredante, Shield Active y Filtro UV. Protege del calor de herramientas y radiación solar.',
+        imagen: 'images/productos/cloe-hotglow-kiss.jpg',
+        destacado: false
+    },
+    {
+        id: 'cloe-shineon-gold',
+        nombre: 'Shine On Spray de Brillo (aroma coco y naranja) 150ml',
         marca: 'Cloe Professional',
         categoria: 'cloe',
         precio: '$16.500',
         descripcion: 'Spray de brillo con acción antiquiebre para finalizar el peinado. Potenciador Amino-Coat protege del daño mecánico y disminuye el frizz.',
-        imagen: 'images/productos/cloe-shineon.jpg',
+        imagen: 'images/productos/cloe-shineon-gold.jpg',
         destacado: false
     },
-    //agregar el otro
     {
-        id: 'cloe-fascination-oil',
-        nombre: 'Fascination Oil 50ml',
+        id: 'cloe-shineon-black',
+        nombre: 'Shine On Spray de Brillo (aroma vainilla y flores) 150ml',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$16.500',
+        descripcion: 'Spray de brillo con acción antiquiebre para finalizar el peinado. Potenciador Amino-Coat protege del daño mecánico y disminuye el frizz.',
+        imagen: 'images/productos/cloe-shineon-black.jpg',
+        destacado: false
+    },
+    {
+        id: 'cloe-fascination-oil-tradi',
+        nombre: 'Fascination Oil (aroma vainilla exotica) 50ml',
         marca: 'Cloe Professional',
         categoria: 'cloe',
         precio: '$14.500',
         descripcion: 'Sérum capilar altamente nutritivo, efecto no graso y sin alcohol. Contiene Argán, Macadamia y Palta. Aromas: Vainilla Exótica o Mandarina Playera.',
-        imagen: 'images/productos/cloe-fascination-oil.jpg',
+        imagen: 'images/productos/cloe-fascination-oil-tradi.jpg',
         destacado: false
     },
-    //agregar el otro
     {
-        id: 'cloe-butter',
+        id: 'cloe-fascination-oil-pearl',
+        nombre: 'Fascination Oil (aroma mandarina playera) 50ml',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$14.500',
+        descripcion: 'Sérum capilar altamente nutritivo, efecto no graso y sin alcohol. Contiene Argán, Macadamia y Palta. Aromas: Vainilla Exótica o Mandarina Playera.',
+        imagen: 'images/productos/cloe-fascination-oil-pearl.jpg',
+        destacado: false
+    },
+    {
+        id: 'cloe-butter-vainilla',
         nombre: 'Butter by Cloe Crema Manos y Cuerpo 170gr',
         marca: 'Cloe Professional',
         categoria: 'cloe',
         precio: '$11.900',
         descripcion: 'Crema de textura intensa, gran nutrición e hidratación. Tecnología Lipocire natural y Eco-Certificada. Con ácido hialurónico. Aromas variados.',
-        imagen: 'images/productos/cloe-butter.jpg',
+        imagen: 'images/productos/cloe-butter-vainilla.jpg',
         destacado: false
     },
-    //agregar otros 2
-
+    {
+        id: 'cloe-butter-caramel',
+        nombre: 'Butter by Cloe Crema Manos y Cuerpo 170gr',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$11.900',
+        descripcion: 'Crema de textura intensa, gran nutrición e hidratación. Tecnología Lipocire natural y Eco-Certificada. Con ácido hialurónico. Aromas variados.',
+        imagen: 'images/productos/cloe-butter-caramel.jpg',
+        destacado: false
+    },
+    {
+        id: 'cloe-butter-sweet',
+        nombre: 'Butter by Cloe Crema Manos y Cuerpo 170gr',
+        marca: 'Cloe Professional',
+        categoria: 'cloe',
+        precio: '$11.900',
+        descripcion: 'Crema de textura intensa, gran nutrición e hidratación. Tecnología Lipocire natural y Eco-Certificada. Con ácido hialurónico. Aromas variados.',
+        imagen: 'images/productos/cloe-butter-sweet.jpg',
+        destacado: false
+    },
     // ===== ROUVÉ PROFESSIONAL =====
     {
         id: 'rouve-magic-repair',

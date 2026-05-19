@@ -354,14 +354,71 @@ article{
     background-color: var(--white);
     border-radius: 1.25rem;
     overflow: hidden;
-    transition: transform 0.3s;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    border: 1px solid transparent;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s ease,
+                border-color 0.45s ease;
+    position: relative;
+}
+
+.product-card::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--rose-mauve) 0%, var(--copper) 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 3;
 }
 
 .product-card:hover{
-    transform: translateY(-4px);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(139, 74, 107, 0.15);
+    border-color: var(--copper-soft);
+}
+
+.product-card:hover::before{
+    transform: scaleX(1);
+}
+
+.product-card .product-image{
+    transition: background-color 0.45s ease;
+    overflow: hidden;
+}
+
+.product-card:hover .product-image{
+    background-color: var(--cream-light);
+}
+
+.product-card .product-image img{
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card:hover .product-image img{
+    transform: scale(1.06);
+}
+
+.product-card h3{
+    transition: color 0.3s ease;
+}
+
+.product-card:hover h3{
+    color: var(--rose-mauve-dark);
+}
+
+.product-card .product-price{
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-price{
+    transform: translateX(4px);
 }
 
 .product-image{
@@ -2836,17 +2893,45 @@ body {
 
 /* IMAGEN DE PRODUCTO (con foto real o placeholder) */
 
+.product-image {
+    background-color: var(--white);
+    padding: 1.5rem;
+}
+
 .product-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.product-image.sin-imagen {
+    background: linear-gradient(135deg, var(--cream) 0%, var(--nude) 100%);
+    position: relative;
+}
+
+.product-image.sin-imagen::before {
+    content: '✦';
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--copper-soft);
+    opacity: 0.6;
 }
 
 .product-image.sin-imagen::after {
     content: 'Imagen próximamente';
+    position: absolute;
+    top: 56%;
+    left: 50%;
+    transform: translateX(-50%);
     color: var(--copper);
     font-size: 0.7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
