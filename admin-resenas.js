@@ -4,8 +4,9 @@ const API_URL = 'http://localhost:3000/api/resenas';
 
 // AUTENTICACION \\
 
-// El token vive solo en memoria (variable), no en localStorage
-let tokenSesion = null;
+// El token se guarda en sessionStorage: persiste al recargar
+// pero se borra al cerrar el navegador
+let tokenSesion = sessionStorage.getItem('adminToken') || null;
 
 function mostrarPanel() {
     document.getElementById('login-screen').style.display = 'none';
@@ -46,6 +47,7 @@ async function hacerLogin() {
 
         // Login exitoso: guardar token y mostrar panel
         tokenSesion = datos.token;
+        sessionStorage.setItem('adminToken', tokenSesion);
         mostrarPanel();
         cargarPendientes();
         cargarPublicadas();
@@ -292,4 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-password').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') hacerLogin();
     });
+
+    // Si ya hay token guardado (recargó la página), entrar directo
+    if (tokenSesion) {
+        mostrarPanel();
+        cargarPendientes();
+        cargarPublicadas();
+    }
 });
