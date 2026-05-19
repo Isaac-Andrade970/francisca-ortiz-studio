@@ -1684,11 +1684,12 @@ footer h4{
 
 @media (max-width: 768px) {
     .carousel-track .product-card {
-        flex: 0 0 calc(100% - 1rem);
+        flex: 0 0 100%;
     }
 
     .carousel-track {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 0;
+        gap: 1rem;
     }
 
     .carousel-btn {
@@ -2492,3 +2493,195 @@ body {
         width: 250px; height: 250px; }
 }
 
+/* SPLASH SCREEN */
+
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: splashFadeOut 0.8s ease 2.4s forwards;
+}
+
+.splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.splash-logo {
+    max-width: 520px;
+    width: 85%;
+    height: auto;
+    animation: splashLogoIn 1.3s ease forwards;
+}
+
+.splash-tagline {
+    font-family: var(--font-script);
+    font-size: 2.2rem;
+    color: var(--rose-mauve);
+    margin-top: -1rem;
+    opacity: 0;
+    animation: splashTaglineIn 1s ease 0.8s forwards;
+}
+
+.splash-loader {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: splashTaglineIn 0.6s ease 1.3s forwards;
+}
+
+.splash-loader span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--rose-mauve);
+    animation: splashDot 1.4s ease-in-out infinite;
+}
+
+.splash-loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.splash-loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes splashLogoIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes splashTaglineIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes splashDot {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 1;
+    }
+}
+
+@keyframes splashFadeOut {
+    0% {
+        opacity: 1;
+        visibility: visible;
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+#splash-screen.hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .splash-logo {
+        max-width: 340px;
+    }
+
+    .splash-tagline {
+        font-size: 1.6rem;
+    }
+}
+
+/* MENU HAMBURGUESA */
+
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 101;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--cream);
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+
+    nav#main-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 75%;
+        max-width: 320px;
+        height: 100vh;
+        background-color: var(--rose-mauve-dark);
+        flex-direction: column;
+        padding: 6rem 2rem 2rem;
+        transition: right 0.35s ease;
+        z-index: 100;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.2);
+    }
+
+    nav#main-nav.open {
+        right: 0;
+    }
+
+    nav#main-nav ul {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+
+    nav#main-nav a {
+        font-size: 1rem;
+    }
+}
