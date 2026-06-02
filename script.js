@@ -321,7 +321,8 @@ function irAPaso(numeroPaso) {
             servicio: reserva.servicioNombre,
             notas: document.getElementById('client-notes').value,
             inicio: fechaInicio.toISOString(),
-            fin: fechaFin.toISOString()
+            fin: fechaFin.toISOString(),
+            website: document.getElementById('client-website').value
         };
 
         try {
@@ -592,6 +593,28 @@ cargarCarruselDestacados();
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.classList.contains('open')) {
             cerrarModal();
+        }
+    });
+})();
+
+// CONTADOR DE CARACTERES EN COMENTARIOS DE RESERVA \\
+
+(function () {
+    const textarea = document.getElementById('client-notes');
+    const contador = document.getElementById('char-count');
+    const contenedor = document.querySelector('.char-counter-reservar');
+
+    if (!textarea || !contador || !contenedor) return;
+
+    textarea.addEventListener('input', () => {
+        const largo = textarea.value.length;
+        contador.textContent = largo;
+
+        contenedor.classList.remove('casi-lleno', 'lleno');
+        if (largo >= 100) {
+            contenedor.classList.add('lleno');
+        } else if (largo >= 80) {
+            contenedor.classList.add('casi-lleno');
         }
     });
 })();
