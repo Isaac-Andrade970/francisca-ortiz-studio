@@ -190,7 +190,8 @@
 
                         <div class="form-field">
                             <label for="client-notes">Comentarios (opcional)</label>
-                            <textarea id="client-notes" name="notes" rows="4" placeholder="Ej: Soy nueva clienta, mi cabello es teñido..."></textarea>
+                            <textarea id="client-notes" placeholder="Ej: Soy nueva clienta, mi cabello es teñido..." maxlength="100"></textarea>
+                            <p class="char-counter-reservar"><span id="char-count">0</span>/100 caracteres</p>
                         </div>
 
                         <div class="form-field-checkbox">
@@ -199,6 +200,11 @@
                         </div>
 
                     </form>
+
+                    <div class="honeypot-field" aria-hidden="true">
+                        <label for="client-website">No completar este campo</label>
+                        <input type="text" id="client-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
 
                     <div class="booking-actions">
                         <button class="btn btn-secondary" id="back-to-step-2">Volver</button>
