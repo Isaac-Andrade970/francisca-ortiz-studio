@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin | Francisca Ortiz</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <!-- Pantalla de login -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <img src="images/logo-fo.png" alt="Francisca Ortiz" class="login-logo">
+            <p class="login-eyebrow">Panel privado</p>
+            <h1>Bienvenida, Francisca</h1>
+            <p>Ingresa tu contraseña para gestionar tu estudio</p>
+            <div class="login-field">
+                <input type="password" id="login-password" placeholder="Tu contraseña" autocomplete="current-password">
+            </div>
+            <p id="login-error" class="login-error" style="display: none;">Contraseña incorrecta</p>
+            <button id="login-btn" class="btn btn-primary">Ingresar al panel</button>
+        </div>
+    </div>
+
+    <!-- Panel -->
+    <div id="admin-content" style="display: none;">
+        <header class="admin-header">
+            <div class="admin-header-inner">
+                <div>
+                    <p class="admin-eyebrow">Panel de administración</p>
+                    <h1>Hola, Francisca <span class="script">✦</span></h1>
+                    <p class="admin-subtitle">Gestiona tu estudio desde un solo lugar</p>
+                </div>
+                <img src="images/logo-fo-blanco.png" alt="Francisca Ortiz" class="admin-header-logo">
+            </div>
+        </header>
+
+        <main class="container admin-main">
+            <!-- Pestañas -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="resenas">Reseñas</button>
+                <button class="admin-tab" data-tab="servicios">Servicios</button>
+            </div>
+
+            <!-- PESTAÑA: RESEÑAS -->
+            <div id="tab-resenas" class="admin-tab-content active">
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>Pendientes de aprobación</h2>
+                        <span class="badge" id="count-pendientes">0</span>
+                    </div>
+                    <div id="loading-pendientes" class="admin-loading">Cargando reseñas...</div>
+                    <div id="lista-pendientes" class="admin-list"></div>
+                    <div id="empty-pendientes" class="admin-empty" style="display: none;"><p>No hay reseñas pendientes</p></div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>Reseñas publicadas</h2>
+                        <span class="badge" id="count-publicadas">0</span>
+                    </div>
+                    <div id="loading-publicadas" class="admin-loading">Cargando reseñas...</div>
+                    <div id="lista-publicadas" class="admin-list"></div>
+                    <div id="empty-publicadas" class="admin-empty" style="display: none;"><p>Aún no hay reseñas publicadas</p></div>
+                </section>
+            </div>
+
+            <!-- PESTAÑA: SERVICIOS -->
+            <div id="tab-servicios" class="admin-tab-content">
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <div class="admin-section-titulo">
+                        <h2>Tus servicios</h2>
+                        <span class="badge" id="count-servicios">0</span>
+                        </div>
+                        <button id="btn-nuevo-servicio" class="btn btn-primary btn-small">+ Nuevo servicio</button>
+                    </div>
+                    <div id="loading-servicios" class="admin-loading">Cargando servicios...</div>
+                    <div id="lista-servicios" class="servicios-admin-list"></div>
+                    <div id="empty-servicios" class="admin-empty" style="display: none;"><p>Aún no hay servicios</p></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para crear/editar servicio -->
+    <div id="modal-servicio" class="servicio-modal-overlay" style="display: none;">
+        <div class="servicio-modal-box">
+            <h2 id="modal-servicio-titulo">Nuevo servicio</h2>
+            <input type="hidden" id="servicio-id">
+
+            <div class="form-grupo">
+                <label for="servicio-nombre">Nombre</label>
+                <input type="text" id="servicio-nombre" placeholder="Ej: Corte de pelo">
+            </div>
+
+            <div class="form-fila">
+                <div class="form-grupo">
+                    <label for="servicio-categoria">Categoría</label>
+                    <select id="servicio-categoria">
+                        <option value="peluqueria">Peluquería</option>
+                        <option value="manicure">Manicure</option>
+                    </select>
+                </div>
+                <div class="form-grupo">
+                    <label for="servicio-orden">Orden</label>
+                    <input type="number" id="servicio-orden" placeholder="1" min="1">
+                </div>
+            </div>
+
+            <div class="form-fila">
+                <div class="form-grupo">
+                    <label for="servicio-precio">Precio (CLP)</label>
+                    <input type="number" id="servicio-precio" placeholder="15000" min="0">
+                </div>
+                <div class="form-grupo">
+                    <label for="servicio-duracion">Duración (min)</label>
+                    <input type="number" id="servicio-duracion" placeholder="45" min="0">
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label for="servicio-descripcion">Descripción</label>
+                <textarea id="servicio-descripcion" rows="3" placeholder="Breve descripción del servicio"></textarea>
+            </div>
+
+            <p id="modal-servicio-error" class="login-error" style="display: none;"></p>
+
+            <div class="modal-acciones">
+                <button id="btn-cancelar-servicio" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-guardar-servicio" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
