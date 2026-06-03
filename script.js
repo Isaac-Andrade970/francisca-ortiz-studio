@@ -62,23 +62,64 @@ if (document.querySelector('.booking-page')) {
     let mesActual = new Date();
     mesActual.setDate(1);
 
-    const serviceOptions = document.querySelectorAll('.service-option');
     const btnNextStep1 = document.getElementById('next-to-step-2');
 
-    serviceOptions.forEach((option) => {
-        option.addEventListener('click', () => {
-            serviceOptions.forEach((o) => o.classList.remove('selected'));
-            option.classList.add('selected');
+    function formatearPrecioReserva(precio) {
+        return '$' + Number(precio).toLocaleString('es-CL');
+    }
+    function formatearDuracionReserva(min) {
+        if (min < 60) return `${min} min`;
+        const horas = min / 60;
+        if (horas === 1) return '1 hora';
+        return `${horas} horas`;
+    }
 
-            reserva.servicio = option.getAttribute('data-service');
-            reserva.duracion = parseInt(option.getAttribute('data-duration'));
-            reserva.servicioNombre = option.querySelector('h3').textContent;
-            reserva.servicioPrecio = option.querySelector('.price').textContent;
+    // Conecta el clic a cada tarjeta (se llama DESPUÉS de dibujarlas)
+    function conectarOpcionesServicio() {
+        const serviceOptions = document.querySelectorAll('.service-option');
+        serviceOptions.forEach((option) => {
+            option.addEventListener('click', () => {
+                serviceOptions.forEach((o) => o.classList.remove('selected'));
+                option.classList.add('selected');
 
-            btnNextStep1.disabled = false;
-            actualizarSidebar();
+                reserva.servicio = option.getAttribute('data-service');
+                reserva.duracion = parseInt(option.getAttribute('data-duration'));
+                reserva.servicioNombre = option.querySelector('h3').textContent;
+                reserva.servicioPrecio = option.querySelector('.price').textContent;
+
+                btnNextStep1.disabled = false;
+                actualizarSidebar();
+            });
         });
-});
+    }
+
+    // Trae los servicios del backend, los dibuja y luego conecta los clics
+    async function cargarServiciosReserva() {
+        const contenedor = document.querySelector('.services-selection');
+        if (!contenedor) return;
+
+        try {
+            const respuesta = await fetch('http://localhost:3000/api/servicios');
+            const datos = await respuesta.json();
+            const servicios = datos.servicios || [];
+
+            contenedor.innerHTML = servicios.map((s) => `
+                <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}">
+                    <h3>${s.nombre}</h3>
+                    <p>${s.descripcion || ''}</p>
+                    <p class="service-meta"><span class="price">${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
+                </article>
+            `).join('');
+
+            conectarOpcionesServicio();
+
+        } catch (error) {
+            console.error('Error al cargar servicios para reservar:', error);
+            contenedor.innerHTML = '<p style="color:var(--text-soft); grid-column:1/-1;">No se pudieron cargar los servicios. Recarga la página o escríbenos por WhatsApp.</p>';
+        }
+    }
+
+    cargarServiciosReserva();
 
 function irAPaso(numeroPaso) {
         document.querySelectorAll('.booking-step').forEach((s) => s.classList.remove('active'));
@@ -618,3 +659,41 @@ cargarCarruselDestacados();
         }
     });
 })();
+
+
+// SERVICIOS DESTACADOS EN EL HOME \\
+
+async function cargarServiciosHome() {
+    const grid = document.getElementById('servicios-home');
+    if (!grid) return;
+
+    function formatearPrecio(precio) {
+        return '$' + Number(precio).toLocaleString('es-CL');
+    }
+    function formatearDuracion(min) {
+        if (min < 60) return `${min} min`;
+        const horas = min / 60;
+        if (horas === 1) return '1 hora';
+        return `${horas} horas`;
+    }
+
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/servicios');
+        const datos = await respuesta.json();
+        // Mostramos solo los primeros 4 (según el campo "orden")
+        const servicios = (datos.servicios || []).slice(0, 4);
+
+        grid.innerHTML = servicios.map(s => `
+            <article class="service-card">
+                <h3>${s.nombre}</h3>
+                <p>${s.descripcion || ''}</p>
+                <p class="price">Desde ${formatearPrecio(s.precio)} <span class="duration">· ${formatearDuracion(s.duracion)}</span></p>
+            </article>
+        `).join('');
+
+    } catch (error) {
+        console.error('Error al cargar servicios del home:', error);
+    }
+}
+
+cargarServiciosHome();

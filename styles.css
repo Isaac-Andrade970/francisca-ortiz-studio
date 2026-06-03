@@ -3359,13 +3359,6 @@ body.modal-abierto {
 /* BOTONES EXTRA */
 .btn-small { padding: 0.5rem 1rem; font-size: 0.85rem; }
 
-.btn-secondary {
-    background-color: transparent;
-    color: var(--text-soft);
-    border: 1px solid var(--nude);
-}
-.btn-secondary:hover { color: var(--text-dark); border-color: var(--copper); }
-
 /* ENCABEZADO CON BOTÓN */
 .admin-section-titulo { display: flex; align-items: center; gap: 0.75rem; }
 
