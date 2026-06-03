@@ -3259,3 +3259,220 @@ body.modal-abierto {
     opacity: 0;
     pointer-events: none;
 }
+
+/* PESTAÑAS DEL PANEL ADMIN */
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--nude);
+}
+
+.admin-tab {
+    background: none;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover { color: var(--text-dark); }
+
+.admin-tab.active {
+    color: var(--copper);
+    border-bottom-color: var(--copper);
+    font-weight: 500;
+}
+
+.admin-tab-content { display: none; }
+.admin-tab-content.active { display: block; }
+
+/* LISTA DE SERVICIOS EN EL ADMIN */
+.servicios-admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.servicio-card {
+    background-color: var(--white);
+    border: 1px solid var(--nude);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.servicio-inactivo { opacity: 0.55; }
+
+.servicio-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.servicio-titulo h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--text-dark);
+    margin: 0;
+    font-weight: 500;
+}
+
+.servicio-categoria {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--copper);
+    background-color: var(--cream-light);
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+}
+
+.servicio-badge-off {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #b04a4a;
+    background-color: #f7e3e3;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+}
+
+.servicio-desc {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.servicio-meta {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin: 0;
+}
+
+/* BOTONES EXTRA */
+.btn-small { padding: 0.5rem 1rem; font-size: 0.85rem; }
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-soft);
+    border: 1px solid var(--nude);
+}
+.btn-secondary:hover { color: var(--text-dark); border-color: var(--copper); }
+
+/* ENCABEZADO CON BOTÓN */
+.admin-section-titulo { display: flex; align-items: center; gap: 0.75rem; }
+
+/* ACCIONES EN TARJETA DE SERVICIO */
+.servicio-acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+.servicio-acciones button {
+    background: none;
+    border: 1px solid var(--nude);
+    border-radius: 0.6rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.servicio-acciones button:hover { border-color: var(--copper); color: var(--copper); }
+.btn-eliminar-servicio { color: #b04a4a; border-color: #e7c4c4; }
+.btn-eliminar-servicio:hover { background-color: #f7e3e3; color: #b04a4a; }
+
+/* MODAL DE SERVICIO */
+.servicio-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(60, 40, 35, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1000;
+}
+.servicio-modal-box {
+    background-color: var(--white);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.servicio-modal-box h2 {
+    font-family: var(--font-serif);
+    color: var(--text-dark);
+    margin: 0 0 1.5rem 0;
+    font-weight: 500;
+}
+
+/* FORMULARIO DEL MODAL DE SERVICIO */
+.servicio-modal-box .form-grupo {
+    margin-bottom: 1.25rem;
+}
+
+.servicio-modal-box label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.servicio-modal-box input,
+.servicio-modal-box select,
+.servicio-modal-box textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 0.75rem;
+    background-color: var(--cream-light);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.servicio-modal-box input:focus,
+.servicio-modal-box select:focus,
+.servicio-modal-box textarea:focus {
+    outline: none;
+    border-color: var(--rose-mauve);
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(165, 107, 130, 0.12);
+}
+
+.servicio-modal-box textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.servicio-modal-box .form-fila {
+    display: flex;
+    gap: 1rem;
+}
+
+.servicio-modal-box .form-fila .form-grupo {
+    flex: 1;
+}
+
+.servicio-modal-box .modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
