@@ -50,6 +50,7 @@
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="resenas">Reseñas</button>
                 <button class="admin-tab" data-tab="servicios">Servicios</button>
+                <button class="admin-tab" data-tab="productos">Productos</button>
             </div>
 
             <!-- PESTAÑA: RESEÑAS -->
@@ -90,9 +91,25 @@
                     <div id="empty-servicios" class="admin-empty" style="display: none;"><p>Aún no hay servicios</p></div>
                 </section>
             </div>
+
+            <!-- PESTAÑA: PRODUCTOS -->
+            <div id="tab-productos" class="admin-tab-content">
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <div class="admin-section-titulo">
+                        <h2>Tus productos</h2>
+                        <span class="badge" id="count-productos">0</span>
+                        </div>
+                        <button id="btn-nuevo-producto" class="btn btn-primary btn-small">+ Nuevo producto</button>
+                    </div>
+                    <div id="loading-productos" class="admin-loading">Cargando productos...</div>
+                    <div id="lista-productos" class="servicios-admin-list"></div>
+                    <div id="empty-productos" class="admin-empty" style="display: none;"><p>Aún no hay productos</p></div>
+                </section>
+            </div>
         </main>
     </div>
-
+        
     <!-- Modal para crear/editar servicio -->
     <div id="modal-servicio" class="servicio-modal-overlay" style="display: none;">
         <div class="servicio-modal-box">
@@ -139,6 +156,63 @@
             <div class="modal-acciones">
                 <button id="btn-cancelar-servicio" class="btn btn-secondary">Cancelar</button>
                 <button id="btn-guardar-servicio" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar producto -->
+    <div id="modal-producto" class="servicio-modal-overlay" style="display: none;">
+        <div class="servicio-modal-box">
+            <h2 id="modal-producto-titulo">Nuevo producto</h2>
+            <input type="hidden" id="producto-id">
+            <input type="hidden" id="producto-imagen-url">
+
+            <div class="form-grupo">
+                <label for="producto-nombre">Nombre</label>
+               <input type="text" id="producto-nombre" placeholder="Ej: Shampoo Pure Sensation 400ml">
+            </div>
+
+            <div class="form-fila">
+                <div class="form-grupo">
+                    <label for="producto-marca">Línea / Marca</label>
+                    <select id="producto-marca">
+                        <option value="cloe">Cloe Professional</option>
+                        <option value="rouve">Rouvé Professional</option>
+                        <option value="mens">Men's Work</option>
+                    </select>
+                </div>
+                <div class="form-grupo">
+                    <label for="producto-orden">Orden</label>
+                    <input type="number" id="producto-orden" placeholder="1" min="1">
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label for="producto-precio">Precio (CLP)</label>
+                <input type="number" id="producto-precio" placeholder="16300" min="0">
+            </div>
+
+            <div class="form-grupo">
+                <label for="producto-descripcion">Descripción</label>
+                <textarea id="producto-descripcion" rows="3" placeholder="Breve descripción"></textarea>
+            </div>
+
+            <div class="form-grupo">
+                <label for="producto-imagen-file">Foto del producto</label>
+                <input type="file" id="producto-imagen-file" accept="image/*">
+                <p id="producto-imagen-estado" style="font-size:0.8rem; color:var(--text-soft); margin-top:0.4rem;"></p>
+                <img id="producto-imagen-preview" alt="Vista previa" style="display:none; width:90px; height:90px; object-fit:cover; border-radius:0.6rem; margin-top:0.5rem;">
+            </div>
+
+            <label style="display:flex; align-items:center; gap:0.5rem; text-transform:none; letter-spacing:0; color:var(--text-dark); font-size:0.95rem; cursor:pointer;">
+                <input type="checkbox" id="producto-destacado" style="width:auto; padding:0; margin:0; background:none; border:none; accent-color:var(--rose-mauve);"> Mostrar en destacados del home
+            </label>
+
+            <p id="modal-producto-error" class="login-error" style="display:none;"></p>
+
+            <div class="modal-acciones">
+                <button id="btn-cancelar-producto" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-guardar-producto" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>

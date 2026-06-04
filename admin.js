@@ -2,6 +2,9 @@
 
 const API_RESENAS = 'http://localhost:3000/api/resenas';
 const API_SERVICIOS = 'http://localhost:3000/api/servicios';
+const API_PRODUCTOS = 'http://localhost:3000/api/productos';
+const CLOUDINARY_CLOUD_NAME = 'dgq8ohuko';        // 👈 tu cloud name
+const CLOUDINARY_UPLOAD_PRESET = 's2a10wum';  // 👈 el nombre de tu preset (unsigned)
 const API_AUTH = 'http://localhost:3000/api/auth';
 
 // Sesión: token y rol guardados en sessionStorage
@@ -10,6 +13,8 @@ let rolSesion = sessionStorage.getItem('adminRol') || null;
 
 let serviciosCargados = false; // para cargar servicios solo la 1ra vez que se abre la pestaña
 let serviciosActuales = []; // guardamos la lista para poder editar
+let productosCargados = false;
+let productosActuales = [];
 
 // LOGIN \\
 
@@ -82,6 +87,11 @@ function cambiarTab(nombre) {
     if (nombre === 'servicios' && !serviciosCargados) {
         cargarServicios();
         serviciosCargados = true;
+    }
+
+    if (nombre === 'productos' && !productosCargados) {
+        cargarProductos();
+        productosCargados = true;
     }
 }
 
@@ -483,6 +493,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-nuevo-servicio').addEventListener('click', () => abrirFormServicio(null));
     document.getElementById('btn-cancelar-servicio').addEventListener('click', cerrarFormServicio);
     document.getElementById('btn-guardar-servicio').addEventListener('click', guardarServicio);
+    document.getElementById('btn-nuevo-producto').addEventListener('click', () => abrirFormProducto(null));
+    document.getElementById('btn-cancelar-producto').addEventListener('click', cerrarFormProducto);
+    document.getElementById('btn-guardar-producto').addEventListener('click', guardarProducto);
+    document.getElementById('producto-imagen-file').addEventListener('change', manejarSeleccionImagen);
+    document.getElementById('modal-producto').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-producto') cerrarFormProducto();
+    });
     // Cerrar el modal al hacer clic fuera de la caja
     document.getElementById('modal-servicio').addEventListener('click', (e) => {
         if (e.target.id === 'modal-servicio') cerrarFormServicio();
@@ -494,3 +511,267 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarPublicadas();
     }
 });
+
+// PRODUCTOS \\
+
+function crearCardProducto(p) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+    if (!p.activo) card.classList.add('servicio-inactivo');
+
+    const img = p.imagen
+        ? `<img src="${p.imagen}" alt="${p.nombre}" style="width:56px;height:56px;object-fit:cover;border-radius:0.5rem;flex-shrink:0;">`
+        : '';
+
+    const botonEliminar = rolSesion === 'superadmin'
+        ? `<button class="btn-eliminar-servicio btn-eliminar-producto" data-id="${p.id}">Eliminar</button>`
+        : '';
+
+    card.innerHTML = `
+        <div style="display:flex; gap:1rem; align-items:flex-start;">
+            ${img}
+            <div style="flex:1;">
+                <div class="servicio-titulo">
+                    <h3>${p.nombre}</h3>
+                    <span class="servicio-categoria">${p.marca}</span>
+                    ${p.destacado ? '<span class="servicio-categoria">★ Destacado</span>' : ''}
+                    ${!p.activo ? '<span class="servicio-badge-off">Desactivado</span>' : ''}
+                </div>
+                <p class="servicio-desc">${p.descripcion || ''}</p>
+                <p class="servicio-meta">${formatearPrecio(p.precio)}</p>
+                <div class="servicio-acciones">
+                    <button class="btn-editar-producto" data-id="${p.id}">Editar</button>
+                    <button class="btn-toggle-producto" data-id="${p.id}" data-activo="${p.activo}">${p.activo ? 'Desactivar' : 'Activar'}</button>
+                    ${botonEliminar}
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+async function cargarProductos() {
+    const lista = document.getElementById('lista-productos');
+    const loading = document.getElementById('loading-productos');
+    const empty = document.getElementById('empty-productos');
+    const count = document.getElementById('count-productos');
+
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_PRODUCTOS}/admin/todos`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+
+        loading.style.display = 'none';
+        lista.innerHTML = '';
+
+        productosActuales = datos.productos || [];
+
+        if (productosActuales.length === 0) {
+            empty.style.display = 'block';
+            count.textContent = '0';
+            return;
+        }
+
+        empty.style.display = 'none';
+        count.textContent = productosActuales.length;
+
+        productosActuales.forEach(p => lista.appendChild(crearCardProducto(p)));
+
+        document.querySelectorAll('.btn-editar-producto').forEach(b => {
+            b.addEventListener('click', () => {
+                const producto = productosActuales.find(p => p.id === b.getAttribute('data-id'));
+                abrirFormProducto(producto);
+            });
+        });
+        document.querySelectorAll('.btn-toggle-producto').forEach(b => {
+            b.addEventListener('click', () => {
+                const nuevoEstado = b.getAttribute('data-activo') !== 'true';
+                cambiarEstadoProducto(b.getAttribute('data-id'), nuevoEstado);
+            });
+        });
+        document.querySelectorAll('.btn-eliminar-producto').forEach(b => {
+            b.addEventListener('click', () => eliminarProductoPermanente(b.getAttribute('data-id')));
+        });
+
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        loading.textContent = 'Error al cargar productos';
+    }
+}
+
+const MARCAS = {
+    cloe: 'Cloe Professional',
+    rouve: 'Rouvé Professional',
+    mens: "Men's Work"
+};
+
+// Sube un archivo a Cloudinary y devuelve la URL final
+async function subirImagenCloudinary(file) {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const respuesta = await fetch(url, { method: 'POST', body: formData });
+    if (!respuesta.ok) throw new Error('Falló la subida a Cloudinary');
+    const datos = await respuesta.json();
+    return datos.secure_url;
+}
+
+async function manejarSeleccionImagen(evento) {
+    const file = evento.target.files[0];
+    if (!file) return;
+
+    const estado = document.getElementById('producto-imagen-estado');
+    const preview = document.getElementById('producto-imagen-preview');
+    estado.textContent = 'Subiendo foto...';
+
+    try {
+        const urlImagen = await subirImagenCloudinary(file);
+        document.getElementById('producto-imagen-url').value = urlImagen;
+        preview.src = urlImagen;
+        preview.style.display = 'block';
+        estado.textContent = 'Foto subida ✓';
+    } catch (error) {
+        console.error('Error al subir imagen:', error);
+        estado.textContent = 'No se pudo subir la foto. Revisa el cloud name / preset.';
+    }
+}
+
+function abrirFormProducto(producto = null) {
+    const error = document.getElementById('modal-producto-error');
+    const estado = document.getElementById('producto-imagen-estado');
+    const preview = document.getElementById('producto-imagen-preview');
+    error.style.display = 'none';
+    estado.textContent = '';
+    document.getElementById('producto-imagen-file').value = '';
+
+    if (producto) {
+        document.getElementById('modal-producto-titulo').textContent = 'Editar producto';
+        document.getElementById('producto-id').value = producto.id;
+        document.getElementById('producto-nombre').value = producto.nombre;
+        document.getElementById('producto-marca').value = producto.categoria;
+        document.getElementById('producto-orden').value = producto.orden;
+        document.getElementById('producto-precio').value = producto.precio;
+        document.getElementById('producto-descripcion').value = producto.descripcion || '';
+        document.getElementById('producto-destacado').checked = !!producto.destacado;
+        document.getElementById('producto-imagen-url').value = producto.imagen || '';
+        if (producto.imagen) {
+            preview.src = producto.imagen;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    } else {
+        document.getElementById('modal-producto-titulo').textContent = 'Nuevo producto';
+        document.getElementById('producto-id').value = '';
+        document.getElementById('producto-nombre').value = '';
+        document.getElementById('producto-marca').value = 'cloe';
+        document.getElementById('producto-orden').value = '';
+        document.getElementById('producto-precio').value = '';
+        document.getElementById('producto-descripcion').value = '';
+        document.getElementById('producto-destacado').checked = false;
+        document.getElementById('producto-imagen-url').value = '';
+        preview.style.display = 'none';
+    }
+
+    document.getElementById('modal-producto').style.display = 'flex';
+}
+
+function cerrarFormProducto() {
+    document.getElementById('modal-producto').style.display = 'none';
+}
+
+async function guardarProducto() {
+    const id = document.getElementById('producto-id').value;
+    const error = document.getElementById('modal-producto-error');
+    const boton = document.getElementById('btn-guardar-producto');
+
+    const categoria = document.getElementById('producto-marca').value;
+    const datos = {
+        nombre: document.getElementById('producto-nombre').value.trim(),
+        categoria: categoria,
+        marca: MARCAS[categoria],
+        orden: document.getElementById('producto-orden').value,
+        precio: document.getElementById('producto-precio').value,
+        descripcion: document.getElementById('producto-descripcion').value.trim(),
+        destacado: document.getElementById('producto-destacado').checked,
+        imagen: document.getElementById('producto-imagen-url').value
+    };
+
+    if (!datos.nombre || datos.precio === '') {
+        error.textContent = 'Nombre y precio son obligatorios';
+        error.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    error.style.display = 'none';
+
+    const esEdicion = id !== '';
+    const url = esEdicion ? `${API_PRODUCTOS}/${id}` : API_PRODUCTOS;
+    const metodo = esEdicion ? 'PATCH' : 'POST';
+
+    try {
+        const respuesta = await fetch(url, {
+            method: metodo,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify(datos)
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al guardar');
+        }
+        cerrarFormProducto();
+        cargarProductos();
+    } catch (e) {
+        console.error('Error al guardar producto:', e);
+        error.textContent = e.message || 'Hubo un problema al guardar';
+        error.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar';
+    }
+}
+
+async function cambiarEstadoProducto(id, activo) {
+    const accion = activo ? 'activar' : 'desactivar';
+    if (!confirm(`¿Seguro que quieres ${accion} este producto?`)) return;
+    try {
+        const respuesta = await fetch(`${API_PRODUCTOS}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify({ activo: activo })
+        });
+        if (!respuesta.ok) throw new Error('Error al cambiar estado');
+        cargarProductos();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al cambiar el estado del producto');
+    }
+}
+
+async function eliminarProductoPermanente(id) {
+    if (!confirm('⚠️ Esto BORRA el producto para siempre y no se puede deshacer.\n\nSi solo quieres ocultarlo, usa "Desactivar".\n\n¿Continuar con el borrado permanente?')) return;
+    try {
+        const respuesta = await fetch(`${API_PRODUCTOS}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al eliminar');
+        }
+        cargarProductos();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al eliminar el producto');
+    }
+}

@@ -529,6 +529,13 @@ cargarResenas();
 
 // CATÁLOGO DE PRODUCTOS \\
 
+const API_PRODUCTOS = 'http://localhost:3000/api/productos';
+
+// El precio ahora viene como número desde el backend, así que lo formateamos
+function formatearPrecioProducto(precio) {
+    return '$' + Number(precio).toLocaleString('es-CL');
+}
+
 // Genera el HTML de una tarjeta de producto
 function crearTarjetaProducto(producto) {
     return `
@@ -540,29 +547,42 @@ function crearTarjetaProducto(producto) {
             <p class="product-brand">${producto.marca}</p>
             <h3>${producto.nombre}</h3>
             <p class="product-descripcion">${producto.descripcion}</p>
-            <p class="product-price">${producto.precio}</p>
+            <p class="product-price">${formatearPrecioProducto(producto.precio)}</p>
         </article>
     `;
 }
 
-// Llena la tienda con TODOS los productos
-function cargarTiendaCompleta() {
+// Llena la tienda con TODOS los productos (desde el backend)
+async function cargarTiendaCompleta() {
     const grid = document.getElementById('shop-grid');
     if (!grid) return; // No estamos en la tienda
 
-    grid.innerHTML = PRODUCTOS.map(crearTarjetaProducto).join('');
+    try {
+        const respuesta = await fetch(API_PRODUCTOS);
+        const datos = await respuesta.json();
+        const productos = datos.productos || [];
 
-    // Reconectar los filtros (porque las tarjetas son nuevas)
-    conectarFiltros();
+        grid.innerHTML = productos.map(crearTarjetaProducto).join('');
+        conectarFiltros(); // reconectar filtros porque las tarjetas son nuevas
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        grid.innerHTML = '<p class="resenas-loading">No se pudieron cargar los productos en este momento.</p>';
+    }
 }
 
-// Llena el carrusel del home solo con destacados
-function cargarCarruselDestacados() {
+// Llena el carrusel del home solo con destacados (desde el backend)
+async function cargarCarruselDestacados() {
     const track = document.getElementById('productos-carousel');
     if (!track) return; // No estamos en el home
 
-    const destacados = PRODUCTOS.filter((p) => p.destacado);
-    track.innerHTML = destacados.map(crearTarjetaProducto).join('');
+    try {
+        const respuesta = await fetch(API_PRODUCTOS);
+        const datos = await respuesta.json();
+        const destacados = (datos.productos || []).filter((p) => p.destacado);
+        track.innerHTML = destacados.map(crearTarjetaProducto).join('');
+    } catch (error) {
+        console.error('Error al cargar destacados:', error);
+    }
 }
 
 // Conecta los botones de filtro con las tarjetas
