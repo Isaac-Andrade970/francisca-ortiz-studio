@@ -1,7 +1,7 @@
 
 // PÁGINA CALIFICAR SERVICIO \\
 
-const API_URL = 'http://localhost:3000/api/resenas';
+const API_URL = API_URL + '/resenas';
 
 // Estado actual de la calificación
 let calificacionSeleccionada = 0;

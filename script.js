@@ -99,7 +99,7 @@ if (document.querySelector('.booking-page')) {
         if (!contenedor) return;
 
         try {
-            const respuesta = await fetch('http://localhost:3000/api/servicios');
+            const respuesta = await fetch(API_URL + '/servicios');
             const datos = await respuesta.json();
             const servicios = datos.servicios || [];
 
@@ -232,7 +232,7 @@ function irAPaso(numeroPaso) {
             const dia = String(fecha.getDate()).padStart(2, '0');
             const fechaTexto = `${año}-${mes}-${dia}`;
 
-            const url = `http://localhost:3000/api/reservas/disponibilidad?fecha=${fechaTexto}`;
+            const url = `${API_URL}//reservas/disponibilidad?fecha=${fechaTexto}`;
             const respuesta = await fetch(url);
 
             if (!respuesta.ok){
@@ -367,7 +367,7 @@ function irAPaso(numeroPaso) {
         };
 
         try {
-            const respuesta = await fetch('http://localhost:3000/api/reservas', {
+            const respuesta = await fetch(API_URL + '/reservas', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -485,7 +485,7 @@ async function cargarResenas() {
     if (!grid) return; // No estamos en el home
 
     try {
-        const respuesta = await fetch('http://localhost:3000/api/resenas');
+        const respuesta = await fetch(API_URL + '/resenas');
         if (!respuesta.ok) throw new Error('Error al cargar');
 
         const datos = await respuesta.json();
@@ -529,7 +529,7 @@ cargarResenas();
 
 // CATÁLOGO DE PRODUCTOS \\
 
-const API_PRODUCTOS = 'http://localhost:3000/api/productos';
+const API_PRODUCTOS = API_URL + '/productos';
 
 // El precio ahora viene como número desde el backend, así que lo formateamos
 function formatearPrecioProducto(precio) {
@@ -698,7 +698,7 @@ async function cargarServiciosHome() {
     }
 
     try {
-        const respuesta = await fetch('http://localhost:3000/api/servicios');
+        const respuesta = await fetch(API_URL + '/servicios');
         const datos = await respuesta.json();
         // Mostramos solo los primeros 4 (según el campo "orden")
         const servicios = (datos.servicios || []).slice(0, 4);

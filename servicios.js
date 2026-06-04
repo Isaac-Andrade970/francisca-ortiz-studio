@@ -3,7 +3,7 @@
 // Para agregar o editar servicios NO se toca este archivo: se hace desde el panel admin.
 
 (function () {
-    const API_SERVICIOS = 'http://localhost:3000/api/servicios';
+    const API_SERVICIOS = API_URL + '/servicios';
 
     function formatearPrecio(precio) {
         return '$' + Number(precio).toLocaleString('es-CL');
