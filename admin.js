@@ -1,11 +1,11 @@
 // PANEL ADMIN UNIFICADO \\
 
-const API_RESENAS = 'http://localhost:3000/api/resenas';
-const API_SERVICIOS = 'http://localhost:3000/api/servicios';
-const API_PRODUCTOS = 'http://localhost:3000/api/productos';
+const API_RESENAS = API_URL + '/resenas';
+const API_SERVICIOS = API_URL + '/servicios';
+const API_PRODUCTOS = API_URL + '/productos';
 const CLOUDINARY_CLOUD_NAME = 'dgq8ohuko';        // 👈 tu cloud name
 const CLOUDINARY_UPLOAD_PRESET = 's2a10wum';  // 👈 el nombre de tu preset (unsigned)
-const API_AUTH = 'http://localhost:3000/api/auth';
+const API_AUTH = API_URL + '/auth';
 
 // Sesión: token y rol guardados en sessionStorage
 let tokenSesion = sessionStorage.getItem('adminToken') || null;

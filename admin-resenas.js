@@ -1,6 +1,6 @@
 // PANEL ADMIN - GESTIÓN DE RESEÑAS \\
 
-const API_URL = 'http://localhost:3000/api/resenas';
+const API_URL = API_URL + '/resenas';
 
 // AUTENTICACION \\
 
@@ -29,7 +29,7 @@ async function hacerLogin() {
     errorMsg.style.display = 'none';
 
     try {
-        const respuesta = await fetch('http://localhost:3000/api/auth/login', {
+        const respuesta = await fetch(API_URL + '/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password: password })
