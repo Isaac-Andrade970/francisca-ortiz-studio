@@ -52,11 +52,11 @@ if (document.querySelector('.booking-page')) {
     const HORARIOS = {
         0: null,
         1: null,
-        2: ['09:00', '11:00', '14:00', '16:00', '18:00'],       
-        3: ['09:00', '11:00', '14:00', '16:00'],                 
-        4: ['09:00', '11:00', '14:00', '16:00', '18:00'],        
-        5: ['09:00', '11:00', '14:00', '16:00'],                
-        6: ['09:00', '11:00', '15:00'] 
+        2: ['09:00', '11:00', '14:00', '16:00', '18:00'],
+        3: ['09:00', '11:00', '14:00', '16:00'],
+        4: ['09:00', '11:00', '14:00', '16:00', '18:00'],
+        5: ['09:00', '11:00', '14:00', '16:00'],
+        6: ['09:00', '11:00', '15:00']
     };
 
     let mesActual = new Date();
@@ -121,7 +121,7 @@ if (document.querySelector('.booking-page')) {
 
     cargarServiciosReserva();
 
-function irAPaso(numeroPaso) {
+    function irAPaso(numeroPaso) {
         document.querySelectorAll('.booking-step').forEach((s) => s.classList.remove('active'));
         document.querySelector(`.booking-step-${numeroPaso}`).classList.add('active');
 
@@ -220,32 +220,32 @@ function irAPaso(numeroPaso) {
         helpText.textContent = 'Consultando disponibilidad...';
         slotsContainer.innerHTML = '';
 
-        const HorariosOcupados = await obtenerHorariosOcupados(fecha);
-        renderHorarios(fecha);
+        const horariosOcupados = await obtenerHorariosOcupados(fecha);
+        renderHorarios(fecha, horariosOcupados);
         actualizarSidebar();
     }
 
     async function obtenerHorariosOcupados(fecha) {
-        try{
+        try {
             const año = fecha.getFullYear();
             const mes = String(fecha.getMonth() + 1).padStart(2, '0');
             const dia = String(fecha.getDate()).padStart(2, '0');
             const fechaTexto = `${año}-${mes}-${dia}`;
 
-            const url = `${API_URL}//reservas/disponibilidad?fecha=${fechaTexto}`;
+            const url = `${API_URL}/reservas/disponibilidad?fecha=${fechaTexto}`;
             const respuesta = await fetch(url);
 
-            if (!respuesta.ok){
+            if (!respuesta.ok) {
                 console.error('Error al consultar disponibilidad');
-                return[];
+                return [];
             }
 
             const datos = await respuesta.json();
             return datos.ocupados || [];
 
-        } catch (error){
+        } catch (error) {
             console.error('Error de red al consultar disponibilidad:', error);
-            return[];
+            return [];
         }
     }
 
@@ -271,7 +271,7 @@ function irAPaso(numeroPaso) {
         const duracionBloque = Math.max(reserva.duracion, 120);
 
         let slotsCreados = 0;
-        
+
         const ahora = new Date();
 
         horasDelDia.forEach((horaTexto) => {
@@ -312,9 +312,7 @@ function irAPaso(numeroPaso) {
             helpText.textContent = `Horarios disponibles para ${fechaFormateada}.`;
         }
     }
-        
 
-    
     function seleccionarHora(hora, celda) {
         document.querySelectorAll('.time-slot').forEach((s) => s.classList.remove('selected'));
         celda.classList.add('selected');
@@ -324,7 +322,6 @@ function irAPaso(numeroPaso) {
         actualizarSidebar();
     }
 
-    
     function actualizarSidebar() {
         document.getElementById('sidebar-service').textContent = reserva.servicioNombre || 'Por elegir';
         document.getElementById('sidebar-duration').textContent = reserva.duracion ? `${reserva.duracion} min` : '—';
@@ -335,8 +332,7 @@ function irAPaso(numeroPaso) {
         document.getElementById('sidebar-total').textContent = reserva.servicioPrecio || '$0';
     }
 
-    
-        document.getElementById('confirm-booking')?.addEventListener('click', async () => {
+    document.getElementById('confirm-booking')?.addEventListener('click', async () => {
         const form = document.getElementById('booking-form');
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -367,7 +363,7 @@ function irAPaso(numeroPaso) {
         };
 
         try {
-            const respuesta = await fetch(API_URL + '/reservas', {
+            const respuesta = await fetch(API_URL + '/pagos/iniciar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -378,22 +374,18 @@ function irAPaso(numeroPaso) {
             const resultado = await respuesta.json();
 
             if (!respuesta.ok) {
-                throw new Error(resultado.error || 'Error al crear la reserva');
+                throw new Error(resultado.error || 'Error al iniciar el pago');
             }
 
-            document.getElementById('summary-service').textContent = reserva.servicioNombre;
-            document.getElementById('summary-date').textContent = reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('summary-time').textContent = reserva.hora;
-            document.getElementById('summary-name').textContent = datosReserva.cliente;
-
-            irAPaso(4);
+            // Redirige al cliente a la página de pago de SumUp
+            window.location.href = resultado.url_pago;
 
         } catch (error) {
-            console.error('Error al confirmar reserva:', error);
-            alert('Hubo un problema al confirmar tu reserva. Por favor intenta de nuevo o contáctanos por WhatsApp.');
+            console.error('Error al iniciar el pago:', error);
+            alert('Hubo un problema al iniciar el pago. Intenta de nuevo o contáctanos por WhatsApp.');
 
             boton.disabled = false;
-            boton.textContent = 'Confirmar reserva';
+            boton.textContent = 'Pagar abono y reservar';
         }
     });
 
@@ -448,7 +440,7 @@ if (carouselTrack && btnPrev && btnNext) {
             if (!pausado) {
                 moverDerecha();
             }
-        }, 3000); // Cada 5 segundos
+        }, 3000);
     }
 
     function reiniciarAutoScroll() {
@@ -471,7 +463,7 @@ if (carouselTrack && btnPrev && btnNext) {
     });
 
     carouselTrack.addEventListener('touchend', () => {
-        setTimeout(() => { pausado = false; }, 3000); // 3s de pausa después de tocar
+        setTimeout(() => { pausado = false; }, 3000);
     });
 
     // Iniciar todo
