@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación - Francisca Ortiz Studio</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+        <div id="resultado" style="max-width: 480px; text-align: center;">
+            <p>Verificando tu pago...</p>
+        </div>
+    </main>
+
+    <script>
+        async function verificarPago(intento = 1) {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            const cont = document.getElementById('resultado');
+
+            if (!ref) {
+                cont.innerHTML = '<h1>Algo salió mal</h1><p>No encontramos la referencia del pago.</p>';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(API_URL + '/pagos/confirmar?ref=' + ref);
+                const datos = await respuesta.json();
+
+                if (datos.estado === 'confirmada') {
+                    cont.innerHTML = `
+                        <div style="font-size:3rem; color:#A56B82;">✓</div>
+                        <h1>¡Reserva confirmada!</h1>
+                        <p>Tu abono fue recibido y tu cita quedó agendada. Te enviamos los detalles por correo.</p>
+                        <a href="index.html" class="btn btn-primary">Volver al inicio</a>
+                    `;
+                } else if (datos.estado === 'no_pagado') {
+                    // Puede haber un pequeño retraso: reintentamos un par de veces
+                    if (intento < 3) {
+                        cont.innerHTML = '<p>Verificando tu pago...</p>';
+                        setTimeout(() => verificarPago(intento + 1), 3000);
+                        return;
+                    }
+                    cont.innerHTML = `
+                        <h1>El pago no se completó</h1>
+                        <p>No pudimos confirmar tu pago. Si crees que es un error, recarga en unos segundos o contáctanos por WhatsApp.</p>
+                        <a href="reservar.html" class="btn btn-primary">Intentar de nuevo</a>
+                    `;
+                } else {
+                    cont.innerHTML = '<h1>Algo salió mal</h1><p>Intenta de nuevo o contáctanos por WhatsApp.</p>';
+                }
+            } catch (error) {
+                console.error(error);
+                cont.innerHTML = '<h1>Algo salió mal</h1><p>No pudimos verificar tu pago. Contáctanos por WhatsApp.</p>';
+            }
+        }
+        verificarPago();
+    </script>
+</body>
+</html>
