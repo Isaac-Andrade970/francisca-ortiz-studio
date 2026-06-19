@@ -51,7 +51,7 @@ if (document.querySelector('.booking-page')) {
 
     const HORARIOS = {
         0: null,
-        1: null,
+        1: ['09:00', '11:00', '14:00', '16:00'],
         2: ['09:00', '11:00', '14:00', '16:00', '18:00'],
         3: ['09:00', '11:00', '14:00', '16:00'],
         4: ['09:00', '11:00', '14:00', '16:00', '18:00'],
@@ -709,3 +709,25 @@ async function cargarServiciosHome() {
 }
 
 cargarServiciosHome();
+
+// SCROLL SUAVE A SECCIONES INTERNAS (ajustando por el header) \\
+(function () {
+    const header = document.querySelector('header');
+
+    document.querySelectorAll('a[href*="#"]').forEach((link) => {
+        const href = link.getAttribute('href');
+        const esAncla = href && (href.startsWith('#') || href.includes('index.html#'));
+        if (!esAncla) return;
+
+        link.addEventListener('click', (e) => {
+            const id = href.split('#')[1];
+            const destino = document.getElementById(id);
+            if (!destino) return; // el ancla no está en esta página: navegar normal
+
+            e.preventDefault();
+            const offset = (header ? header.offsetHeight : 80) + 16;
+            const y = destino.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        });
+    });
+})();
