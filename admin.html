@@ -41,7 +41,7 @@
                     <h1>Hola, Francisca <span class="script">✦</span></h1>
                     <p class="admin-subtitle">Gestiona tu estudio desde un solo lugar</p>
                 </div>
-                <img src="images/logo-fo-blanco.png" alt="Francisca Ortiz" class="admin-header-logo">
+                <img src="images/logo-fo.png" alt="Francisca Ortiz" class="admin-header-logo">
             </div>
         </header>
 
@@ -107,6 +107,17 @@
                     <div id="empty-productos" class="admin-empty" style="display: none;"><p>Aún no hay productos</p></div>
                 </section>
             </div>
+
+            <!-- Solo visible para superadmin: cambiar contraseña de Francisca -->
+            <section id="superadmin-password" class="admin-section" style="display:none; margin-top:2rem; padding:1.5rem; border:1px solid var(--nude); border-radius:1rem;">
+                <h2 style="margin-bottom:0.5rem;">Cambiar contraseña de Francisca</h2>
+                <p style="margin-bottom:1rem; color:var(--text-soft);">Como superadmin, puedes asignarle una nueva contraseña de acceso.</p>
+                <div class="login-field">
+                    <input type="password" id="nueva-password-admin" placeholder="Nueva contraseña (mín. 6 caracteres)">
+                </div>
+                <p id="password-msg" style="display:none; margin:0.5rem 0;"></p>
+                <button id="btn-cambiar-password" class="btn btn-primary">Guardar nueva contraseña</button>
+            </section>
         </main>
     </div>
         

@@ -21,6 +21,10 @@ let productosActuales = [];
 function mostrarPanel() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-content').style.display = 'block';
+    if (rolSesion === 'superadmin') {
+        const sec = document.getElementById('superadmin-password');
+        if (sec) sec.style.display = 'block';
+    }
 }
 
 async function hacerLogin() {
@@ -70,6 +74,55 @@ async function hacerLogin() {
         errorMsg.style.display = 'block';
         boton.disabled = false;
         boton.textContent = 'Ingresar al panel';
+    }
+}
+
+// CAMBIAR CONTRASEÑA DE FRANCISCA (solo superadmin) \\
+async function cambiarPasswordFrancisca() {
+    const input = document.getElementById('nueva-password-admin');
+    const msg = document.getElementById('password-msg');
+    const boton = document.getElementById('btn-cambiar-password');
+    const nueva = input.value.trim();
+
+    if (nueva.length < 6) {
+        msg.textContent = 'La contraseña debe tener al menos 6 caracteres';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const respuesta = await fetch(`${API_AUTH}/cambiar-password-admin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ nuevaPassword: nueva })
+        });
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            msg.textContent = datos.error || 'No se pudo cambiar la contraseña';
+            msg.style.color = '#b00020';
+        } else {
+            msg.textContent = '✅ Listo. Francisca ya puede entrar con la nueva contraseña.';
+            msg.style.color = 'green';
+            input.value = '';
+        }
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = 'Error de conexión con el servidor';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar nueva contraseña';
     }
 }
 
@@ -497,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-cancelar-producto').addEventListener('click', cerrarFormProducto);
     document.getElementById('btn-guardar-producto').addEventListener('click', guardarProducto);
     document.getElementById('producto-imagen-file').addEventListener('change', manejarSeleccionImagen);
+    document.getElementById('btn-cambiar-password').addEventListener('click', cambiarPasswordFrancisca);
     document.getElementById('modal-producto').addEventListener('click', (e) => {
         if (e.target.id === 'modal-producto') cerrarFormProducto();
     });
