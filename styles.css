@@ -3479,3 +3479,33 @@ body.modal-abierto {
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
+
+/* EDITOR DE HORARIOS (PANEL) */
+.horarios-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.horario-fila {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.horario-dia {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 130px;
+    cursor: pointer;
+}
+.horario-horas {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--nude);
+    border-radius: 0.6rem;
+    font-family: inherit;
+}
