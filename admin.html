@@ -51,6 +51,7 @@
                 <button class="admin-tab active" data-tab="resenas">Reseñas</button>
                 <button class="admin-tab" data-tab="servicios">Servicios</button>
                 <button class="admin-tab" data-tab="productos">Productos</button>
+                <button class="admin-tab" data-tab="horarios">Horarios</button>
             </div>
 
             <!-- PESTAÑA: RESEÑAS -->
@@ -105,6 +106,23 @@
                     <div id="loading-productos" class="admin-loading">Cargando productos...</div>
                     <div id="lista-productos" class="servicios-admin-list"></div>
                     <div id="empty-productos" class="admin-empty" style="display: none;"><p>Aún no hay productos</p></div>
+                </section>
+            </div>
+
+            <!-- PESTAÑA: HORARIOS -->
+            <div id="tab-horarios" class="admin-tab-content">
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>Horario semanal</h2>
+                    </div>
+                    <p style="color:var(--text-soft); margin-bottom:1.5rem;">
+                        Marca los días que atiendes y escribe las horas separadas por coma (ej: 09:00, 11:00, 14:00). Si desmarcas un día, queda cerrado.
+                    </p>
+                    <div id="horarios-editor" class="horarios-editor">
+                        <p class="admin-loading">Cargando horarios...</p>
+                    </div>
+                    <p id="horarios-msg" style="display:none; margin:1rem 0;"></p>
+                    <button id="btn-guardar-horarios" class="btn btn-primary">Guardar horarios</button>
                 </section>
             </div>
 

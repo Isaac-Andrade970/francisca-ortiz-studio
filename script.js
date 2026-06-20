@@ -49,15 +49,25 @@ if (document.querySelector('.booking-page')) {
         hora: null
     };
 
-    const HORARIOS = {
-        0: null,
-        1: ['09:00', '11:00', '14:00', '16:00'],
-        2: ['09:00', '11:00', '14:00', '16:00', '18:00'],
-        3: ['09:00', '11:00', '14:00', '16:00'],
-        4: ['09:00', '11:00', '14:00', '16:00', '18:00'],
-        5: ['09:00', '11:00', '14:00', '16:00'],
-        6: ['09:00', '11:00', '15:00']
-    };
+   // El horario ahora viene de la base de datos (editable desde el panel)
+    let HORARIOS = {};
+    let BLOQUEOS = [];
+    let horariosCargados = false;
+
+    async function cargarHorarios() {
+        if (horariosCargados) return;
+        try {
+            const res = await fetch(`${API_URL}/horarios`);
+            const data = await res.json();
+            HORARIOS = data.semana || {};
+            BLOQUEOS = data.bloqueos || [];
+        } catch (e) {
+            console.error('No se pudieron cargar los horarios:', e);
+            HORARIOS = {};
+            BLOQUEOS = [];
+        }
+        horariosCargados = true;
+    }
 
     let mesActual = new Date();
     mesActual.setDate(1);
@@ -138,7 +148,8 @@ if (document.querySelector('.booking-page')) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    document.getElementById('next-to-step-2')?.addEventListener('click', () => {
+    document.getElementById('next-to-step-2')?.addEventListener('click', async () => {
+        await cargarHorarios();
         irAPaso(2);
         renderCalendario();
     });
@@ -187,9 +198,13 @@ if (document.querySelector('.booking-page')) {
             if (fechaDia.getTime() === hoy.getTime()) {
                 cell.classList.add('today');
             }
-            if (fechaDia < hoy || HORARIOS[diaSemana] === null) {
-                cell.classList.add('disabled');
-            } else {
+            const horasDia = HORARIOS[diaSemana] || [];
+            const fechaTexto = `${año}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            const bloqueado = BLOQUEOS.includes(fechaTexto);
+
+            if (fechaDia < hoy || horasDia.length === 0 || bloqueado) {
+                cell.classList.add('disabled'); 
+            }    else {
                 cell.classList.add('has-availability');
 
                 cell.addEventListener('click', () => seleccionarDia(fechaDia, cell));
@@ -254,11 +269,11 @@ if (document.querySelector('.booking-page')) {
         const helpText = document.querySelector('.slots-help');
 
         const diaSemana = fecha.getDay();
-        const horasDelDia = HORARIOS[diaSemana];
+        const horasDelDia = HORARIOS[diaSemana] || [];
 
         slotsContainer.innerHTML = '';
 
-        if (!horasDelDia) {
+        if (horasDelDia.length === 0) {
             helpText.textContent = 'Este día no atendemos.';
             return;
         }

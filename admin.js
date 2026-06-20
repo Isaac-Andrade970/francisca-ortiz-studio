@@ -15,6 +15,7 @@ let serviciosCargados = false; // para cargar servicios solo la 1ra vez que se a
 let serviciosActuales = []; // guardamos la lista para poder editar
 let productosCargados = false;
 let productosActuales = [];
+let horariosCargados = false;
 
 // LOGIN \\
 
@@ -126,6 +127,109 @@ async function cambiarPasswordFrancisca() {
     }
 }
 
+// HORARIOS \\
+
+const DIAS_SEMANA = [
+    { num: 1, nombre: 'Lunes' },
+    { num: 2, nombre: 'Martes' },
+    { num: 3, nombre: 'Miércoles' },
+    { num: 4, nombre: 'Jueves' },
+    { num: 5, nombre: 'Viernes' },
+    { num: 6, nombre: 'Sábado' },
+    { num: 0, nombre: 'Domingo' }
+];
+
+async function cargarHorariosAdmin() {
+    const cont = document.getElementById('horarios-editor');
+    try {
+        const res = await fetch(`${API_URL}/horarios`);
+        const data = await res.json();
+        const semana = data.semana || {};
+
+        cont.innerHTML = '';
+        DIAS_SEMANA.forEach(dia => {
+            const horas = semana[dia.num] || [];
+            const abierto = horas.length > 0;
+            const fila = document.createElement('div');
+            fila.classList.add('horario-fila');
+            fila.innerHTML = `
+                <label class="horario-dia">
+                    <input type="checkbox" class="horario-check" data-dia="${dia.num}" ${abierto ? 'checked' : ''}>
+                    <span>${dia.nombre}</span>
+                </label>
+                <input type="text" class="horario-horas" data-dia="${dia.num}" value="${horas.join(', ')}" placeholder="09:00, 11:00, 14:00">
+            `;
+            cont.appendChild(fila);
+        });
+    } catch (e) {
+        console.error('Error al cargar horarios:', e);
+        cont.innerHTML = '<p style="color:#b00020;">No se pudieron cargar los horarios.</p>';
+    }
+}
+
+async function guardarHorariosAdmin() {
+    const msg = document.getElementById('horarios-msg');
+    const boton = document.getElementById('btn-guardar-horarios');
+    const semana = {};
+    let error = null;
+
+    DIAS_SEMANA.forEach(dia => {
+        const check = document.querySelector(`.horario-check[data-dia="${dia.num}"]`);
+        const input = document.querySelector(`.horario-horas[data-dia="${dia.num}"]`);
+
+        if (!check.checked) {
+            semana[dia.num] = [];
+            return;
+        }
+        const horas = input.value.split(',').map(h => h.trim()).filter(h => h.length > 0);
+        for (const h of horas) {
+            if (!/^\d{1,2}:\d{2}$/.test(h)) {
+                error = `Hora inválida en ${dia.nombre}: "${h}". Usa el formato HH:MM (ej: 09:00).`;
+            }
+        }
+        semana[dia.num] = horas;
+    });
+
+    if (error) {
+        msg.textContent = error;
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const res = await fetch(`${API_URL}/horarios`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ semana })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            msg.textContent = data.error || 'No se pudo guardar';
+            msg.style.color = '#b00020';
+        } else {
+            msg.textContent = '✅ Horarios guardados. Ya están activos en la página de reservas.';
+            msg.style.color = 'green';
+        }
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = 'Error de conexión';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar horarios';
+    }
+}
+
 // PESTAÑAS \\
 
 function cambiarTab(nombre) {
@@ -145,6 +249,11 @@ function cambiarTab(nombre) {
     if (nombre === 'productos' && !productosCargados) {
         cargarProductos();
         productosCargados = true;
+    }
+
+    if (nombre === 'horarios' && !horariosCargados) {
+        cargarHorariosAdmin();
+        horariosCargados = true;
     }
 }
 
@@ -551,6 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-guardar-producto').addEventListener('click', guardarProducto);
     document.getElementById('producto-imagen-file').addEventListener('change', manejarSeleccionImagen);
     document.getElementById('btn-cambiar-password').addEventListener('click', cambiarPasswordFrancisca);
+    document.getElementById('btn-guardar-horarios').addEventListener('click', guardarHorariosAdmin);
     document.getElementById('modal-producto').addEventListener('click', (e) => {
         if (e.target.id === 'modal-producto') cerrarFormProducto();
     });
