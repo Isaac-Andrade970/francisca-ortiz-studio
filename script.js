@@ -545,8 +545,9 @@ function formatearPrecioProducto(precio) {
 
 // Genera el HTML de una tarjeta de producto
 function crearTarjetaProducto(producto) {
+    const marca = (producto.marca || '').trim();
     return `
-        <article class="product-card" data-category="${producto.categoria}">
+        <article class="product-card" data-category="${marca}">
             <div class="product-image">
                 <img src="${producto.imagen}" alt="${producto.nombre}"
                      onerror="this.parentElement.classList.add('sin-imagen'); this.remove();">
@@ -559,7 +560,9 @@ function crearTarjetaProducto(producto) {
     `;
 }
 
-// Genera los botones de filtro de marca según las marcas que existan en los productos
+// Genera los botones de filtro de marca según las marcas que existan en los productos.
+// Se agrupa por el nombre real de la marca (no por "categoria") para que dos productos
+// de la misma marca nunca generen dos botones de filtro distintos.
 function generarFiltrosMarca(productos) {
     const contenedor = document.getElementById('shop-filters');
     if (!contenedor) return;
@@ -567,15 +570,16 @@ function generarFiltrosMarca(productos) {
     // Quita los botones de marca generados antes, dejando el botón "Todos"
     contenedor.querySelectorAll('.filter-btn:not([data-filter="all"])').forEach((btn) => btn.remove());
 
-    const marcasVistas = new Map(); // categoria -> nombre de marca
+    const marcasVistas = new Set();
     productos.forEach((p) => {
-        if (p.categoria && !marcasVistas.has(p.categoria)) marcasVistas.set(p.categoria, p.marca);
+        const marca = (p.marca || '').trim();
+        if (marca) marcasVistas.add(marca);
     });
 
-    marcasVistas.forEach((marca, categoria) => {
+    marcasVistas.forEach((marca) => {
         const boton = document.createElement('button');
         boton.className = 'filter-btn';
-        boton.setAttribute('data-filter', categoria);
+        boton.setAttribute('data-filter', marca);
         boton.textContent = marca;
         contenedor.appendChild(boton);
     });

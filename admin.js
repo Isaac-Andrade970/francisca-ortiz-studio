@@ -733,6 +733,7 @@ async function cargarProductos() {
 
         productosActuales = datos.productos || [];
         actualizarListaMarcas();
+        renderizarMarcas();
 
         if (productosActuales.length === 0) {
             empty.style.display = 'block';
@@ -767,13 +768,6 @@ async function cargarProductos() {
     }
 }
 
-// Marcas base que siempre aparecen sugeridas en el formulario de productos
-const MARCAS = {
-    cloe: 'Cloe Professional',
-    rouve: 'Rouvé Professional',
-    mens: "Men's Work"
-};
-
 // Convierte el nombre de una marca en una clave simple para "categoria" (ej: filtros de la tienda)
 function slugificarMarca(marca) {
     const sinTildes = { a: 'áàä', e: 'éèë', i: 'íìï', o: 'óòö', u: 'úùü', n: 'ñ' };
@@ -788,13 +782,123 @@ function slugificarMarca(marca) {
         .replace(/^-+|-+$/g, '');
 }
 
-// Agrega al datalist las marcas base más las que ya existan en los productos guardados
+// Agrega al datalist las marcas que ya existan en los productos guardados.
+// Si una marca ya no tiene ningún producto, deja de sugerirse sola.
 function actualizarListaMarcas() {
     const datalist = document.getElementById('marcas-existentes');
     if (!datalist) return;
-    const marcas = new Set(Object.values(MARCAS));
-    productosActuales.forEach((p) => { if (p.marca) marcas.add(p.marca); });
+    const marcas = new Set();
+    productosActuales.forEach((p) => { if (p.marca) marcas.add(p.marca.trim()); });
     datalist.innerHTML = [...marcas].map((m) => `<option value="${m}"></option>`).join('');
+}
+
+// Agrupa los productos actuales por marca (nombre exacto y sin espacios extra)
+function agruparPorMarca() {
+    const porMarca = new Map();
+    productosActuales.forEach((p) => {
+        const marca = (p.marca || '').trim();
+        if (!marca) return;
+        if (!porMarca.has(marca)) porMarca.set(marca, []);
+        porMarca.get(marca).push(p);
+    });
+    return porMarca;
+}
+
+function crearCardMarca(marca, productos) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+
+    const activos = productos.filter((p) => p.activo).length;
+
+    card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+            <div>
+                <h3 style="margin:0;">${marca}</h3>
+                <p class="servicio-meta" style="margin:0.2rem 0 0;">${productos.length} producto${productos.length === 1 ? '' : 's'} · ${activos} activo${activos === 1 ? '' : 's'}</p>
+            </div>
+            <div class="servicio-acciones">
+                <button class="btn-renombrar-marca" data-marca="${marca}">Renombrar</button>
+                <button class="btn-baja-marca" data-marca="${marca}">Dejar de vender</button>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+// Pinta la sección "Marcas" a partir de los productos ya cargados
+function renderizarMarcas() {
+    const lista = document.getElementById('lista-marcas');
+    const count = document.getElementById('count-marcas');
+    if (!lista) return;
+
+    const porMarca = agruparPorMarca();
+
+    lista.innerHTML = '';
+    count.textContent = porMarca.size;
+
+    porMarca.forEach((productos, marca) => lista.appendChild(crearCardMarca(marca, productos)));
+
+    document.querySelectorAll('.btn-renombrar-marca').forEach((b) => {
+        b.addEventListener('click', () => renombrarMarca(b.getAttribute('data-marca')));
+    });
+    document.querySelectorAll('.btn-baja-marca').forEach((b) => {
+        b.addEventListener('click', () => darDeBajaMarca(b.getAttribute('data-marca')));
+    });
+}
+
+// Renombra una marca en todos sus productos a la vez (sirve para fusionar duplicados o corregir errores de tipeo)
+async function renombrarMarca(marcaActual) {
+    const nuevoNombre = prompt(`Nuevo nombre para "${marcaActual}":`, marcaActual);
+    if (nuevoNombre === null) return;
+
+    const nombreLimpio = nuevoNombre.trim();
+    if (!nombreLimpio || nombreLimpio === marcaActual) return;
+
+    const productos = productosActuales.filter((p) => (p.marca || '').trim() === marcaActual);
+    if (productos.length === 0) return;
+
+    if (!confirm(`Esto va a renombrar "${marcaActual}" a "${nombreLimpio}" en ${productos.length} producto(s). ¿Continuar?`)) return;
+
+    try {
+        await Promise.all(productos.map((p) => fetch(`${API_PRODUCTOS}/${p.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ marca: nombreLimpio, categoria: slugificarMarca(nombreLimpio) })
+        })));
+        cargarProductos();
+    } catch (e) {
+        console.error('Error al renombrar marca:', e);
+        alert('Hubo un problema al renombrar la marca');
+    }
+}
+
+// Desactiva de una vez todos los productos de una marca (para cuando ya no se vende)
+async function darDeBajaMarca(marca) {
+    const productos = productosActuales.filter((p) => (p.marca || '').trim() === marca && p.activo);
+    if (productos.length === 0) {
+        alert('Esta marca ya no tiene productos activos.');
+        return;
+    }
+
+    if (!confirm(`Esto desactiva los ${productos.length} producto(s) de "${marca}" (dejan de verse en la tienda). Si cambias de opinión, puedes reactivarlos uno por uno desde "Tus productos". ¿Continuar?`)) return;
+
+    try {
+        await Promise.all(productos.map((p) => fetch(`${API_PRODUCTOS}/${p.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ activo: false })
+        })));
+        cargarProductos();
+    } catch (e) {
+        console.error('Error al desactivar la marca:', e);
+        alert('Hubo un problema al desactivar los productos de la marca');
+    }
 }
 
 // Sube un archivo a Cloudinary y devuelve la URL final
