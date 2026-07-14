@@ -732,6 +732,7 @@ async function cargarProductos() {
         lista.innerHTML = '';
 
         productosActuales = datos.productos || [];
+        actualizarListaMarcas();
 
         if (productosActuales.length === 0) {
             empty.style.display = 'block';
@@ -766,11 +767,35 @@ async function cargarProductos() {
     }
 }
 
+// Marcas base que siempre aparecen sugeridas en el formulario de productos
 const MARCAS = {
     cloe: 'Cloe Professional',
     rouve: 'Rouvé Professional',
     mens: "Men's Work"
 };
+
+// Convierte el nombre de una marca en una clave simple para "categoria" (ej: filtros de la tienda)
+function slugificarMarca(marca) {
+    const sinTildes = { a: 'áàä', e: 'éèë', i: 'íìï', o: 'óòö', u: 'úùü', n: 'ñ' };
+    let texto = marca.toLowerCase();
+    for (const letra in sinTildes) {
+        for (const acento of sinTildes[letra]) {
+            texto = texto.split(acento).join(letra);
+        }
+    }
+    return texto
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+// Agrega al datalist las marcas base más las que ya existan en los productos guardados
+function actualizarListaMarcas() {
+    const datalist = document.getElementById('marcas-existentes');
+    if (!datalist) return;
+    const marcas = new Set(Object.values(MARCAS));
+    productosActuales.forEach((p) => { if (p.marca) marcas.add(p.marca); });
+    datalist.innerHTML = [...marcas].map((m) => `<option value="${m}"></option>`).join('');
+}
 
 // Sube un archivo a Cloudinary y devuelve la URL final
 async function subirImagenCloudinary(file) {
@@ -817,7 +842,7 @@ function abrirFormProducto(producto = null) {
         document.getElementById('modal-producto-titulo').textContent = 'Editar producto';
         document.getElementById('producto-id').value = producto.id;
         document.getElementById('producto-nombre').value = producto.nombre;
-        document.getElementById('producto-marca').value = producto.categoria;
+        document.getElementById('producto-marca').value = producto.marca || '';
         document.getElementById('producto-orden').value = producto.orden;
         document.getElementById('producto-precio').value = producto.precio;
         document.getElementById('producto-descripcion').value = producto.descripcion || '';
@@ -833,7 +858,7 @@ function abrirFormProducto(producto = null) {
         document.getElementById('modal-producto-titulo').textContent = 'Nuevo producto';
         document.getElementById('producto-id').value = '';
         document.getElementById('producto-nombre').value = '';
-        document.getElementById('producto-marca').value = 'cloe';
+        document.getElementById('producto-marca').value = '';
         document.getElementById('producto-orden').value = '';
         document.getElementById('producto-precio').value = '';
         document.getElementById('producto-descripcion').value = '';
@@ -854,11 +879,11 @@ async function guardarProducto() {
     const error = document.getElementById('modal-producto-error');
     const boton = document.getElementById('btn-guardar-producto');
 
-    const categoria = document.getElementById('producto-marca').value;
+    const marca = document.getElementById('producto-marca').value.trim();
     const datos = {
         nombre: document.getElementById('producto-nombre').value.trim(),
-        categoria: categoria,
-        marca: MARCAS[categoria],
+        categoria: slugificarMarca(marca),
+        marca: marca,
         orden: document.getElementById('producto-orden').value,
         precio: document.getElementById('producto-precio').value,
         descripcion: document.getElementById('producto-descripcion').value.trim(),
@@ -866,8 +891,8 @@ async function guardarProducto() {
         imagen: document.getElementById('producto-imagen-url').value
     };
 
-    if (!datos.nombre || datos.precio === '') {
-        error.textContent = 'Nombre y precio son obligatorios';
+    if (!datos.nombre || !marca || datos.precio === '') {
+        error.textContent = 'Nombre, marca y precio son obligatorios';
         error.style.display = 'block';
         return;
     }

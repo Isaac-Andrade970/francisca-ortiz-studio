@@ -204,11 +204,12 @@
             <div class="form-fila">
                 <div class="form-grupo">
                     <label for="producto-marca">Línea / Marca</label>
-                    <select id="producto-marca">
-                        <option value="cloe">Cloe Professional</option>
-                        <option value="rouve">Rouvé Professional</option>
-                        <option value="mens">Men's Work</option>
-                    </select>
+                    <input type="text" id="producto-marca" list="marcas-existentes" placeholder="Ej: Cloe Professional">
+                    <datalist id="marcas-existentes">
+                        <option value="Cloe Professional">
+                        <option value="Rouvé Professional">
+                        <option value="Men's Work">
+                    </datalist>
                 </div>
                 <div class="form-grupo">
                     <label for="producto-orden">Orden</label>

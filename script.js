@@ -559,6 +559,28 @@ function crearTarjetaProducto(producto) {
     `;
 }
 
+// Genera los botones de filtro de marca según las marcas que existan en los productos
+function generarFiltrosMarca(productos) {
+    const contenedor = document.getElementById('shop-filters');
+    if (!contenedor) return;
+
+    // Quita los botones de marca generados antes, dejando el botón "Todos"
+    contenedor.querySelectorAll('.filter-btn:not([data-filter="all"])').forEach((btn) => btn.remove());
+
+    const marcasVistas = new Map(); // categoria -> nombre de marca
+    productos.forEach((p) => {
+        if (p.categoria && !marcasVistas.has(p.categoria)) marcasVistas.set(p.categoria, p.marca);
+    });
+
+    marcasVistas.forEach((marca, categoria) => {
+        const boton = document.createElement('button');
+        boton.className = 'filter-btn';
+        boton.setAttribute('data-filter', categoria);
+        boton.textContent = marca;
+        contenedor.appendChild(boton);
+    });
+}
+
 // Llena la tienda con TODOS los productos (desde el backend)
 async function cargarTiendaCompleta() {
     const grid = document.getElementById('shop-grid');
@@ -569,6 +591,7 @@ async function cargarTiendaCompleta() {
         const datos = await respuesta.json();
         const productos = datos.productos || [];
 
+        generarFiltrosMarca(productos);
         grid.innerHTML = productos.map(crearTarjetaProducto).join('');
         conectarFiltros(); // reconectar filtros porque las tarjetas son nuevas
     } catch (error) {
