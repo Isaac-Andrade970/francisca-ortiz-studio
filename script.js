@@ -137,6 +137,37 @@ if (document.querySelector('.booking-page')) {
         });
     }
 
+    // Filtro por categoría: solo oculta/muestra tarjetas, no toca la selección.
+    const CATEGORIAS = [
+        { valor: 'todos', etiqueta: 'Todos' },
+        { valor: 'peluqueria', etiqueta: 'Peluquería' },
+        { valor: 'manicure', etiqueta: 'Manicure' }
+    ];
+
+    function renderFiltroCategorias() {
+        const contenedor = document.getElementById('category-filter');
+        if (!contenedor) return;
+
+        contenedor.innerHTML = CATEGORIAS.map((c, i) => `
+            <button type="button" class="category-chip${i === 0 ? ' active' : ''}" data-categoria="${c.valor}">${c.etiqueta}</button>
+        `).join('');
+
+        contenedor.querySelectorAll('.category-chip').forEach((chip) => {
+            chip.addEventListener('click', () => {
+                contenedor.querySelectorAll('.category-chip').forEach((c) => c.classList.remove('active'));
+                chip.classList.add('active');
+                aplicarFiltroCategoria(chip.getAttribute('data-categoria'));
+            });
+        });
+    }
+
+    function aplicarFiltroCategoria(categoria) {
+        document.querySelectorAll('.service-option').forEach((option) => {
+            const coincide = categoria === 'todos' || option.getAttribute('data-categoria') === categoria;
+            option.classList.toggle('oculto-por-filtro', !coincide);
+        });
+    }
+
     // Trae los servicios del backend, los dibuja y luego conecta los clics
     async function cargarServiciosReserva() {
         const contenedor = document.querySelector('.services-selection');
@@ -148,7 +179,7 @@ if (document.querySelector('.booking-page')) {
             const servicios = datos.servicios || [];
 
             contenedor.innerHTML = servicios.map((s) => `
-                <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}" data-price="${s.precio}">
+                <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}" data-price="${s.precio}" data-categoria="${s.categoria}">
                     <h3>${s.nombre}</h3>
                     <p>${s.descripcion || ''}</p>
                     <p class="service-meta"><span class="price">${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
@@ -156,6 +187,7 @@ if (document.querySelector('.booking-page')) {
             `).join('');
 
             conectarOpcionesServicio();
+            renderFiltroCategorias();
 
         } catch (error) {
             console.error('Error al cargar servicios para reservar:', error);

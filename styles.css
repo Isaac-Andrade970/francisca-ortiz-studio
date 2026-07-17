@@ -1209,6 +1209,41 @@ footer h4{
     font-size: 1rem;
 }
 
+.category-filter{
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.category-chip{
+    padding: 0.55rem 1.25rem;
+    border-radius: 50px;
+    border: 2px solid var(--nude);
+    background-color: var(--white);
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+
+.category-chip:hover{
+    border-color: var(--copper-soft);
+    color: var(--rose-mauve-dark);
+}
+
+.category-chip.active{
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
+    border-color: transparent;
+    color: var(--white);
+}
+
+.service-option.oculto-por-filtro{
+    display: none;
+}
+
 .service-option{
     background-color: var(--white);
     padding: 1.75rem;
