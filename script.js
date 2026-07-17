@@ -84,9 +84,12 @@ if (document.querySelector('.booking-page')) {
     }
     function formatearDuracionReserva(min) {
         if (min < 60) return `${min} min`;
-        const horas = min / 60;
-        if (horas === 1) return '1 hora';
-        return `${horas} horas`;
+        const horas = Math.floor(min / 60);
+        const minutosRestantes = min % 60;
+        if (minutosRestantes === 0) {
+            return horas === 1 ? '1 hora' : `${horas} horas`;
+        }
+        return `${horas} h ${minutosRestantes} min`;
     }
 
     // Conecta el clic a cada tarjeta (se llama DESPUÉS de dibujarlas)
