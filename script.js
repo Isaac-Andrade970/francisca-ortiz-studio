@@ -92,6 +92,18 @@ if (document.querySelector('.booking-page')) {
         return `${horas} h ${minutosRestantes} min`;
     }
 
+    const MAX_SERVICIOS = 3;
+
+    // Marca como deshabilitadas (visualmente) las tarjetas no elegidas
+    // cuando ya se llegó al máximo de servicios por reserva.
+    function actualizarLimiteServicios() {
+        const alcanzoLimite = reserva.servicios.length >= MAX_SERVICIOS;
+        document.querySelectorAll('.service-option').forEach((option) => {
+            const seleccionado = option.classList.contains('selected');
+            option.classList.toggle('disabled', alcanzoLimite && !seleccionado);
+        });
+    }
+
     // Conecta el clic a cada tarjeta (se llama DESPUÉS de dibujarlas)
     // Selección múltiple: cada clic agrega o saca ese servicio de la reserva.
     function conectarOpcionesServicio() {
@@ -100,6 +112,10 @@ if (document.querySelector('.booking-page')) {
             option.addEventListener('click', () => {
                 const id = option.getAttribute('data-service');
                 const yaSeleccionado = reserva.servicios.some((s) => s.id === id);
+
+                if (!yaSeleccionado && reserva.servicios.length >= MAX_SERVICIOS) {
+                    return;
+                }
 
                 if (yaSeleccionado) {
                     reserva.servicios = reserva.servicios.filter((s) => s.id !== id);
@@ -115,6 +131,7 @@ if (document.querySelector('.booking-page')) {
                 }
 
                 btnNextStep1.disabled = reserva.servicios.length === 0;
+                actualizarLimiteServicios();
                 actualizarSidebar();
             });
         });

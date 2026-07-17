@@ -1281,6 +1281,13 @@ footer h4{
     color: var(--rose-mauve-dark);
 }
 
+/* Deshabilitada: se llegó al máximo de servicios por reserva */
+.service-option.disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .service-option h3{
     font-family: var(--font-serif);
     font-size: 1.25rem;
