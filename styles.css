@@ -2989,7 +2989,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(139, 74, 107, 0.75) 0%, rgba(165, 107, 130, 0.55) 100%);
+    background: linear-gradient(135deg, rgba(139, 74, 107, 0.45) 0%, rgba(165, 107, 130, 0.3) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3002,7 +3002,7 @@ body {
     margin: 0;
     font-weight: 500;
     letter-spacing: 0.05em;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 @media (max-width: 768px) {
