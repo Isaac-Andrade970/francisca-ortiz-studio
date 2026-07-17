@@ -41,13 +41,18 @@ elementosAnimados.forEach((elemento) => {
 if (document.querySelector('.booking-page')) {
 
     const reserva = {
-        servicio: null,
-        servicioNombre: null,
-        servicioPrecio: null,
-        duracion: null,
+        servicios: [], // { id, nombre, precio, duracion }
         fecha: null,
         hora: null
     };
+
+    function duracionTotal() {
+        return reserva.servicios.reduce((total, s) => total + s.duracion, 0);
+    }
+
+    function precioTotal() {
+        return reserva.servicios.reduce((total, s) => total + s.precio, 0);
+    }
 
    // El horario ahora viene de la base de datos (editable desde el panel)
     let HORARIOS = {};
@@ -85,19 +90,28 @@ if (document.querySelector('.booking-page')) {
     }
 
     // Conecta el clic a cada tarjeta (se llama DESPUÉS de dibujarlas)
+    // Selección múltiple: cada clic agrega o saca ese servicio de la reserva.
     function conectarOpcionesServicio() {
         const serviceOptions = document.querySelectorAll('.service-option');
         serviceOptions.forEach((option) => {
             option.addEventListener('click', () => {
-                serviceOptions.forEach((o) => o.classList.remove('selected'));
-                option.classList.add('selected');
+                const id = option.getAttribute('data-service');
+                const yaSeleccionado = reserva.servicios.some((s) => s.id === id);
 
-                reserva.servicio = option.getAttribute('data-service');
-                reserva.duracion = parseInt(option.getAttribute('data-duration'));
-                reserva.servicioNombre = option.querySelector('h3').textContent;
-                reserva.servicioPrecio = option.querySelector('.price').textContent;
+                if (yaSeleccionado) {
+                    reserva.servicios = reserva.servicios.filter((s) => s.id !== id);
+                    option.classList.remove('selected');
+                } else {
+                    reserva.servicios.push({
+                        id: id,
+                        nombre: option.querySelector('h3').textContent,
+                        precio: parseInt(option.getAttribute('data-price')),
+                        duracion: parseInt(option.getAttribute('data-duration'))
+                    });
+                    option.classList.add('selected');
+                }
 
-                btnNextStep1.disabled = false;
+                btnNextStep1.disabled = reserva.servicios.length === 0;
                 actualizarSidebar();
             });
         });
@@ -114,7 +128,7 @@ if (document.querySelector('.booking-page')) {
             const servicios = datos.servicios || [];
 
             contenedor.innerHTML = servicios.map((s) => `
-                <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}">
+                <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}" data-price="${s.precio}">
                     <h3>${s.nombre}</h3>
                     <p>${s.descripcion || ''}</p>
                     <p class="service-meta"><span class="price">${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
@@ -283,7 +297,7 @@ if (document.querySelector('.booking-page')) {
             fin: new Date(evento.fin)
         }));
 
-        const duracionBloque = Math.max(reserva.duracion, 120);
+        const duracionBloque = Math.max(duracionTotal(), 120);
 
         let slotsCreados = 0;
 
@@ -338,13 +352,18 @@ if (document.querySelector('.booking-page')) {
     }
 
     function actualizarSidebar() {
-        document.getElementById('sidebar-service').textContent = reserva.servicioNombre || 'Por elegir';
-        document.getElementById('sidebar-duration').textContent = reserva.duracion ? `${reserva.duracion} min` : '—';
+        const nombres = reserva.servicios.map((s) => s.nombre).join(', ');
+        document.getElementById('sidebar-service').textContent = nombres || 'Por elegir';
+        document.getElementById('sidebar-duration').textContent = reserva.servicios.length
+            ? formatearDuracionReserva(duracionTotal())
+            : '—';
         document.getElementById('sidebar-date').textContent = reserva.fecha
             ? reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })
             : 'Por elegir';
         document.getElementById('sidebar-time').textContent = reserva.hora || 'Por elegir';
-        document.getElementById('sidebar-total').textContent = reserva.servicioPrecio || '$0';
+        document.getElementById('sidebar-total').textContent = reserva.servicios.length
+            ? formatearPrecioReserva(precioTotal())
+            : '$0';
     }
 
     document.getElementById('confirm-booking')?.addEventListener('click', async () => {
@@ -363,14 +382,14 @@ if (document.querySelector('.booking-page')) {
         fechaInicio.setHours(horas, minutos, 0, 0);
 
         const fechaFin = new Date(fechaInicio);
-        const duracionBloque = Math.max(reserva.duracion, 120);
+        const duracionBloque = Math.max(duracionTotal(), 120);
         fechaFin.setMinutes(fechaFin.getMinutes() + duracionBloque);
 
         const datosReserva = {
             cliente: document.getElementById('client-name').value,
             telefono: document.getElementById('client-phone').value,
             email: document.getElementById('client-email').value,
-            servicio: reserva.servicioNombre,
+            servicios: reserva.servicios.map((s) => s.nombre),
             notas: document.getElementById('client-notes').value,
             inicio: fechaInicio.toISOString(),
             fin: fechaFin.toISOString(),
@@ -389,7 +408,7 @@ if (document.querySelector('.booking-page')) {
             const resultado = await respuesta.json();
 
             if (!respuesta.ok) {
-                throw new Error(resultado.error || 'Error al iniciar el pago');
+                throw new Error(resultado.error || 'Hubo un problema al iniciar el pago. Intenta de nuevo o contáctanos por WhatsApp.');
             }
 
             // Redirige al cliente a la página de pago de SumUp
@@ -397,7 +416,7 @@ if (document.querySelector('.booking-page')) {
 
         } catch (error) {
             console.error('Error al iniciar el pago:', error);
-            alert('Hubo un problema al iniciar el pago. Intenta de nuevo o contáctanos por WhatsApp.');
+            alert(error.message);
 
             boton.disabled = false;
             boton.textContent = 'Pagar abono y reservar';
