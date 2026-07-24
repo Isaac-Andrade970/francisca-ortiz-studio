@@ -133,6 +133,11 @@ if (document.querySelector('.booking-page')) {
                 btnNextStep1.disabled = reserva.servicios.length === 0;
                 actualizarLimiteServicios();
                 actualizarSidebar();
+
+                // Al llegar al máximo, ya no hay nada más que elegir: bajamos solos al botón.
+                if (!yaSeleccionado && reserva.servicios.length === MAX_SERVICIOS) {
+                    btnNextStep1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             });
         });
     }
