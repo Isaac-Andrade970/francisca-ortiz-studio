@@ -16,6 +16,9 @@ let serviciosActuales = []; // guardamos la lista para poder editar
 let productosCargados = false;
 let productosActuales = [];
 let horariosCargados = false;
+let clientesCargados = false;
+let clientesActuales = [];
+let clientaAbiertaEmail = null;
 
 // LOGIN \\
 
@@ -254,6 +257,11 @@ function cambiarTab(nombre) {
     if (nombre === 'horarios' && !horariosCargados) {
         cargarHorariosAdmin();
         horariosCargados = true;
+    }
+
+    if (nombre === 'clientas' && !clientesCargados) {
+        cargarClientes();
+        clientesCargados = true;
     }
 }
 
@@ -640,6 +648,162 @@ async function eliminarServicioPermanente(id) {
     }
 }
 
+// CLIENTAS \\
+
+function crearCardClienta(cliente) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+
+    card.innerHTML = `
+        <div class="servicio-titulo">
+            <h3>${cliente.cliente || 'Sin nombre'}</h3>
+        </div>
+        <p class="servicio-desc">${cliente.email} · ${cliente.telefono || 'sin teléfono'}</p>
+        <p class="servicio-meta">${cliente.totalReservas} reserva${cliente.totalReservas === 1 ? '' : 's'} · última: ${formatearFecha(cliente.ultimaReserva)}</p>
+        <div class="servicio-acciones">
+            <button class="btn-ver-clienta" data-email="${cliente.email}">Ver historial</button>
+        </div>
+    `;
+    return card;
+}
+
+function renderClientes(lista) {
+    const cont = document.getElementById('lista-clientas');
+    const empty = document.getElementById('empty-clientas');
+    const count = document.getElementById('count-clientas');
+
+    cont.innerHTML = '';
+    count.textContent = lista.length;
+
+    if (lista.length === 0) {
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    lista.forEach(cliente => cont.appendChild(crearCardClienta(cliente)));
+
+    document.querySelectorAll('.btn-ver-clienta').forEach(b => {
+        b.addEventListener('click', () => abrirClienta(b.getAttribute('data-email')));
+    });
+}
+
+async function cargarClientes() {
+    const loading = document.getElementById('loading-clientas');
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_URL}/clientes`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+
+        clientesActuales = datos.clientes || [];
+        renderClientes(clientesActuales);
+    } catch (error) {
+        console.error('Error al cargar clientas:', error);
+        document.getElementById('lista-clientas').innerHTML = '<p style="color:#b00020;">No se pudieron cargar las clientas.</p>';
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+function filtrarClientes() {
+    const texto = document.getElementById('buscar-clienta').value.trim().toLowerCase();
+    if (!texto) {
+        renderClientes(clientesActuales);
+        return;
+    }
+    const filtradas = clientesActuales.filter(c =>
+        (c.cliente || '').toLowerCase().includes(texto) ||
+        (c.email || '').toLowerCase().includes(texto) ||
+        (c.telefono || '').toLowerCase().includes(texto)
+    );
+    renderClientes(filtradas);
+}
+
+async function abrirClienta(email) {
+    clientaAbiertaEmail = email;
+    const errorMsg = document.getElementById('modal-clienta-error');
+    errorMsg.style.display = 'none';
+
+    const resumen = clientesActuales.find(c => c.email === email);
+    document.getElementById('modal-clienta-nombre').textContent = resumen ? resumen.cliente : email;
+    document.getElementById('modal-clienta-contacto').textContent = resumen ? `${resumen.email} · ${resumen.telefono || 'sin teléfono'}` : email;
+    document.getElementById('modal-clienta-historial').innerHTML = '<p class="admin-loading">Cargando historial...</p>';
+    document.getElementById('clienta-observaciones').value = '';
+    document.getElementById('modal-clienta').style.display = 'flex';
+
+    try {
+        const respuesta = await fetch(`${API_URL}/clientes/${encodeURIComponent(email)}`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+
+        const cont = document.getElementById('modal-clienta-historial');
+        if (!datos.historial || datos.historial.length === 0) {
+            cont.innerHTML = '<p style="color:var(--text-soft);">Sin reservas registradas.</p>';
+        } else {
+            cont.innerHTML = datos.historial.map(r => `
+                <div class="resena-card">
+                    <strong>${formatearFecha(r.fecha)}</strong> — ${(r.servicios || []).join(', ')}
+                    <span style="color:var(--text-soft);"> (${r.estado})</span>
+                    ${r.notas ? `<p style="margin:0.3rem 0 0; color:var(--text-soft); font-size:0.85rem;">${r.notas}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('clienta-observaciones').value = datos.observaciones || '';
+    } catch (error) {
+        console.error('Error al abrir clienta:', error);
+        document.getElementById('modal-clienta-historial').innerHTML = '<p style="color:#b00020;">No se pudo cargar el historial.</p>';
+    }
+}
+
+function cerrarClienta() {
+    document.getElementById('modal-clienta').style.display = 'none';
+    clientaAbiertaEmail = null;
+}
+
+async function guardarObservacionesClienta() {
+    if (!clientaAbiertaEmail) return;
+
+    const boton = document.getElementById('btn-guardar-observaciones');
+    const errorMsg = document.getElementById('modal-clienta-error');
+    const observaciones = document.getElementById('clienta-observaciones').value;
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    errorMsg.style.display = 'none';
+
+    try {
+        const respuesta = await fetch(`${API_URL}/clientes/${encodeURIComponent(clientaAbiertaEmail)}/observaciones`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ observaciones })
+        });
+
+        if (!respuesta.ok) {
+            const datos = await respuesta.json();
+            errorMsg.textContent = datos.error || 'No se pudieron guardar las observaciones';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        cerrarClienta();
+    } catch (error) {
+        console.error('Error al guardar observaciones:', error);
+        errorMsg.textContent = 'Error de conexión con el servidor';
+        errorMsg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar observaciones';
+    }
+}
+
 // INICIO \\
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -667,6 +831,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cerrar el modal al hacer clic fuera de la caja
     document.getElementById('modal-servicio').addEventListener('click', (e) => {
         if (e.target.id === 'modal-servicio') cerrarFormServicio();
+    });
+
+    document.getElementById('buscar-clienta').addEventListener('input', filtrarClientes);
+    document.getElementById('btn-cerrar-clienta').addEventListener('click', cerrarClienta);
+    document.getElementById('btn-guardar-observaciones').addEventListener('click', guardarObservacionesClienta);
+    document.getElementById('modal-clienta').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-clienta') cerrarClienta();
     });
 
     if (tokenSesion) {

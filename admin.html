@@ -52,6 +52,7 @@
                 <button class="admin-tab" data-tab="servicios">Servicios</button>
                 <button class="admin-tab" data-tab="productos">Productos</button>
                 <button class="admin-tab" data-tab="horarios">Horarios</button>
+                <button class="admin-tab" data-tab="clientas">Clientas</button>
             </div>
 
             <!-- PESTAÑA: RESEÑAS -->
@@ -134,6 +135,24 @@
                     </div>
                     <p id="horarios-msg" style="display:none; margin:1rem 0;"></p>
                     <button id="btn-guardar-horarios" class="btn btn-primary">Guardar horarios</button>
+                </section>
+            </div>
+
+            <!-- PESTAÑA: CLIENTAS -->
+            <div id="tab-clientas" class="admin-tab-content">
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <div class="admin-section-titulo">
+                        <h2>Tus clientas</h2>
+                        <span class="badge" id="count-clientas">0</span>
+                        </div>
+                    </div>
+                    <div class="form-grupo">
+                        <input type="text" id="buscar-clienta" placeholder="Buscar por nombre, correo o teléfono...">
+                    </div>
+                    <div id="loading-clientas" class="admin-loading">Cargando clientas...</div>
+                    <div id="lista-clientas" class="servicios-admin-list"></div>
+                    <div id="empty-clientas" class="admin-empty" style="display: none;"><p>No se encontraron clientas</p></div>
                 </section>
             </div>
 
@@ -254,6 +273,31 @@
             <div class="modal-acciones">
                 <button id="btn-cancelar-producto" class="btn btn-secondary">Cancelar</button>
                 <button id="btn-guardar-producto" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalle de clienta -->
+    <div id="modal-clienta" class="servicio-modal-overlay" style="display: none;">
+        <div class="servicio-modal-box">
+            <h2 id="modal-clienta-nombre">Clienta</h2>
+            <p id="modal-clienta-contacto" style="color:var(--text-soft); margin-top:-0.5rem; margin-bottom:1rem;"></p>
+
+            <div class="form-grupo">
+                <label>Historial de reservas</label>
+                <div id="modal-clienta-historial" class="admin-list"></div>
+            </div>
+
+            <div class="form-grupo">
+                <label for="clienta-observaciones">Observaciones</label>
+                <textarea id="clienta-observaciones" rows="4" placeholder="Ej: alérgica a tal producto, prefiere tal horario..."></textarea>
+            </div>
+
+            <p id="modal-clienta-error" class="login-error" style="display:none;"></p>
+
+            <div class="modal-acciones">
+                <button id="btn-cerrar-clienta" class="btn btn-secondary">Cerrar</button>
+                <button id="btn-guardar-observaciones" class="btn btn-primary">Guardar observaciones</button>
             </div>
         </div>
     </div>
