@@ -3356,6 +3356,32 @@ body.modal-abierto {
     gap: 1rem;
 }
 
+.servicios-admin-list-clientas {
+    margin-top: 1.5rem;
+}
+
+.admin-search {
+    margin-bottom: 0.5rem;
+}
+
+.admin-search input {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 0.75rem;
+    background-color: var(--cream-light);
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+    transition: all 0.2s;
+}
+
+.admin-search input:focus {
+    outline: none;
+    border-color: var(--rose-mauve);
+    background-color: var(--white);
+}
+
 .servicio-card {
     background-color: var(--white);
     border: 1px solid var(--nude);
