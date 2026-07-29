@@ -18,15 +18,16 @@
         async function verificarPago(intento = 1) {
             const params = new URLSearchParams(window.location.search);
             const ref = params.get('ref');
+            const paymentId = params.get('payment_id');
             const cont = document.getElementById('resultado');
 
-            if (!ref) {
-                cont.innerHTML = '<h1>Algo salió mal</h1><p>No encontramos la referencia del pago.</p>';
+            if (!paymentId) {
+                cont.innerHTML = '<h1>Algo salió mal</h1><p>No encontramos el pago. Si crees que es un error, contáctanos por WhatsApp.</p>';
                 return;
             }
 
             try {
-                const respuesta = await fetch(API_URL + '/pagos/confirmar?ref=' + ref);
+                const respuesta = await fetch(API_URL + '/pagos/confirmar?ref=' + ref + '&payment_id=' + paymentId);
                 const datos = await respuesta.json();
 
                 if (datos.estado === 'confirmada') {
