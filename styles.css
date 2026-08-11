@@ -3356,6 +3356,32 @@ body.modal-abierto {
     gap: 1rem;
 }
 
+.servicios-admin-list-clientas {
+    margin-top: 1.5rem;
+}
+
+.admin-search {
+    margin-bottom: 0.5rem;
+}
+
+.admin-search input {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 0.75rem;
+    background-color: var(--cream-light);
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+    transition: all 0.2s;
+}
+
+.admin-search input:focus {
+    outline: none;
+    border-color: var(--rose-mauve);
+    background-color: var(--white);
+}
+
 .servicio-card {
     background-color: var(--white);
     border: 1px solid var(--nude);
@@ -3526,6 +3552,22 @@ body.modal-abierto {
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1.5rem;
+}
+
+/* MODAL DE CLIENTA: más ancho que los de servicio/producto porque lleva
+   historial completo, y las tarjetas del historial van más compactas
+   que en la vista pública de reseñas. */
+#modal-clienta .servicio-modal-box {
+    max-width: 640px;
+}
+
+#modal-clienta-historial {
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+#modal-clienta-historial .resena-card {
+    padding: 1rem 1.25rem;
 }
 
 /* EDITOR DE HORARIOS (PANEL) */
