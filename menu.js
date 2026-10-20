@@ -26,6 +26,8 @@
     const header = document.querySelector('body > header');
     if (!header) return;
     if (location.pathname.endsWith('promociones.html')) return;
+    // En el inicio el aviso va como cápsula dentro del hero
+    if (document.body.classList.contains('pagina-inicio')) return;
 
     const banner = document.createElement('a');
     banner.href = 'promociones.html';
@@ -40,6 +42,18 @@
         <span class="promo-banner-boton"><span class="promo-banner-largo">Ver beneficios </span><span class="promo-banner-corto">Ver </span><span aria-hidden="true">→</span></span>
     `;
     header.parentNode.insertBefore(banner, header);
+})();
+
+// HEADER TRANSPARENTE EN EL INICIO: se vuelve sólido al bajar \\
+
+(function () {
+    if (!document.body.classList.contains('pagina-inicio')) return;
+    const header = document.querySelector('body > header');
+    if (!header) return;
+
+    const actualizar = () => header.classList.toggle('header-solido', window.scrollY > 40);
+    actualizar();
+    window.addEventListener('scroll', actualizar, { passive: true });
 })();
 
 // HORARIO DE ATENCIÓN EN EL PIE (editable desde el panel admin) \\
