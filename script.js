@@ -110,6 +110,8 @@ if (document.querySelector('.booking-page')) {
         const serviceOptions = document.querySelectorAll('.service-option');
         serviceOptions.forEach((option) => {
             option.addEventListener('click', () => {
+                if (animandoSeleccion) return;
+
                 const id = option.getAttribute('data-service');
                 const yaSeleccionado = reserva.servicios.some((s) => s.id === id);
 
@@ -130,16 +132,257 @@ if (document.querySelector('.booking-page')) {
                     option.classList.add('selected');
                 }
 
-                btnNextStep1.disabled = reserva.servicios.length === 0;
-                actualizarLimiteServicios();
-                actualizarSidebar();
+                actualizarEstadoSeleccion();
 
-                // Al llegar al máximo, ya no hay nada más que elegir: bajamos solos al botón.
+                // Con el 3.er servicio la grilla se convierte en el ticket de reserva
                 if (!yaSeleccionado && reserva.servicios.length === MAX_SERVICIOS) {
-                    btnNextStep1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    armarTicket();
                 }
             });
         });
+    }
+
+    function actualizarEstadoSeleccion() {
+        btnNextStep1.disabled = reserva.servicios.length === 0;
+        actualizarLimiteServicios();
+        actualizarContador();
+        actualizarSidebar();
+    }
+
+    function actualizarContador() {
+        const cantidad = reserva.servicios.length;
+        document.querySelectorAll('.contador-puntos i').forEach((punto, i) => {
+            punto.classList.toggle('lleno', i < cantidad);
+        });
+        document.getElementById('contador-texto').textContent = cantidad === 0
+            ? `Elige hasta ${MAX_SERVICIOS} servicios`
+            : `${cantidad} de ${MAX_SERVICIOS} servicios elegidos`;
+    }
+
+    // TICKET DE RESERVA (animaciones con Web Animations API: solo transform/opacity = 60fps) \\
+
+    const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let animandoSeleccion = false;
+
+    function esperar(animaciones) {
+        return Promise.all(animaciones.map((a) => a.finished.catch(() => {})));
+    }
+
+    function escaparTexto(texto) {
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+    }
+
+    function dibujarTicket() {
+        const ticket = document.getElementById('ticket-reserva');
+        ticket.innerHTML = `
+            <div class="ticket-cabecera">
+                <p class="ticket-eyebrow">✦ Tu selección</p>
+                <h3>Tu <span class="script">ticket</span> de reserva</h3>
+            </div>
+            <div class="ticket-perforado" aria-hidden="true"></div>
+            <ul class="ticket-lista">
+                ${reserva.servicios.map((s) => `
+                    <li class="ticket-item" data-id="${s.id}">
+                        <div class="ticket-item-info">
+                            <p class="ticket-item-nombre">${escaparTexto(s.nombre)}</p>
+                            <p class="ticket-item-duracion">${formatearDuracionReserva(s.duracion)}</p>
+                        </div>
+                        <p class="ticket-item-precio">Desde ${formatearPrecioReserva(s.precio)}</p>
+                        <button type="button" class="ticket-quitar" data-id="${s.id}" aria-label="Quitar ${escaparTexto(s.nombre)}">✕</button>
+                    </li>
+                `).join('')}
+            </ul>
+            <div class="ticket-perforado" aria-hidden="true"></div>
+            <div class="ticket-total">
+                <div>
+                    <p class="ticket-total-label">Total estimado</p>
+                    <p class="ticket-total-duracion">${formatearDuracionReserva(duracionTotal())} aprox.</p>
+                </div>
+                <p class="ticket-total-valor">Desde ${formatearPrecioReserva(precioTotal())}</p>
+            </div>
+            <p class="ticket-nota">El valor final puede variar según el largo y volumen de tu cabello.</p>
+            <button type="button" class="btn btn-primary ticket-continuar">Elegir fecha y hora →</button>
+        `;
+
+        ticket.querySelectorAll('.ticket-quitar').forEach((boton) => {
+            boton.addEventListener('click', () => quitarDesdeTicket(boton.getAttribute('data-id')));
+        });
+        ticket.querySelector('.ticket-continuar').addEventListener('click', () => btnNextStep1.click());
+    }
+
+    function mostrarModoTicket(activo) {
+        document.querySelector('.services-selection').hidden = activo;
+        document.getElementById('category-filter').hidden = activo;
+        document.getElementById('seleccion-contador').hidden = activo;
+        document.getElementById('acciones-paso-1').hidden = activo;
+        document.getElementById('ticket-reserva').hidden = !activo;
+    }
+
+    async function armarTicket() {
+        animandoSeleccion = true;
+        const grid = document.querySelector('.services-selection');
+        const elegidas = reserva.servicios.map((s) => grid.querySelector(`.service-option[data-service="${s.id}"]`));
+        const resto = [...grid.querySelectorAll('.service-option:not(.selected):not(.oculto-por-filtro)')];
+
+        if (reducirMovimiento) {
+            dibujarTicket();
+            mostrarModoTicket(true);
+            animandoSeleccion = false;
+            return;
+        }
+
+        // 1. Las no elegidas se desvanecen y achican
+        await esperar(resto.map((card, i) => card.animate(
+            // Un solo keyframe: parte desde su estado actual (ya viene semitransparente por .disabled)
+            [{ opacity: 0, transform: 'scale(0.9)' }],
+            { duration: 320, delay: Math.min(i * 30, 240), easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )));
+
+        // 2. Copias "fantasma" de las 3 elegidas, fijas donde están ahora
+        const fantasmas = elegidas.map((card) => {
+            const rect = card.getBoundingClientRect();
+            const copia = card.cloneNode(true);
+            copia.classList.add('ticket-fantasma');
+            Object.assign(copia.style, {
+                left: `${rect.left}px`, top: `${rect.top}px`,
+                width: `${rect.width}px`, height: `${rect.height}px`
+            });
+            document.body.appendChild(copia);
+            return { copia, rect };
+        });
+
+        // 3. Cambia la grilla por el ticket
+        dibujarTicket();
+        mostrarModoTicket(true);
+        resto.forEach((card) => card.getAnimations().forEach((a) => a.cancel()));
+
+        const ticket = document.getElementById('ticket-reserva');
+        const rectTicket = ticket.getBoundingClientRect();
+        const margen = 110; // alto del header fijo
+        if (rectTicket.top < margen || rectTicket.top > window.innerHeight * 0.4) {
+            window.scrollBy({ top: rectTicket.top - margen - 20, behavior: 'instant' });
+        }
+
+        const filas = [...ticket.querySelectorAll('.ticket-item')];
+        filas.forEach((fila) => { fila.style.opacity = '0'; });
+
+        const animaciones = [ticket.animate(
+            [{ opacity: 0, transform: 'translateY(24px) scale(0.96)' }, { opacity: 1, transform: 'none' }],
+            { duration: 550, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        )];
+
+        // 4. Cada fantasma vuela y se pliega hasta su fila del ticket
+        fantasmas.forEach(({ copia, rect }, i) => {
+            const destino = filas[i].getBoundingClientRect();
+            const dx = destino.left - rect.left;
+            const dy = destino.top - rect.top;
+            const sx = destino.width / rect.width;
+            const sy = destino.height / rect.height;
+            const retraso = 80 + i * 90;
+
+            animaciones.push(copia.animate([
+                { transform: 'none', opacity: 1, borderRadius: '1rem' },
+                { transform: `translate(${dx * 0.55}px, ${dy * 0.55}px) scale(${(1 + sx) / 2}, ${(1 + sy) / 2}) rotate(${i % 2 ? 2 : -2}deg)`, opacity: 1, offset: 0.55 },
+                { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0, borderRadius: '0.5rem' }
+            ], { duration: 720, delay: retraso, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'forwards' }));
+
+            animaciones.push(filas[i].animate(
+                [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+                { duration: 320, delay: retraso + 520, easing: 'ease-out', fill: 'forwards' }
+            ));
+        });
+
+        await esperar(animaciones);
+        fantasmas.forEach(({ copia }) => copia.remove());
+        filas.forEach((fila) => {
+            fila.style.opacity = '';
+            fila.getAnimations().forEach((a) => a.cancel());
+        });
+        animandoSeleccion = false;
+    }
+
+    // Efecto trituradora: la fila se corta en tiras verticales que caen
+    async function triturar(elemento) {
+        const rect = elemento.getBoundingClientRect();
+        const capa = document.createElement('div');
+        capa.className = 'trituradora';
+        Object.assign(capa.style, {
+            left: `${rect.left}px`, top: `${rect.top}px`,
+            width: `${rect.width}px`, height: `${rect.height}px`
+        });
+
+        const TIRAS = 12;
+        const tiras = [];
+        for (let i = 0; i < TIRAS; i++) {
+            const tira = elemento.cloneNode(true);
+            tira.classList.add('trituradora-tira');
+            const desde = (i * 100) / TIRAS;
+            const hasta = 100 - ((i + 1) * 100) / TIRAS;
+            tira.style.clipPath = `inset(0 ${hasta}% 0 ${desde}%)`;
+            capa.appendChild(tira);
+            tiras.push(tira);
+        }
+        document.body.appendChild(capa);
+        elemento.style.visibility = 'hidden';
+
+        await esperar(tiras.map((tira, i) => {
+            const centro = i - (TIRAS - 1) / 2;
+            const separacion = (centro * 2.5).toFixed(1);             // las tiras se abren al cortarse
+            const caida = rect.height + 160 + Math.random() * 120;
+            const giro = (centro * 1.6 + (Math.random() * 10 - 5)).toFixed(1);
+            const deriva = (centro * 7 + (Math.random() * 12 - 6)).toFixed(1);
+            return tira.animate([
+                { transform: 'none', opacity: 1 },
+                // 1. Corte: baja un poco y las tiras se separan
+                { transform: `translate(${separacion}px, ${rect.height * 0.18}px)`, opacity: 1, offset: 0.28 },
+                // 2. Caída: cada tira cae girando y abriéndose como abanico
+                { transform: `translate(${deriva}px, ${caida}px) rotate(${giro}deg)`, opacity: 0 }
+            ], { duration: 950, delay: Math.abs(centro) * 18 + Math.random() * 30, easing: 'cubic-bezier(0.55, 0, 0.8, 0.35)', fill: 'forwards' });
+        }));
+        capa.remove();
+    }
+
+    async function quitarDesdeTicket(id) {
+        if (animandoSeleccion) return;
+        animandoSeleccion = true;
+
+        const ticket = document.getElementById('ticket-reserva');
+        const fila = ticket.querySelector(`.ticket-item[data-id="${id}"]`);
+        const card = document.querySelector(`.service-option[data-service="${id}"]`);
+
+        reserva.servicios = reserva.servicios.filter((s) => s.id !== id);
+        if (card) card.classList.remove('selected');
+        actualizarEstadoSeleccion();
+
+        if (reducirMovimiento) {
+            mostrarModoTicket(false);
+            animandoSeleccion = false;
+            return;
+        }
+
+        // 1. La fila se tritura
+        if (fila) await triturar(fila);
+
+        // 2. El ticket se desarma
+        await esperar([ticket.animate(
+            [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(12px) scale(0.97)' }],
+            { duration: 300, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )]);
+        mostrarModoTicket(false);
+        ticket.getAnimations().forEach((a) => a.cancel());
+
+        // 3. La grilla vuelve en cascada (se puede elegir apenas aparece, sin esperar a que termine)
+        const visibles = [...document.querySelectorAll('.service-option:not(.oculto-por-filtro)')];
+        visibles.forEach((c, i) => {
+            const final = c.classList.contains('selected') ? 'translateY(-4px)' : 'none';
+            c.animate(
+                [{ opacity: 0, transform: 'translateY(16px) scale(0.96)' }, { opacity: 1, transform: final }],
+                { duration: 450, delay: Math.min(i * 45, 540), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }
+            );
+        });
+        animandoSeleccion = false;
     }
 
     // Filtro por categoría: solo oculta/muestra tarjetas, no toca la selección.
@@ -187,7 +430,7 @@ if (document.querySelector('.booking-page')) {
                 <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}" data-price="${s.precio}" data-categoria="${s.categoria}">
                     <h3>${s.nombre}</h3>
                     <p>${s.descripcion || ''}</p>
-                    <p class="service-meta"><span class="price">${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
+                    <p class="service-meta"><span class="price">Desde ${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
                 </article>
             `).join('');
 
@@ -418,8 +661,9 @@ if (document.querySelector('.booking-page')) {
             ? reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })
             : 'Por elegir';
         document.getElementById('sidebar-time').textContent = reserva.hora || 'Por elegir';
+        // El precio final depende del largo del cabello, por eso siempre es "Desde"
         document.getElementById('sidebar-total').textContent = reserva.servicios.length
-            ? formatearPrecioReserva(precioTotal())
+            ? 'Desde ' + formatearPrecioReserva(precioTotal())
             : '$0';
     }
 
@@ -561,46 +805,117 @@ if (carouselTrack && btnPrev && btnNext) {
     iniciarAutoScroll();
 }
 
-// CARGAR RESEÑAS APROBADAS EN EL HOME \\
+// RESEÑAS DE GOOGLE EN EL HOME \\
+// Francisca las copia desde Google en el panel admin y elige cuáles se muestran.
+
+const LOGO_GOOGLE = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>`;
+
+function escaparHTMLResena(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto || '';
+    return div.innerHTML.replace(/"/g, '&quot;'); // también sirve dentro de atributos (href)
+}
+
+// "2025-10" -> "Hace un año" (igual que Google, y se actualiza solo con el tiempo)
+function formatearFechaResena(fecha) {
+    if (!fecha) return '';
+    const [año, mes] = fecha.split('-').map(Number);
+    const hoy = new Date();
+    const meses = (hoy.getFullYear() - año) * 12 + (hoy.getMonth() + 1 - mes);
+
+    if (meses <= 0) return 'Este mes';
+    if (meses === 1) return 'Hace un mes';
+    if (meses < 12) return `Hace ${meses} meses`;
+    const años = Math.floor(meses / 12);
+    return años === 1 ? 'Hace un año' : `Hace ${años} años`;
+}
+
+function dibujarResumenGoogle(config) {
+    const resumen = document.getElementById('google-resumen');
+    if (!resumen) return;
+
+    // Siempre con un decimal, como Google: 5 -> "5,0", 4.9 -> "4,9"
+    const promedio = config.promedio
+        ? Number(config.promedio).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+        : '';
+    const llenas = config.promedio ? Math.round(config.promedio) : 5;
+    const botones = [
+        config.enlacePerfil ? `<a href="${escaparHTMLResena(config.enlacePerfil)}" class="btn btn-secondary" target="_blank" rel="noopener">Ver todas en Google</a>` : '',
+        config.enlaceResena ? `<a href="${escaparHTMLResena(config.enlaceResena)}" class="btn btn-primary" target="_blank" rel="noopener">Deja tu reseña</a>` : ''
+    ].join('');
+
+    resumen.innerHTML = `
+        <div class="google-resumen-nota">
+            <span class="google-logo">${LOGO_GOOGLE}</span>
+            ${promedio ? `<span class="google-promedio">${promedio}</span>` : ''}
+            <div>
+                <p class="google-estrellas" aria-label="${promedio || 5} de 5 estrellas">${'★'.repeat(llenas)}${'☆'.repeat(5 - llenas)}</p>
+                <p class="google-total">${config.total ? `${config.total} reseñas en Google` : 'Reseñas en Google'}</p>
+            </div>
+        </div>
+        ${botones ? `<div class="google-resumen-botones">${botones}</div>` : ''}
+    `;
+}
+
+function crearCardResenaGoogle(resena, enlacePerfil) {
+    const card = document.createElement('article');
+    card.className = 'resena-google';
+    const enlace = resena.enlace || enlacePerfil;
+    const inicial = (resena.autor || '?').trim().charAt(0).toUpperCase();
+    const icono = enlace
+        ? `<a href="${escaparHTMLResena(enlace)}" class="resena-google-icono" target="_blank" rel="noopener" aria-label="Ver esta reseña en Google" title="Ver en Google">${LOGO_GOOGLE}</a>`
+        : `<span class="resena-google-icono">${LOGO_GOOGLE}</span>`;
+
+    card.innerHTML = `
+        <div class="resena-google-cabecera">
+            <span class="resena-google-avatar" aria-hidden="true">${escaparHTMLResena(inicial)}</span>
+            <div>
+                <p class="resena-google-autor">${escaparHTMLResena(resena.autor)}</p>
+                ${resena.fecha ? `<p class="resena-google-fecha">${formatearFechaResena(resena.fecha)}</p>` : ''}
+            </div>
+            ${icono}
+        </div>
+        <p class="resena-google-estrellas" aria-label="${resena.estrellas} de 5 estrellas">${'★'.repeat(resena.estrellas)}${'☆'.repeat(5 - resena.estrellas)}</p>
+        <p class="resena-google-texto">${escaparHTMLResena(resena.texto)}</p>
+        <button type="button" class="resena-google-mas" hidden>Leer más</button>
+    `;
+    return card;
+}
+
+// Muestra "Leer más" solo en las reseñas largas que quedaron cortadas
+function activarLeerMas(grid) {
+    grid.querySelectorAll('.resena-google').forEach((card) => {
+        const texto = card.querySelector('.resena-google-texto');
+        const boton = card.querySelector('.resena-google-mas');
+        if (texto.scrollHeight > texto.clientHeight + 2) {
+            boton.hidden = false;
+            boton.addEventListener('click', () => {
+                const abierta = card.classList.toggle('abierta');
+                boton.textContent = abierta ? 'Leer menos' : 'Leer más';
+            });
+        }
+    });
+}
 
 async function cargarResenas() {
     const grid = document.getElementById('resenas-grid');
     if (!grid) return; // No estamos en el home
 
     try {
-        const respuesta = await fetch(API_URL + '/resenas');
+        const respuesta = await fetch(API_URL + '/resenas-google');
         if (!respuesta.ok) throw new Error('Error al cargar');
+        const { resenas = [], config = {} } = await respuesta.json();
 
-        const datos = await respuesta.json();
+        dibujarResumenGoogle(config);
 
-        if (datos.resenas.length === 0) {
-            grid.innerHTML = '<p class="resenas-loading">Aún no tenemos reseñas publicadas. ¡Sé la primera!</p>';
+        if (resenas.length === 0) {
+            grid.innerHTML = '<p class="resenas-loading">Muy pronto verás aquí lo que dicen nuestras clientas en Google.</p>';
             return;
         }
 
         grid.innerHTML = '';
-
-        datos.resenas.forEach((resena) => {
-            const card = document.createElement('article');
-            card.classList.add('resena-publica');
-
-            // Generar estrellas
-            let estrellas = '';
-            for (let i = 1; i <= 5; i++) {
-                estrellas += i <= resena.calificacion ? '★' : '☆';
-            }
-
-            card.innerHTML = `
-                <div class="stars">${estrellas}</div>
-                <p class="comentario">${resena.comentario}</p>
-                <div class="footer-resena">
-                    <p class="cliente">${resena.cliente}</p>
-                    <p class="servicio">${resena.servicio}</p>
-                </div>
-            `;
-
-            grid.appendChild(card);
-        });
+        resenas.forEach((r) => grid.appendChild(crearCardResenaGoogle(r, config.enlacePerfil)));
+        activarLeerMas(grid);
 
     } catch (error) {
         console.error('Error al cargar reseñas:', error);

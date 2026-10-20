@@ -1,7 +1,8 @@
 
 // PÁGINA CALIFICAR SERVICIO \\
 
-const API_URL = API_URL + '/resenas';
+// API_URL viene de config.js (.../api)
+const API_RESENAS = API_URL + '/resenas';
 
 // Estado actual de la calificación
 let calificacionSeleccionada = 0;
@@ -43,7 +44,7 @@ async function verificarToken() {
     }
 
     try {
-        const respuesta = await fetch(`${API_URL}/verificar?token=${token}`);
+        const respuesta = await fetch(`${API_RESENAS}/verificar?token=${token}`);
 
         if (!respuesta.ok) {
             mostrarEstado('resena-error');
@@ -148,7 +149,7 @@ async function enviarResena() {
     boton.textContent = 'Enviando...';
 
     try {
-        const respuesta = await fetch(API_URL, {
+        const respuesta = await fetch(API_RESENAS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

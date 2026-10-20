@@ -41,6 +41,7 @@
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="servicios.html">Servicios</a></li>
                 <li><a href="tienda.html">Tienda</a></li>
+                <li><a href="promociones.html">Promociones</a></li>
                 <li><a href="index.html#galeria">Galería</a></li>
                 <li><a href="index.html#footer-contacto">Contacto</a></li>
                 <li><a href="reservar.html" class="btn-nav">Reservar</a></li>
@@ -84,11 +85,19 @@
 
                     <div class="category-filter" id="category-filter"></div>
 
+                    <div class="seleccion-contador" id="seleccion-contador" aria-live="polite">
+                        <span class="contador-puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="contador-texto" id="contador-texto">Elige hasta 3 servicios</span>
+                    </div>
+
                     <div class="services-selection">
                         <p style="color:var(--text-soft); grid-column:1/-1;">Cargando servicios...</p>
                     </div>
 
-                    <div class="booking-actions">
+                    <!-- Ticket de reserva: aparece al elegir el 3.er servicio -->
+                    <div class="ticket-reserva" id="ticket-reserva" hidden></div>
+
+                    <div class="booking-actions" id="acciones-paso-1">
                         <button class="btn btn-primary" id="next-to-step-2" disabled>Continuar</button>
                     </div>
                 </div>
@@ -206,6 +215,7 @@
                         <span class="summary-value" id="sidebar-total">$0</span>
                     </li>
                 </ul>
+                <p class="summary-nota">El valor final puede variar según el largo y volumen de tu cabello.</p>
             </aside>
 
         </section>
@@ -248,10 +258,9 @@
                         <a href="https://instagram.com/franciscaortizstudio">@franciscaortizstudio</a>
                     </li>
                 </ul>
-                <div class="footer-hours">
-                    <p>Lunes a Viernes: 9:00 — 17:00</p>
-                    <p>Sábado: 9:30 — 15:00</p>
-                    <p>Domingo: Cerrado</p>
+                <div class="footer-hours" id="footer-hours">
+                    <p>Martes a Sábado: 10:30 — 17:00</p>
+                    <p>Domingo y Lunes: Cerrado</p>
                 </div>
             </div>
         </div>

@@ -3,6 +3,8 @@
 const API_RESENAS = API_URL + '/resenas';
 const API_SERVICIOS = API_URL + '/servicios';
 const API_PRODUCTOS = API_URL + '/productos';
+const API_PROMOCIONES = API_URL + '/promociones';
+const API_RESENAS_GOOGLE = API_URL + '/resenas-google';
 const CLOUDINARY_CLOUD_NAME = 'dgq8ohuko';        // 👈 tu cloud name
 const CLOUDINARY_UPLOAD_PRESET = 's2a10wum';  // 👈 el nombre de tu preset (unsigned)
 const API_AUTH = API_URL + '/auth';
@@ -16,6 +18,9 @@ let serviciosActuales = []; // guardamos la lista para poder editar
 let productosCargados = false;
 let productosActuales = [];
 let horariosCargados = false;
+let promocionesCargadas = false;
+let promocionesActuales = [];
+let resenasGoogleActuales = [];
 let clientesCargados = false;
 let clientesActuales = [];
 let clientaAbiertaEmail = null;
@@ -69,6 +74,7 @@ async function hacerLogin() {
         sessionStorage.setItem('adminRol', rolSesion);
 
         mostrarPanel();
+        cargarResenasGoogle();
         cargarPendientes();
         cargarPublicadas();
 
@@ -164,6 +170,8 @@ async function cargarHorariosAdmin() {
             `;
             cont.appendChild(fila);
         });
+
+        document.getElementById('atencion-editor').value = (data.atencion || []).join('\n');
     } catch (e) {
         console.error('Error al cargar horarios:', e);
         cont.innerHTML = '<p style="color:#b00020;">No se pudieron cargar los horarios.</p>';
@@ -233,6 +241,55 @@ async function guardarHorariosAdmin() {
     }
 }
 
+// Texto del horario que sale en el pie de todas las páginas
+async function guardarAtencionAdmin() {
+    const msg = document.getElementById('atencion-msg');
+    const boton = document.getElementById('btn-guardar-atencion');
+    const lineas = document.getElementById('atencion-editor').value
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+
+    if (lineas.length === 0) {
+        msg.textContent = 'Escribe al menos una línea de horario';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const res = await fetch(`${API_URL}/horarios/atencion`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ atencion: lineas })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            msg.textContent = data.error || 'No se pudo guardar';
+            msg.style.color = '#b00020';
+        } else {
+            msg.textContent = '✅ Horario de atención guardado. Ya se ve en todas las páginas.';
+            msg.style.color = 'green';
+        }
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = 'Error de conexión';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar horario de atención';
+    }
+}
+
 // PESTAÑAS \\
 
 function cambiarTab(nombre) {
@@ -252,6 +309,11 @@ function cambiarTab(nombre) {
     if (nombre === 'productos' && !productosCargados) {
         cargarProductos();
         productosCargados = true;
+    }
+
+    if (nombre === 'promociones' && !promocionesCargadas) {
+        cargarPromociones();
+        promocionesCargadas = true;
     }
 
     if (nombre === 'horarios' && !horariosCargados) {
@@ -825,6 +887,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('producto-imagen-file').addEventListener('change', manejarSeleccionImagen);
     document.getElementById('btn-cambiar-password').addEventListener('click', cambiarPasswordFrancisca);
     document.getElementById('btn-guardar-horarios').addEventListener('click', guardarHorariosAdmin);
+    document.getElementById('btn-guardar-atencion').addEventListener('click', guardarAtencionAdmin);
+    document.getElementById('btn-nueva-promocion').addEventListener('click', () => abrirFormPromocion(null));
+    document.getElementById('btn-cancelar-promocion').addEventListener('click', cerrarFormPromocion);
+    document.getElementById('btn-guardar-promocion').addEventListener('click', guardarPromocion);
+    document.getElementById('promocion-imagen-file').addEventListener('change', manejarImagenPromocion);
+    document.getElementById('btn-quitar-imagen-promocion').addEventListener('click', quitarImagenPromocion);
+    document.getElementById('modal-promocion').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-promocion') cerrarFormPromocion();
+    });
     document.getElementById('modal-producto').addEventListener('click', (e) => {
         if (e.target.id === 'modal-producto') cerrarFormProducto();
     });
@@ -840,8 +911,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'modal-clienta') cerrarClienta();
     });
 
+    document.getElementById('btn-nueva-resena-google').addEventListener('click', () => abrirFormResenaGoogle(null));
+    document.getElementById('btn-cancelar-resena-google').addEventListener('click', cerrarFormResenaGoogle);
+    document.getElementById('btn-guardar-resena-google').addEventListener('click', guardarResenaGoogle);
+    document.getElementById('btn-guardar-google-config').addEventListener('click', guardarConfigGoogle);
+    document.getElementById('modal-resena-google').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-resena-google') cerrarFormResenaGoogle();
+    });
+
     if (tokenSesion) {
         mostrarPanel();
+        cargarResenasGoogle();
         cargarPendientes();
         cargarPublicadas();
     }
@@ -1237,5 +1317,482 @@ async function eliminarProductoPermanente(id) {
     } catch (e) {
         console.error('Error:', e);
         alert('Hubo un problema al eliminar el producto');
+    }
+}
+
+// PROMOCIONES \\
+
+// "2026-11-30" -> "30 de noviembre de 2026"
+function formatearFechaPromocion(fechaTexto) {
+    const [año, mes, dia] = fechaTexto.split('-').map(Number);
+    return new Date(año, mes - 1, dia).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function promocionVencida(p) {
+    if (!p.validaHasta) return false;
+    const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    return p.validaHasta < hoy;
+}
+
+function crearCardPromocion(p) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+    const vencida = promocionVencida(p);
+    if (!p.activo || vencida) card.classList.add('servicio-inactivo');
+
+    const img = p.imagen
+        ? `<img src="${p.imagen}" alt="${p.titulo}" style="width:72px;height:56px;object-fit:cover;border-radius:0.5rem;flex-shrink:0;">`
+        : '';
+    const vigencia = p.validaHasta
+        ? `${vencida ? 'Venció el' : 'Válida hasta el'} ${formatearFechaPromocion(p.validaHasta)}`
+        : 'Sin fecha de término';
+
+    card.innerHTML = `
+        <div style="display:flex; gap:1rem; align-items:flex-start;">
+            ${img}
+            <div style="flex:1;">
+                <div class="servicio-titulo">
+                    <h3>${p.titulo}</h3>
+                    ${p.etiqueta ? `<span class="servicio-categoria promo-admin-etiqueta">${p.etiqueta}</span>` : ''}
+                    ${!p.activo ? '<span class="servicio-badge-off">Desactivada</span>' : ''}
+                    ${p.activo && vencida ? '<span class="servicio-badge-off">Vencida</span>' : ''}
+                </div>
+                <p class="servicio-desc" style="white-space:pre-line;">${p.descripcion || ''}</p>
+                <p class="servicio-meta">${vigencia}</p>
+                <div class="servicio-acciones">
+                    <button class="btn-editar-promocion" data-id="${p.id}">Editar</button>
+                    <button class="btn-toggle-promocion" data-id="${p.id}" data-activo="${p.activo}">${p.activo ? 'Desactivar' : 'Activar'}</button>
+                    <button class="btn-eliminar-servicio btn-eliminar-promocion" data-id="${p.id}">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+async function cargarPromociones() {
+    const lista = document.getElementById('lista-promociones');
+    const loading = document.getElementById('loading-promociones');
+    const empty = document.getElementById('empty-promociones');
+    const count = document.getElementById('count-promociones');
+
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/admin/todas`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+
+        loading.style.display = 'none';
+        lista.innerHTML = '';
+
+        promocionesActuales = datos.promociones || [];
+        count.textContent = promocionesActuales.length;
+
+        if (promocionesActuales.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        promocionesActuales.forEach(p => lista.appendChild(crearCardPromocion(p)));
+
+        document.querySelectorAll('.btn-editar-promocion').forEach(b => {
+            b.addEventListener('click', () => {
+                abrirFormPromocion(promocionesActuales.find(p => p.id === b.getAttribute('data-id')));
+            });
+        });
+        document.querySelectorAll('.btn-toggle-promocion').forEach(b => {
+            b.addEventListener('click', () => {
+                cambiarEstadoPromocion(b.getAttribute('data-id'), b.getAttribute('data-activo') !== 'true');
+            });
+        });
+        document.querySelectorAll('.btn-eliminar-promocion').forEach(b => {
+            b.addEventListener('click', () => eliminarPromocion(b.getAttribute('data-id')));
+        });
+
+    } catch (error) {
+        console.error('Error al cargar promociones:', error);
+        loading.textContent = 'Error al cargar promociones';
+    }
+}
+
+function mostrarImagenPromocion(url) {
+    const preview = document.getElementById('promocion-imagen-preview');
+    const quitar = document.getElementById('quitar-imagen-promocion');
+    document.getElementById('promocion-imagen-url').value = url || '';
+    if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        quitar.style.display = 'flex';
+    } else {
+        preview.style.display = 'none';
+        quitar.style.display = 'none';
+    }
+}
+
+async function manejarImagenPromocion(evento) {
+    const file = evento.target.files[0];
+    if (!file) return;
+
+    const estado = document.getElementById('promocion-imagen-estado');
+    estado.textContent = 'Subiendo foto...';
+
+    try {
+        mostrarImagenPromocion(await subirImagenCloudinary(file));
+        estado.textContent = 'Foto subida ✓';
+    } catch (error) {
+        console.error('Error al subir imagen:', error);
+        estado.textContent = 'No se pudo subir la foto. Intenta de nuevo.';
+    }
+}
+
+function quitarImagenPromocion() {
+    document.getElementById('promocion-imagen-file').value = '';
+    document.getElementById('promocion-imagen-estado').textContent = '';
+    mostrarImagenPromocion('');
+}
+
+function abrirFormPromocion(promo = null) {
+    document.getElementById('modal-promocion-error').style.display = 'none';
+    document.getElementById('promocion-imagen-estado').textContent = '';
+    document.getElementById('promocion-imagen-file').value = '';
+
+    document.getElementById('modal-promocion-titulo').textContent = promo ? 'Editar promoción' : 'Nueva promoción';
+    document.getElementById('promocion-id').value = promo ? promo.id : '';
+    document.getElementById('promocion-titulo-input').value = promo ? promo.titulo : '';
+    document.getElementById('promocion-etiqueta').value = promo ? (promo.etiqueta || '') : '';
+    document.getElementById('promocion-orden').value = promo && promo.orden !== 99 ? promo.orden : '';
+    document.getElementById('promocion-descripcion').value = promo ? (promo.descripcion || '') : '';
+    document.getElementById('promocion-valida-hasta').value = promo ? (promo.validaHasta || '') : '';
+    mostrarImagenPromocion(promo ? promo.imagen : '');
+
+    document.getElementById('modal-promocion').style.display = 'flex';
+}
+
+function cerrarFormPromocion() {
+    document.getElementById('modal-promocion').style.display = 'none';
+}
+
+async function guardarPromocion() {
+    const id = document.getElementById('promocion-id').value;
+    const error = document.getElementById('modal-promocion-error');
+    const boton = document.getElementById('btn-guardar-promocion');
+
+    const datos = {
+        titulo: document.getElementById('promocion-titulo-input').value.trim(),
+        etiqueta: document.getElementById('promocion-etiqueta').value.trim(),
+        orden: document.getElementById('promocion-orden').value,
+        descripcion: document.getElementById('promocion-descripcion').value.trim(),
+        validaHasta: document.getElementById('promocion-valida-hasta').value,
+        imagen: document.getElementById('promocion-imagen-url').value
+    };
+
+    if (!datos.titulo) {
+        error.textContent = 'El título es obligatorio';
+        error.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    error.style.display = 'none';
+
+    const esEdicion = id !== '';
+
+    try {
+        const respuesta = await fetch(esEdicion ? `${API_PROMOCIONES}/${id}` : API_PROMOCIONES, {
+            method: esEdicion ? 'PATCH' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify(datos)
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al guardar');
+        }
+        cerrarFormPromocion();
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error al guardar promoción:', e);
+        error.textContent = e.message || 'Hubo un problema al guardar';
+        error.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar';
+    }
+}
+
+async function cambiarEstadoPromocion(id, activo) {
+    const accion = activo ? 'activar' : 'desactivar';
+    if (!confirm(`¿Seguro que quieres ${accion} esta promoción?`)) return;
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify({ activo: activo })
+        });
+        if (!respuesta.ok) throw new Error('Error al cambiar estado');
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al cambiar el estado de la promoción');
+    }
+}
+
+async function eliminarPromocion(id) {
+    if (!confirm('¿Borrar esta promoción para siempre?\n\nSi solo quieres ocultarla por un tiempo, usa "Desactivar".')) return;
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al eliminar');
+        }
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al eliminar la promoción');
+    }
+}
+
+// RESEÑAS DE GOOGLE \\
+
+function escaparAdmin(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto || '';
+    return div.innerHTML.replace(/"/g, '&quot;');
+}
+
+// "2026-03" -> "marzo de 2026"
+function formatearMesResena(fecha) {
+    if (!fecha) return 'Sin fecha';
+    const [año, mes] = fecha.split('-').map(Number);
+    return new Date(año, mes - 1, 1).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+}
+
+function crearCardResenaGoogle(r) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+    if (!r.visible) card.classList.add('servicio-inactivo');
+
+    card.innerHTML = `
+        <div class="servicio-titulo">
+            <h3>${escaparAdmin(r.autor)}</h3>
+            <span class="servicio-categoria" style="color:#F4B400;">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</span>
+            ${!r.visible ? '<span class="servicio-badge-off">Oculta</span>' : ''}
+        </div>
+        <p class="servicio-desc" style="white-space:pre-line; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;">${escaparAdmin(r.texto)}</p>
+        <p class="servicio-meta">${formatearMesResena(r.fecha)} · Orden ${r.orden === 99 ? '—' : r.orden}${r.enlace ? ' · 🔗 con enlace propio' : ''}</p>
+        <div class="servicio-acciones">
+            <button class="btn-editar-rg" data-id="${r.id}">Editar</button>
+            <button class="btn-toggle-rg" data-id="${r.id}" data-visible="${r.visible}">${r.visible ? 'Ocultar' : 'Mostrar'}</button>
+            <button class="btn-eliminar-servicio btn-eliminar-rg" data-id="${r.id}">Eliminar</button>
+        </div>
+    `;
+    return card;
+}
+
+async function cargarResenasGoogle() {
+    const lista = document.getElementById('lista-google');
+    const loading = document.getElementById('loading-google');
+    const empty = document.getElementById('empty-google');
+    const count = document.getElementById('count-google');
+
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/admin/todas`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+        loading.style.display = 'none';
+        lista.innerHTML = '';
+
+        // Configuración (enlaces y promedio)
+        const config = datos.config || {};
+        document.getElementById('google-enlace-resena').value = config.enlaceResena || '';
+        document.getElementById('google-enlace-perfil').value = config.enlacePerfil || '';
+        document.getElementById('google-promedio').value = config.promedio ? String(config.promedio).replace('.', ',') : '';
+        document.getElementById('google-total').value = config.total || '';
+
+        resenasGoogleActuales = datos.resenas || [];
+        const visibles = resenasGoogleActuales.filter(r => r.visible).length;
+        count.textContent = resenasGoogleActuales.length ? `${visibles} de ${resenasGoogleActuales.length} visibles` : '0';
+
+        if (resenasGoogleActuales.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        resenasGoogleActuales.forEach(r => lista.appendChild(crearCardResenaGoogle(r)));
+
+        lista.querySelectorAll('.btn-editar-rg').forEach(b => {
+            b.addEventListener('click', () => abrirFormResenaGoogle(resenasGoogleActuales.find(r => r.id === b.getAttribute('data-id'))));
+        });
+        lista.querySelectorAll('.btn-toggle-rg').forEach(b => {
+            b.addEventListener('click', () => cambiarVisibilidadResenaGoogle(b.getAttribute('data-id'), b.getAttribute('data-visible') !== 'true'));
+        });
+        lista.querySelectorAll('.btn-eliminar-rg').forEach(b => {
+            b.addEventListener('click', () => eliminarResenaGoogle(b.getAttribute('data-id')));
+        });
+
+    } catch (error) {
+        console.error('Error al cargar reseñas de Google:', error);
+        loading.textContent = 'Error al cargar reseñas de Google';
+    }
+}
+
+function abrirFormResenaGoogle(r = null) {
+    document.getElementById('modal-resena-google-error').style.display = 'none';
+    document.getElementById('modal-resena-google-titulo').textContent = r ? 'Editar reseña' : 'Nueva reseña';
+    document.getElementById('resena-google-id').value = r ? r.id : '';
+    document.getElementById('resena-google-autor').value = r ? r.autor : '';
+    document.getElementById('resena-google-estrellas').value = r ? String(r.estrellas) : '5';
+    document.getElementById('resena-google-texto').value = r ? r.texto : '';
+    document.getElementById('resena-google-fecha').value = r && r.fecha ? r.fecha.slice(0, 7) : '';
+    document.getElementById('resena-google-orden').value = r && r.orden !== 99 ? r.orden : '';
+    document.getElementById('resena-google-enlace').value = r ? (r.enlace || '') : '';
+    document.getElementById('resena-google-visible').checked = r ? r.visible : true;
+    document.getElementById('modal-resena-google').style.display = 'flex';
+    document.getElementById('resena-google-autor').focus();
+}
+
+function cerrarFormResenaGoogle() {
+    document.getElementById('modal-resena-google').style.display = 'none';
+}
+
+async function guardarResenaGoogle() {
+    const id = document.getElementById('resena-google-id').value;
+    const error = document.getElementById('modal-resena-google-error');
+    const boton = document.getElementById('btn-guardar-resena-google');
+
+    const datos = {
+        autor: document.getElementById('resena-google-autor').value.trim(),
+        estrellas: Number(document.getElementById('resena-google-estrellas').value),
+        texto: document.getElementById('resena-google-texto').value.trim(),
+        fecha: document.getElementById('resena-google-fecha').value,
+        orden: document.getElementById('resena-google-orden').value,
+        enlace: document.getElementById('resena-google-enlace').value.trim(),
+        visible: document.getElementById('resena-google-visible').checked
+    };
+
+    if (!datos.autor || !datos.texto) {
+        error.textContent = 'Escribe el nombre de la clienta y el texto de la reseña';
+        error.style.display = 'block';
+        return;
+    }
+    if (datos.enlace && !/^https:\/\//i.test(datos.enlace)) {
+        error.textContent = 'El enlace debe empezar con https:// (cópialo desde "Compartir" en Google Maps)';
+        error.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    error.style.display = 'none';
+
+    const esEdicion = id !== '';
+    try {
+        const respuesta = await fetch(esEdicion ? `${API_RESENAS_GOOGLE}/${id}` : API_RESENAS_GOOGLE, {
+            method: esEdicion ? 'PATCH' : 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify(datos)
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al guardar');
+        }
+        cerrarFormResenaGoogle();
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error al guardar reseña de Google:', e);
+        error.textContent = e.message || 'Hubo un problema al guardar';
+        error.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar';
+    }
+}
+
+async function cambiarVisibilidadResenaGoogle(id, visible) {
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify({ visible })
+        });
+        if (!respuesta.ok) throw new Error('Error al cambiar visibilidad');
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al cambiar la reseña');
+    }
+}
+
+async function eliminarResenaGoogle(id) {
+    if (!confirm('¿Quitar esta reseña de tu panel?\n\nEn Google sigue publicada; solo se borra de aquí. Si solo quieres que no se vea en la página, usa "Ocultar".')) return;
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) throw new Error('Error al eliminar');
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al eliminar la reseña');
+    }
+}
+
+async function guardarConfigGoogle() {
+    const msg = document.getElementById('google-config-msg');
+    const boton = document.getElementById('btn-guardar-google-config');
+    const datos = {
+        enlaceResena: document.getElementById('google-enlace-resena').value.trim(),
+        enlacePerfil: document.getElementById('google-enlace-perfil').value.trim(),
+        promedio: document.getElementById('google-promedio').value.trim(),
+        total: document.getElementById('google-total').value
+    };
+
+    const malo = [datos.enlaceResena, datos.enlacePerfil].find(e => e && !/^https:\/\//i.test(e));
+    if (malo) {
+        msg.textContent = 'Los enlaces deben empezar con https:// (cópialos tal cual desde Google)';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/config`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify(datos)
+        });
+        const d = await respuesta.json();
+        if (!respuesta.ok) throw new Error(d.error || 'No se pudo guardar');
+        msg.textContent = d.config.enlaceResena
+            ? '✅ Guardado. Desde ahora el correo después de la cita invita a dejar la reseña en Google.'
+            : '✅ Guardado. (Mientras no pongas el enlace para dejar reseña, el correo sigue usando la página propia.)';
+        msg.style.color = 'green';
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = e.message || 'Error de conexión';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar enlaces y promedio';
     }
 }
