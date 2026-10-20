@@ -4743,6 +4743,15 @@ body.modal-abierto {
     padding-top: 4rem;
 }
 
+/* Sin promociones vigentes el bloque se oculta: el botón de reservar sube */
+#bloque-promos[hidden]{
+    display: none;
+}
+
+#bloque-promos[hidden] + .services-cta{
+    margin-top: 0;
+}
+
 .promos-grid{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -4751,11 +4760,6 @@ body.modal-abierto {
     text-align: left;
 }
 
-.promos-cargando{
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--text-soft);
-}
 
 .promo-card{
     display: flex;
@@ -4846,29 +4850,6 @@ body.modal-abierto {
     text-transform: uppercase;
     font-weight: 500;
     color: var(--rose-mauve-dark);
-}
-
-.promos-vacio{
-    margin-top: 2.5rem;
-    padding: 3rem 1.5rem;
-    border: 1.5px dashed var(--copper-soft);
-    border-radius: 1.5rem;
-    color: var(--text-dark);
-    font-family: var(--font-serif);
-    font-size: 1.4rem;
-}
-
-.promos-vacio-icono{
-    color: var(--rose-mauve);
-    font-size: 1.6rem;
-    margin-bottom: 0.5rem;
-}
-
-.promos-vacio-sub{
-    margin-top: 0.4rem;
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
-    color: var(--text-soft);
 }
 
 @media (max-width: 900px){

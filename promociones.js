@@ -3,8 +3,8 @@
 
 (function () {
     const grid = document.getElementById('promos-grid');
-    const vacio = document.getElementById('promos-vacio');
-    if (!grid) return;
+    const bloque = document.getElementById('bloque-promos');
+    if (!grid || !bloque) return;
 
     // Las promos las escribe Francisca en el admin: escapamos por si acaso
     function escaparHTML(texto) {
@@ -54,17 +54,14 @@
             const datos = await respuesta.json();
             const promociones = datos.promociones || [];
 
+            // Sin promociones vigentes la sección no se muestra (la página sigue con el convenio Tarjeta Vecino)
+            if (promociones.length === 0) return;
+
             grid.innerHTML = '';
-            if (promociones.length === 0) {
-                grid.style.display = 'none';
-                vacio.style.display = 'block';
-                return;
-            }
             promociones.forEach((p) => grid.appendChild(crearCardPromo(p)));
+            bloque.hidden = false;
         } catch (error) {
             console.error('Error al cargar promociones:', error);
-            grid.style.display = 'none';
-            vacio.style.display = 'block';
         }
     }
 

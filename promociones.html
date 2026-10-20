@@ -92,17 +92,11 @@
 
         <!-- PROMOCIONES VIGENTES (las administra Francisca desde el panel) -->
         <section class="promos-section" id="promociones-vigentes">
-            <p class="eyebrow">Por tiempo limitado</p>
-            <h2>Promociones <span class="script">vigentes</span></h2>
-
-            <div class="promos-grid" id="promos-grid">
-                <p class="promos-cargando">Cargando promociones...</p>
-            </div>
-
-            <div class="promos-vacio" id="promos-vacio" style="display: none;">
-                <p class="promos-vacio-icono" aria-hidden="true">✦</p>
-                <p>Pronto tendremos nuevas promociones.</p>
-                <p class="promos-vacio-sub">Síguenos en <a href="https://instagram.com/franciscaortizstudio" target="_blank" rel="noopener">@franciscaortizstudio</a> para enterarte primero.</p>
+            <!-- Se muestra solo si hay promociones activas y vigentes (ver promociones.js) -->
+            <div id="bloque-promos" hidden>
+                <p class="eyebrow">Por tiempo limitado</p>
+                <h2>Promociones <span class="script">vigentes</span></h2>
+                <div class="promos-grid" id="promos-grid"></div>
             </div>
 
             <div class="services-cta">
