@@ -3,6 +3,7 @@
 const API_RESENAS = API_URL + '/resenas';
 const API_SERVICIOS = API_URL + '/servicios';
 const API_PRODUCTOS = API_URL + '/productos';
+const API_PROMOCIONES = API_URL + '/promociones';
 const CLOUDINARY_CLOUD_NAME = 'dgq8ohuko';        // 👈 tu cloud name
 const CLOUDINARY_UPLOAD_PRESET = 's2a10wum';  // 👈 el nombre de tu preset (unsigned)
 const API_AUTH = API_URL + '/auth';
@@ -16,6 +17,8 @@ let serviciosActuales = []; // guardamos la lista para poder editar
 let productosCargados = false;
 let productosActuales = [];
 let horariosCargados = false;
+let promocionesCargadas = false;
+let promocionesActuales = [];
 let clientesCargados = false;
 let clientesActuales = [];
 let clientaAbiertaEmail = null;
@@ -164,6 +167,8 @@ async function cargarHorariosAdmin() {
             `;
             cont.appendChild(fila);
         });
+
+        document.getElementById('atencion-editor').value = (data.atencion || []).join('\n');
     } catch (e) {
         console.error('Error al cargar horarios:', e);
         cont.innerHTML = '<p style="color:#b00020;">No se pudieron cargar los horarios.</p>';
@@ -233,6 +238,55 @@ async function guardarHorariosAdmin() {
     }
 }
 
+// Texto del horario que sale en el pie de todas las páginas
+async function guardarAtencionAdmin() {
+    const msg = document.getElementById('atencion-msg');
+    const boton = document.getElementById('btn-guardar-atencion');
+    const lineas = document.getElementById('atencion-editor').value
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+
+    if (lineas.length === 0) {
+        msg.textContent = 'Escribe al menos una línea de horario';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const res = await fetch(`${API_URL}/horarios/atencion`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify({ atencion: lineas })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            msg.textContent = data.error || 'No se pudo guardar';
+            msg.style.color = '#b00020';
+        } else {
+            msg.textContent = '✅ Horario de atención guardado. Ya se ve en todas las páginas.';
+            msg.style.color = 'green';
+        }
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = 'Error de conexión';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar horario de atención';
+    }
+}
+
 // PESTAÑAS \\
 
 function cambiarTab(nombre) {
@@ -252,6 +306,11 @@ function cambiarTab(nombre) {
     if (nombre === 'productos' && !productosCargados) {
         cargarProductos();
         productosCargados = true;
+    }
+
+    if (nombre === 'promociones' && !promocionesCargadas) {
+        cargarPromociones();
+        promocionesCargadas = true;
     }
 
     if (nombre === 'horarios' && !horariosCargados) {
@@ -825,6 +884,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('producto-imagen-file').addEventListener('change', manejarSeleccionImagen);
     document.getElementById('btn-cambiar-password').addEventListener('click', cambiarPasswordFrancisca);
     document.getElementById('btn-guardar-horarios').addEventListener('click', guardarHorariosAdmin);
+    document.getElementById('btn-guardar-atencion').addEventListener('click', guardarAtencionAdmin);
+    document.getElementById('btn-nueva-promocion').addEventListener('click', () => abrirFormPromocion(null));
+    document.getElementById('btn-cancelar-promocion').addEventListener('click', cerrarFormPromocion);
+    document.getElementById('btn-guardar-promocion').addEventListener('click', guardarPromocion);
+    document.getElementById('promocion-imagen-file').addEventListener('change', manejarImagenPromocion);
+    document.getElementById('btn-quitar-imagen-promocion').addEventListener('click', quitarImagenPromocion);
+    document.getElementById('modal-promocion').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-promocion') cerrarFormPromocion();
+    });
     document.getElementById('modal-producto').addEventListener('click', (e) => {
         if (e.target.id === 'modal-producto') cerrarFormProducto();
     });
@@ -1237,5 +1305,246 @@ async function eliminarProductoPermanente(id) {
     } catch (e) {
         console.error('Error:', e);
         alert('Hubo un problema al eliminar el producto');
+    }
+}
+
+// PROMOCIONES \\
+
+// "2026-11-30" -> "30 de noviembre de 2026"
+function formatearFechaPromocion(fechaTexto) {
+    const [año, mes, dia] = fechaTexto.split('-').map(Number);
+    return new Date(año, mes - 1, dia).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function promocionVencida(p) {
+    if (!p.validaHasta) return false;
+    const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    return p.validaHasta < hoy;
+}
+
+function crearCardPromocion(p) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+    const vencida = promocionVencida(p);
+    if (!p.activo || vencida) card.classList.add('servicio-inactivo');
+
+    const img = p.imagen
+        ? `<img src="${p.imagen}" alt="${p.titulo}" style="width:72px;height:56px;object-fit:cover;border-radius:0.5rem;flex-shrink:0;">`
+        : '';
+    const vigencia = p.validaHasta
+        ? `${vencida ? 'Venció el' : 'Válida hasta el'} ${formatearFechaPromocion(p.validaHasta)}`
+        : 'Sin fecha de término';
+
+    card.innerHTML = `
+        <div style="display:flex; gap:1rem; align-items:flex-start;">
+            ${img}
+            <div style="flex:1;">
+                <div class="servicio-titulo">
+                    <h3>${p.titulo}</h3>
+                    ${p.etiqueta ? `<span class="servicio-categoria promo-admin-etiqueta">${p.etiqueta}</span>` : ''}
+                    ${!p.activo ? '<span class="servicio-badge-off">Desactivada</span>' : ''}
+                    ${p.activo && vencida ? '<span class="servicio-badge-off">Vencida</span>' : ''}
+                </div>
+                <p class="servicio-desc" style="white-space:pre-line;">${p.descripcion || ''}</p>
+                <p class="servicio-meta">${vigencia}</p>
+                <div class="servicio-acciones">
+                    <button class="btn-editar-promocion" data-id="${p.id}">Editar</button>
+                    <button class="btn-toggle-promocion" data-id="${p.id}" data-activo="${p.activo}">${p.activo ? 'Desactivar' : 'Activar'}</button>
+                    <button class="btn-eliminar-servicio btn-eliminar-promocion" data-id="${p.id}">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+async function cargarPromociones() {
+    const lista = document.getElementById('lista-promociones');
+    const loading = document.getElementById('loading-promociones');
+    const empty = document.getElementById('empty-promociones');
+    const count = document.getElementById('count-promociones');
+
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/admin/todas`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+
+        loading.style.display = 'none';
+        lista.innerHTML = '';
+
+        promocionesActuales = datos.promociones || [];
+        count.textContent = promocionesActuales.length;
+
+        if (promocionesActuales.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        promocionesActuales.forEach(p => lista.appendChild(crearCardPromocion(p)));
+
+        document.querySelectorAll('.btn-editar-promocion').forEach(b => {
+            b.addEventListener('click', () => {
+                abrirFormPromocion(promocionesActuales.find(p => p.id === b.getAttribute('data-id')));
+            });
+        });
+        document.querySelectorAll('.btn-toggle-promocion').forEach(b => {
+            b.addEventListener('click', () => {
+                cambiarEstadoPromocion(b.getAttribute('data-id'), b.getAttribute('data-activo') !== 'true');
+            });
+        });
+        document.querySelectorAll('.btn-eliminar-promocion').forEach(b => {
+            b.addEventListener('click', () => eliminarPromocion(b.getAttribute('data-id')));
+        });
+
+    } catch (error) {
+        console.error('Error al cargar promociones:', error);
+        loading.textContent = 'Error al cargar promociones';
+    }
+}
+
+function mostrarImagenPromocion(url) {
+    const preview = document.getElementById('promocion-imagen-preview');
+    const quitar = document.getElementById('quitar-imagen-promocion');
+    document.getElementById('promocion-imagen-url').value = url || '';
+    if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        quitar.style.display = 'flex';
+    } else {
+        preview.style.display = 'none';
+        quitar.style.display = 'none';
+    }
+}
+
+async function manejarImagenPromocion(evento) {
+    const file = evento.target.files[0];
+    if (!file) return;
+
+    const estado = document.getElementById('promocion-imagen-estado');
+    estado.textContent = 'Subiendo foto...';
+
+    try {
+        mostrarImagenPromocion(await subirImagenCloudinary(file));
+        estado.textContent = 'Foto subida ✓';
+    } catch (error) {
+        console.error('Error al subir imagen:', error);
+        estado.textContent = 'No se pudo subir la foto. Intenta de nuevo.';
+    }
+}
+
+function quitarImagenPromocion() {
+    document.getElementById('promocion-imagen-file').value = '';
+    document.getElementById('promocion-imagen-estado').textContent = '';
+    mostrarImagenPromocion('');
+}
+
+function abrirFormPromocion(promo = null) {
+    document.getElementById('modal-promocion-error').style.display = 'none';
+    document.getElementById('promocion-imagen-estado').textContent = '';
+    document.getElementById('promocion-imagen-file').value = '';
+
+    document.getElementById('modal-promocion-titulo').textContent = promo ? 'Editar promoción' : 'Nueva promoción';
+    document.getElementById('promocion-id').value = promo ? promo.id : '';
+    document.getElementById('promocion-titulo-input').value = promo ? promo.titulo : '';
+    document.getElementById('promocion-etiqueta').value = promo ? (promo.etiqueta || '') : '';
+    document.getElementById('promocion-orden').value = promo && promo.orden !== 99 ? promo.orden : '';
+    document.getElementById('promocion-descripcion').value = promo ? (promo.descripcion || '') : '';
+    document.getElementById('promocion-valida-hasta').value = promo ? (promo.validaHasta || '') : '';
+    mostrarImagenPromocion(promo ? promo.imagen : '');
+
+    document.getElementById('modal-promocion').style.display = 'flex';
+}
+
+function cerrarFormPromocion() {
+    document.getElementById('modal-promocion').style.display = 'none';
+}
+
+async function guardarPromocion() {
+    const id = document.getElementById('promocion-id').value;
+    const error = document.getElementById('modal-promocion-error');
+    const boton = document.getElementById('btn-guardar-promocion');
+
+    const datos = {
+        titulo: document.getElementById('promocion-titulo-input').value.trim(),
+        etiqueta: document.getElementById('promocion-etiqueta').value.trim(),
+        orden: document.getElementById('promocion-orden').value,
+        descripcion: document.getElementById('promocion-descripcion').value.trim(),
+        validaHasta: document.getElementById('promocion-valida-hasta').value,
+        imagen: document.getElementById('promocion-imagen-url').value
+    };
+
+    if (!datos.titulo) {
+        error.textContent = 'El título es obligatorio';
+        error.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    error.style.display = 'none';
+
+    const esEdicion = id !== '';
+
+    try {
+        const respuesta = await fetch(esEdicion ? `${API_PROMOCIONES}/${id}` : API_PROMOCIONES, {
+            method: esEdicion ? 'PATCH' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenSesion}`
+            },
+            body: JSON.stringify(datos)
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al guardar');
+        }
+        cerrarFormPromocion();
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error al guardar promoción:', e);
+        error.textContent = e.message || 'Hubo un problema al guardar';
+        error.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar';
+    }
+}
+
+async function cambiarEstadoPromocion(id, activo) {
+    const accion = activo ? 'activar' : 'desactivar';
+    if (!confirm(`¿Seguro que quieres ${accion} esta promoción?`)) return;
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify({ activo: activo })
+        });
+        if (!respuesta.ok) throw new Error('Error al cambiar estado');
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al cambiar el estado de la promoción');
+    }
+}
+
+async function eliminarPromocion(id) {
+    if (!confirm('¿Borrar esta promoción para siempre?\n\nSi solo quieres ocultarla por un tiempo, usa "Desactivar".')) return;
+    try {
+        const respuesta = await fetch(`${API_PROMOCIONES}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al eliminar');
+        }
+        cargarPromociones();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al eliminar la promoción');
     }
 }

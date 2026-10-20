@@ -1,10 +1,8 @@
 // PÁGINA REAGENDAR \\
 
-const API_URL = API_URL + '/reagendar';
-
-// Aquí API_URL ya apunta a .../api/reagendar.
-// El endpoint de horarios es /api/horarios (hermano, no hijo), así que sacamos la base.
-const API_BASE = API_URL.replace(/\/reagendar$/, '');
+// API_URL viene de config.js (.../api); los horarios están en /api/horarios
+const API_REAGENDAR = API_URL + '/reagendar';
+const API_BASE = API_URL;
 
 // El horario ahora viene de la base de datos (editable desde el panel)
 let HORARIOS = {};
@@ -75,7 +73,7 @@ async function verificar() {
     }
 
     try {
-        const respuesta = await fetch(`${API_URL}/verificar?token=${token}`);
+        const respuesta = await fetch(`${API_REAGENDAR}/verificar?token=${token}`);
         if (!respuesta.ok) {
             mostrarEstado('estado-error');
             return;
@@ -200,7 +198,7 @@ async function obtenerHorariosOcupados(fecha) {
         const fechaTexto = `${año}-${mes}-${dia}`;
         const token = obtenerToken();
 
-        const respuesta = await fetch(`${API_URL}/disponibilidad?fecha=${fechaTexto}&token=${token}`);
+        const respuesta = await fetch(`${API_REAGENDAR}/disponibilidad?fecha=${fechaTexto}&token=${token}`);
         if (!respuesta.ok) return [];
         const datos = await respuesta.json();
         return datos.ocupados || [];
@@ -299,7 +297,7 @@ document.getElementById('confirmar-reagendamiento').addEventListener('click', as
     fechaFin.setMinutes(fechaFin.getMinutes() + duracionBloque);
 
     try {
-        const respuesta = await fetch(API_URL, {
+        const respuesta = await fetch(API_REAGENDAR, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

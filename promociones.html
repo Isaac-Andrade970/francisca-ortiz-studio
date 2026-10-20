@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Promociones y Descuentos | Francisca Ortiz Peluquería y Manicure</title>
+    <meta name="description" content="Promociones vigentes y descuentos con tu Tarjeta Vecino Soy Quinta en Francisca Ortiz Studio, Quinta Normal.">
+    <meta name="keywords" content="promociones peluquería, descuento manicure, tarjeta vecino, soy quinta, quinta normal">
+    <meta name="author" content="Francisca Ortiz">
+
+    <meta property="og:title" content="Promociones y Descuentos | Francisca Ortiz">
+    <meta property="og:description" content="Hasta 15% de descuento con tu Tarjeta Vecino Soy Quinta.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/hero-salon.jpg">
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <header>
+        <a href="index.html" class="logo">
+            <img src="images/logo-fo.png" alt="Francisca Ortiz - Peluquería y Manicure">
+        </a>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav id="main-nav">
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="tienda.html">Tienda</a></li>
+                <li><a href="promociones.html">Promociones</a></li>
+                <li><a href="index.html#galeria">Galería</a></li>
+                <li><a href="index.html#footer-contacto">Contacto</a></li>
+                <li><a href="reservar.html" class="btn-nav">Reservar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <p class="eyebrow">Beneficios para ti</p>
+            <h1>Promociones y <span class="script">descuentos</span></h1>
+            <p class="lead">Porque cuidarte también puede ser un regalo. Revisa nuestros beneficios vigentes.</p>
+        </section>
+
+        <!-- CONVENIO TARJETA VECINO -->
+        <section class="convenio-section fade-in" id="tarjeta-vecino">
+            <article class="convenio-card">
+                <div class="convenio-info">
+                    <p class="convenio-sello">✦ Convenio Municipalidad de Quinta Normal</p>
+                    <h2>Tarjeta Vecino <span class="script">Soy Quinta</span></h2>
+                    <p class="convenio-texto">Si eres vecina o vecino de Quinta Normal, con tu Tarjeta Vecino tienes descuento en <strong>todos nuestros servicios de peluquería y manicure</strong>.</p>
+
+                    <ol class="convenio-pasos">
+                        <li><span>1</span> Reserva tu hora en la página</li>
+                        <li><span>2</span> Muestra tu Tarjeta Vecino al momento de pagar</li>
+                        <li><span>3</span> Se descuenta del valor de tu servicio</li>
+                    </ol>
+
+                    <div class="convenio-acciones">
+                        <a href="reservar.html" class="btn btn-primary">Reservar hora</a>
+                        <a href="https://soyquinta.quintanormal.cl/beneficios?convenio=francisca-ortiz-studio" class="btn btn-secondary" target="_blank" rel="noopener">Ver en Soy Quinta ↗</a>
+                    </div>
+                </div>
+
+                <div class="convenio-descuentos">
+                    <div class="descuento-tile descuento-tile-principal">
+                        <p class="descuento-valor">15<span>%</span></p>
+                        <p class="descuento-dias">Lunes a jueves</p>
+                    </div>
+                    <div class="descuento-tile">
+                        <p class="descuento-valor">10<span>%</span></p>
+                        <p class="descuento-dias">Viernes y sábado</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- PROMOCIONES VIGENTES (las administra Francisca desde el panel) -->
+        <section class="promos-section" id="promociones-vigentes">
+            <p class="eyebrow">Por tiempo limitado</p>
+            <h2>Promociones <span class="script">vigentes</span></h2>
+
+            <div class="promos-grid" id="promos-grid">
+                <p class="promos-cargando">Cargando promociones...</p>
+            </div>
+
+            <div class="promos-vacio" id="promos-vacio" style="display: none;">
+                <p class="promos-vacio-icono" aria-hidden="true">✦</p>
+                <p>Pronto tendremos nuevas promociones.</p>
+                <p class="promos-vacio-sub">Síguenos en <a href="https://instagram.com/franciscaortizstudio" target="_blank" rel="noopener">@franciscaortizstudio</a> para enterarte primero.</p>
+            </div>
+
+            <div class="services-cta">
+                <p>¿Lista para consentirte?</p>
+                <a href="reservar.html" class="btn btn-primary">Reservar hora</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="images/logo-fo.png" alt="Francisca Ortiz - Peluquería y Manicure">
+                </a>
+                <p class="footer-about">Un espacio íntimo dedicado a ti, donde cada detalle importa.</p>
+            </div>
+
+            <div class="footer-location">
+                <h4>Ubicación</h4>
+                <div class="footer-map">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.510172324065!2d-70.7031197234322!3d-33.43601257339522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c53d94956e33%3A0xd6a7738a6822965f!2sFrancisca%20Ortiz%20Studio!5e0!3m2!1ses-419!2scl!4v1777145176476!5m2!1ses-419!2scl"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <p class="footer-address">Catán 1254, Quinta Normal<br>Región Metropolitana</p>
+            </div>
+
+            <div class="footer-contact" id="footer-contacto">
+                <h4>Contacto</h4>
+                <ul class="footer-contact-list">
+                    <li>
+                        <span class="contact-icon">✉</span>
+                        <a href="mailto:franciscaortizstudio@gmail.com">franciscaortizstudio@gmail.com</a>
+                    </li>
+                    <li>
+                        <span class="contact-icon">📞</span>
+                        <a href="https://wa.me/56957348639">+56 9 5734 8639</a>
+                    </li>
+                    <li>
+                        <span class="contact-icon">📷</span>
+                        <a href="https://instagram.com/franciscaortizstudio">@franciscaortizstudio</a>
+                    </li>
+                </ul>
+                <div class="footer-hours" id="footer-hours">
+                    <p>Martes a Sábado: 10:30 — 17:00</p>
+                    <p>Domingo y Lunes: Cerrado</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Francisca Ortiz · Peluquería y Manicure · Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/56957348639?text=Hola!%20Tengo%20una%20consulta%20sobre%20las%20promociones%20de%20Francisca%20Ortiz%20Studio"
+       class="whatsapp-float"
+       target="_blank"
+       rel="noopener"
+       aria-label="Contactar por WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+        </svg>
+    </a>
+
+    <script src="config.js"></script>
+    <script src="menu.js"></script>
+    <script src="script.js"></script>
+    <script src="promociones.js"></script>
+</body>
+</html>

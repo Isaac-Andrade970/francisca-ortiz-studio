@@ -187,7 +187,7 @@ if (document.querySelector('.booking-page')) {
                 <article class="service-option" data-service="${s.id}" data-duration="${s.duracion}" data-price="${s.precio}" data-categoria="${s.categoria}">
                     <h3>${s.nombre}</h3>
                     <p>${s.descripcion || ''}</p>
-                    <p class="service-meta"><span class="price">${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
+                    <p class="service-meta"><span class="price">Desde ${formatearPrecioReserva(s.precio)}</span> <span class="duration">· ${formatearDuracionReserva(s.duracion)}</span></p>
                 </article>
             `).join('');
 
@@ -418,8 +418,9 @@ if (document.querySelector('.booking-page')) {
             ? reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })
             : 'Por elegir';
         document.getElementById('sidebar-time').textContent = reserva.hora || 'Por elegir';
+        // El precio final depende del largo del cabello, por eso siempre es "Desde"
         document.getElementById('sidebar-total').textContent = reserva.servicios.length
-            ? formatearPrecioReserva(precioTotal())
+            ? 'Desde ' + formatearPrecioReserva(precioTotal())
             : '$0';
     }
 
