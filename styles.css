@@ -1252,7 +1252,7 @@ footer h4{
 
 .service-option{
     background-color: var(--white);
-    padding: 1.75rem;
+    padding: 1.1rem 1.25rem;
     border-radius: 1rem;
     border: 2px solid var(--nude);
     cursor: pointer;
@@ -1291,8 +1291,8 @@ footer h4{
 /* Estado seleccionado: claramente diferenciado */
 .service-option.selected{
     border-color: var(--rose-mauve);
-    background-color: var(--cream-light);
-    box-shadow: 0 8px 28px rgba(139, 74, 107, 0.18);
+    background: linear-gradient(135deg, #F4E1EA 0%, var(--cream-light) 100%);
+    box-shadow: 0 10px 30px rgba(139, 74, 107, 0.22);
     transform: translateY(-4px);
 }
 
@@ -1303,10 +1303,10 @@ footer h4{
 .service-option.selected::after{
     content: '✓';
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 28px;
-    height: 28px;
+    top: 0.85rem;
+    right: 0.85rem;
+    width: 26px;
+    height: 26px;
     background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
     color: var(--white);
     border-radius: 50%;
@@ -1331,10 +1331,12 @@ footer h4{
 
 .service-option h3{
     font-family: var(--font-serif);
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 500;
+    line-height: 1.25;
     color: var(--text-dark);
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
+    padding-right: 2rem; /* espacio para el ✓ */
     transition: color 0.3s ease;
 }
 .service-option:hover h3{
@@ -1343,8 +1345,47 @@ footer h4{
 
 .service-option p{
     color: var(--text-soft);
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin-bottom: 0.55rem;
+}
+
+/* Descripción cortada a 2 líneas para que la lista sea corta; al elegirla se ve completa */
+.service-option p:not(.service-meta){
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.service-option.selected p:not(.service-meta){
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+}
+
+.service-option p:empty{
+    display: none;
+}
+
+.service-option .service-meta{
+    margin-bottom: 0;
+}
+
+/* En celular la descripción aparece solo al elegir el servicio: la lista queda a la mitad */
+@media (max-width: 600px){
+    .service-option{
+        padding: 0.9rem 1.1rem;
+    }
+
+    .service-option p:not(.service-meta){
+        display: none;
+    }
+
+    .service-option.selected p:not(.service-meta){
+        display: block;
+        margin-top: 0.2rem;
+    }
 }
 
 .service-meta{
@@ -1357,7 +1398,7 @@ footer h4{
 .service-option .price{
     color: var(--rose-mauve-dark);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .service-option .duration{
@@ -3611,6 +3652,303 @@ body.modal-abierto {
     line-height: 1.7;
     resize: vertical;
     margin-bottom: 1rem;
+}
+
+/* RESERVAR: CONTADOR DE SERVICIOS ELEGIDOS */
+
+.booking-step-1 [hidden]{
+    display: none !important;
+}
+
+.seleccion-contador{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+}
+
+.contador-puntos{
+    display: inline-flex;
+    gap: 0.35rem;
+}
+
+.contador-puntos i{
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rose-mauve);
+    background-color: transparent;
+    transition: background-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.contador-puntos i.lleno{
+    background-color: var(--rose-mauve);
+    transform: scale(1.15);
+}
+
+/* RESERVAR: TICKET DE RESERVA (al elegir 3 servicios) */
+
+.ticket-reserva{
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto 1rem;
+    background-color: var(--white);
+    border-radius: 1.5rem;
+    box-shadow: 0 18px 50px rgba(139, 74, 107, 0.18);
+    overflow: hidden;
+}
+
+/* Borde inferior dentado tipo ticket */
+.ticket-reserva::after{
+    content: '';
+    display: block;
+    height: 12px;
+    background:
+        radial-gradient(circle at 10px 12px, var(--cream) 6px, transparent 6.5px) 0 0 / 20px 12px repeat-x;
+}
+
+.ticket-cabecera{
+    padding: 1.75rem 2rem 1.5rem;
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
+    color: var(--cream-light);
+    text-align: center;
+}
+
+.ticket-eyebrow{
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 0.35rem;
+}
+
+.ticket-cabecera h3{
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.ticket-cabecera h3 .script{
+    font-family: var(--font-script);
+    font-size: 2.6rem;
+    color: var(--cream);
+}
+
+/* Línea perforada con muescas a los lados */
+.ticket-perforado{
+    position: relative;
+    height: 22px;
+    margin: 0 1.25rem;
+    background: linear-gradient(90deg, var(--nude) 50%, transparent 50%) 0 50% / 12px 1.5px repeat-x;
+}
+
+.ticket-perforado::before,
+.ticket-perforado::after{
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: var(--cream);
+    transform: translateY(-50%);
+}
+
+.ticket-perforado::before{ left: calc(-1.25rem - 11px); }
+.ticket-perforado::after{ right: calc(-1.25rem - 11px); }
+
+.ticket-lista{
+    padding: 0.25rem 1.5rem;
+}
+
+.ticket-item{
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0.5rem;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--cream);
+    list-style: none;
+}
+
+.ticket-item:last-child{
+    border-bottom: none;
+}
+
+.ticket-item-nombre{
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.ticket-item-duracion{
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 500;
+}
+
+.ticket-item-precio{
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--rose-mauve-dark);
+    white-space: nowrap;
+}
+
+.ticket-quitar{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--nude);
+    background-color: var(--white);
+    color: var(--text-soft);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s, background-color 0.25s, transform 0.25s;
+}
+
+.ticket-quitar:hover{
+    border-color: #c0392b;
+    background-color: #fbeaea;
+    color: #c0392b;
+    transform: rotate(90deg);
+}
+
+.ticket-total{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 0.5rem 2rem 0.25rem;
+}
+
+.ticket-total-label{
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 500;
+}
+
+.ticket-total-duracion{
+    font-size: 0.85rem;
+    color: var(--text-soft);
+}
+
+.ticket-total-valor{
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--rose-mauve-dark);
+    line-height: 1.1;
+    white-space: nowrap;
+    font-variant-numeric: lining-nums;
+}
+
+.ticket-nota{
+    padding: 0 2rem;
+    margin: 0.5rem 0 1.25rem;
+    font-size: 0.78rem;
+    color: var(--text-soft);
+}
+
+.ticket-continuar{
+    display: block;
+    width: calc(100% - 4rem);
+    margin: 0 2rem 1.75rem;
+    border: none;
+    font-family: inherit;
+}
+
+/* Copias que vuelan desde la grilla al ticket */
+.ticket-fantasma{
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 150;
+    pointer-events: none;
+    transform-origin: top left;
+    transition: none !important;
+    will-change: transform, opacity;
+}
+
+/* Tiras de la trituradora */
+.trituradora{
+    position: fixed;
+    z-index: 150;
+    pointer-events: none;
+}
+
+/* Cada tira: color papel rosado con los bordes del corte marcados
+   (el degradado se repite cada 1/12 del ancho, justo donde corta cada tira) */
+.trituradora-tira{
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    border: none !important;
+    border-radius: 0.4rem;
+    background-color: #F7E4EB !important;
+    background-image: linear-gradient(90deg,
+        rgba(139, 74, 107, 0.35) 0, transparent 2px,
+        transparent calc(100% - 2px), rgba(139, 74, 107, 0.35) 100%);
+    background-size: calc(100% / 12) 100%;
+    will-change: transform, opacity;
+}
+
+@media (max-width: 600px){
+    .ticket-cabecera{
+        padding: 1.5rem 1.25rem 1.25rem;
+    }
+
+    .ticket-lista{
+        padding: 0.25rem 1rem;
+    }
+
+    .ticket-item{
+        grid-template-columns: 1fr auto;
+        gap: 0.25rem 0.75rem;
+    }
+
+    .ticket-item-info{
+        grid-column: 1 / 2;
+    }
+
+    .ticket-item-precio{
+        grid-column: 1 / 2;
+        grid-row: 2;
+    }
+
+    .ticket-quitar{
+        grid-column: 2;
+        grid-row: 1 / 3;
+    }
+
+    .ticket-total{
+        padding: 0.5rem 1.25rem 0.25rem;
+    }
+
+    .ticket-total-valor{
+        font-size: 1.5rem;
+    }
+
+    .ticket-nota{
+        padding: 0 1.25rem;
+    }
+
+    .ticket-continuar{
+        width: calc(100% - 2.5rem);
+        margin: 0 1.25rem 1.5rem;
+    }
 }
 
 /* NOTA DEL TOTAL EN RESERVAR ("Desde") */

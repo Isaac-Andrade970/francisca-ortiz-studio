@@ -85,11 +85,19 @@
 
                     <div class="category-filter" id="category-filter"></div>
 
+                    <div class="seleccion-contador" id="seleccion-contador" aria-live="polite">
+                        <span class="contador-puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="contador-texto" id="contador-texto">Elige hasta 3 servicios</span>
+                    </div>
+
                     <div class="services-selection">
                         <p style="color:var(--text-soft); grid-column:1/-1;">Cargando servicios...</p>
                     </div>
 
-                    <div class="booking-actions">
+                    <!-- Ticket de reserva: aparece al elegir el 3.er servicio -->
+                    <div class="ticket-reserva" id="ticket-reserva" hidden></div>
+
+                    <div class="booking-actions" id="acciones-paso-1">
                         <button class="btn btn-primary" id="next-to-step-2" disabled>Continuar</button>
                     </div>
                 </div>

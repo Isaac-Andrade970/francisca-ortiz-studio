@@ -110,6 +110,8 @@ if (document.querySelector('.booking-page')) {
         const serviceOptions = document.querySelectorAll('.service-option');
         serviceOptions.forEach((option) => {
             option.addEventListener('click', () => {
+                if (animandoSeleccion) return;
+
                 const id = option.getAttribute('data-service');
                 const yaSeleccionado = reserva.servicios.some((s) => s.id === id);
 
@@ -130,16 +132,257 @@ if (document.querySelector('.booking-page')) {
                     option.classList.add('selected');
                 }
 
-                btnNextStep1.disabled = reserva.servicios.length === 0;
-                actualizarLimiteServicios();
-                actualizarSidebar();
+                actualizarEstadoSeleccion();
 
-                // Al llegar al máximo, ya no hay nada más que elegir: bajamos solos al botón.
+                // Con el 3.er servicio la grilla se convierte en el ticket de reserva
                 if (!yaSeleccionado && reserva.servicios.length === MAX_SERVICIOS) {
-                    btnNextStep1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    armarTicket();
                 }
             });
         });
+    }
+
+    function actualizarEstadoSeleccion() {
+        btnNextStep1.disabled = reserva.servicios.length === 0;
+        actualizarLimiteServicios();
+        actualizarContador();
+        actualizarSidebar();
+    }
+
+    function actualizarContador() {
+        const cantidad = reserva.servicios.length;
+        document.querySelectorAll('.contador-puntos i').forEach((punto, i) => {
+            punto.classList.toggle('lleno', i < cantidad);
+        });
+        document.getElementById('contador-texto').textContent = cantidad === 0
+            ? `Elige hasta ${MAX_SERVICIOS} servicios`
+            : `${cantidad} de ${MAX_SERVICIOS} servicios elegidos`;
+    }
+
+    // TICKET DE RESERVA (animaciones con Web Animations API: solo transform/opacity = 60fps) \\
+
+    const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let animandoSeleccion = false;
+
+    function esperar(animaciones) {
+        return Promise.all(animaciones.map((a) => a.finished.catch(() => {})));
+    }
+
+    function escaparTexto(texto) {
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+    }
+
+    function dibujarTicket() {
+        const ticket = document.getElementById('ticket-reserva');
+        ticket.innerHTML = `
+            <div class="ticket-cabecera">
+                <p class="ticket-eyebrow">✦ Tu selección</p>
+                <h3>Tu <span class="script">ticket</span> de reserva</h3>
+            </div>
+            <div class="ticket-perforado" aria-hidden="true"></div>
+            <ul class="ticket-lista">
+                ${reserva.servicios.map((s) => `
+                    <li class="ticket-item" data-id="${s.id}">
+                        <div class="ticket-item-info">
+                            <p class="ticket-item-nombre">${escaparTexto(s.nombre)}</p>
+                            <p class="ticket-item-duracion">${formatearDuracionReserva(s.duracion)}</p>
+                        </div>
+                        <p class="ticket-item-precio">Desde ${formatearPrecioReserva(s.precio)}</p>
+                        <button type="button" class="ticket-quitar" data-id="${s.id}" aria-label="Quitar ${escaparTexto(s.nombre)}">✕</button>
+                    </li>
+                `).join('')}
+            </ul>
+            <div class="ticket-perforado" aria-hidden="true"></div>
+            <div class="ticket-total">
+                <div>
+                    <p class="ticket-total-label">Total estimado</p>
+                    <p class="ticket-total-duracion">${formatearDuracionReserva(duracionTotal())} aprox.</p>
+                </div>
+                <p class="ticket-total-valor">Desde ${formatearPrecioReserva(precioTotal())}</p>
+            </div>
+            <p class="ticket-nota">El valor final puede variar según el largo y volumen de tu cabello.</p>
+            <button type="button" class="btn btn-primary ticket-continuar">Elegir fecha y hora →</button>
+        `;
+
+        ticket.querySelectorAll('.ticket-quitar').forEach((boton) => {
+            boton.addEventListener('click', () => quitarDesdeTicket(boton.getAttribute('data-id')));
+        });
+        ticket.querySelector('.ticket-continuar').addEventListener('click', () => btnNextStep1.click());
+    }
+
+    function mostrarModoTicket(activo) {
+        document.querySelector('.services-selection').hidden = activo;
+        document.getElementById('category-filter').hidden = activo;
+        document.getElementById('seleccion-contador').hidden = activo;
+        document.getElementById('acciones-paso-1').hidden = activo;
+        document.getElementById('ticket-reserva').hidden = !activo;
+    }
+
+    async function armarTicket() {
+        animandoSeleccion = true;
+        const grid = document.querySelector('.services-selection');
+        const elegidas = reserva.servicios.map((s) => grid.querySelector(`.service-option[data-service="${s.id}"]`));
+        const resto = [...grid.querySelectorAll('.service-option:not(.selected):not(.oculto-por-filtro)')];
+
+        if (reducirMovimiento) {
+            dibujarTicket();
+            mostrarModoTicket(true);
+            animandoSeleccion = false;
+            return;
+        }
+
+        // 1. Las no elegidas se desvanecen y achican
+        await esperar(resto.map((card, i) => card.animate(
+            // Un solo keyframe: parte desde su estado actual (ya viene semitransparente por .disabled)
+            [{ opacity: 0, transform: 'scale(0.9)' }],
+            { duration: 320, delay: Math.min(i * 30, 240), easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )));
+
+        // 2. Copias "fantasma" de las 3 elegidas, fijas donde están ahora
+        const fantasmas = elegidas.map((card) => {
+            const rect = card.getBoundingClientRect();
+            const copia = card.cloneNode(true);
+            copia.classList.add('ticket-fantasma');
+            Object.assign(copia.style, {
+                left: `${rect.left}px`, top: `${rect.top}px`,
+                width: `${rect.width}px`, height: `${rect.height}px`
+            });
+            document.body.appendChild(copia);
+            return { copia, rect };
+        });
+
+        // 3. Cambia la grilla por el ticket
+        dibujarTicket();
+        mostrarModoTicket(true);
+        resto.forEach((card) => card.getAnimations().forEach((a) => a.cancel()));
+
+        const ticket = document.getElementById('ticket-reserva');
+        const rectTicket = ticket.getBoundingClientRect();
+        const margen = 110; // alto del header fijo
+        if (rectTicket.top < margen || rectTicket.top > window.innerHeight * 0.4) {
+            window.scrollBy({ top: rectTicket.top - margen - 20, behavior: 'instant' });
+        }
+
+        const filas = [...ticket.querySelectorAll('.ticket-item')];
+        filas.forEach((fila) => { fila.style.opacity = '0'; });
+
+        const animaciones = [ticket.animate(
+            [{ opacity: 0, transform: 'translateY(24px) scale(0.96)' }, { opacity: 1, transform: 'none' }],
+            { duration: 550, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        )];
+
+        // 4. Cada fantasma vuela y se pliega hasta su fila del ticket
+        fantasmas.forEach(({ copia, rect }, i) => {
+            const destino = filas[i].getBoundingClientRect();
+            const dx = destino.left - rect.left;
+            const dy = destino.top - rect.top;
+            const sx = destino.width / rect.width;
+            const sy = destino.height / rect.height;
+            const retraso = 80 + i * 90;
+
+            animaciones.push(copia.animate([
+                { transform: 'none', opacity: 1, borderRadius: '1rem' },
+                { transform: `translate(${dx * 0.55}px, ${dy * 0.55}px) scale(${(1 + sx) / 2}, ${(1 + sy) / 2}) rotate(${i % 2 ? 2 : -2}deg)`, opacity: 1, offset: 0.55 },
+                { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0, borderRadius: '0.5rem' }
+            ], { duration: 720, delay: retraso, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'forwards' }));
+
+            animaciones.push(filas[i].animate(
+                [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+                { duration: 320, delay: retraso + 520, easing: 'ease-out', fill: 'forwards' }
+            ));
+        });
+
+        await esperar(animaciones);
+        fantasmas.forEach(({ copia }) => copia.remove());
+        filas.forEach((fila) => {
+            fila.style.opacity = '';
+            fila.getAnimations().forEach((a) => a.cancel());
+        });
+        animandoSeleccion = false;
+    }
+
+    // Efecto trituradora: la fila se corta en tiras verticales que caen
+    async function triturar(elemento) {
+        const rect = elemento.getBoundingClientRect();
+        const capa = document.createElement('div');
+        capa.className = 'trituradora';
+        Object.assign(capa.style, {
+            left: `${rect.left}px`, top: `${rect.top}px`,
+            width: `${rect.width}px`, height: `${rect.height}px`
+        });
+
+        const TIRAS = 12;
+        const tiras = [];
+        for (let i = 0; i < TIRAS; i++) {
+            const tira = elemento.cloneNode(true);
+            tira.classList.add('trituradora-tira');
+            const desde = (i * 100) / TIRAS;
+            const hasta = 100 - ((i + 1) * 100) / TIRAS;
+            tira.style.clipPath = `inset(0 ${hasta}% 0 ${desde}%)`;
+            capa.appendChild(tira);
+            tiras.push(tira);
+        }
+        document.body.appendChild(capa);
+        elemento.style.visibility = 'hidden';
+
+        await esperar(tiras.map((tira, i) => {
+            const centro = i - (TIRAS - 1) / 2;
+            const separacion = (centro * 2.5).toFixed(1);             // las tiras se abren al cortarse
+            const caida = rect.height + 160 + Math.random() * 120;
+            const giro = (centro * 1.6 + (Math.random() * 10 - 5)).toFixed(1);
+            const deriva = (centro * 7 + (Math.random() * 12 - 6)).toFixed(1);
+            return tira.animate([
+                { transform: 'none', opacity: 1 },
+                // 1. Corte: baja un poco y las tiras se separan
+                { transform: `translate(${separacion}px, ${rect.height * 0.18}px)`, opacity: 1, offset: 0.28 },
+                // 2. Caída: cada tira cae girando y abriéndose como abanico
+                { transform: `translate(${deriva}px, ${caida}px) rotate(${giro}deg)`, opacity: 0 }
+            ], { duration: 950, delay: Math.abs(centro) * 18 + Math.random() * 30, easing: 'cubic-bezier(0.55, 0, 0.8, 0.35)', fill: 'forwards' });
+        }));
+        capa.remove();
+    }
+
+    async function quitarDesdeTicket(id) {
+        if (animandoSeleccion) return;
+        animandoSeleccion = true;
+
+        const ticket = document.getElementById('ticket-reserva');
+        const fila = ticket.querySelector(`.ticket-item[data-id="${id}"]`);
+        const card = document.querySelector(`.service-option[data-service="${id}"]`);
+
+        reserva.servicios = reserva.servicios.filter((s) => s.id !== id);
+        if (card) card.classList.remove('selected');
+        actualizarEstadoSeleccion();
+
+        if (reducirMovimiento) {
+            mostrarModoTicket(false);
+            animandoSeleccion = false;
+            return;
+        }
+
+        // 1. La fila se tritura
+        if (fila) await triturar(fila);
+
+        // 2. El ticket se desarma
+        await esperar([ticket.animate(
+            [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(12px) scale(0.97)' }],
+            { duration: 300, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )]);
+        mostrarModoTicket(false);
+        ticket.getAnimations().forEach((a) => a.cancel());
+
+        // 3. La grilla vuelve en cascada (se puede elegir apenas aparece, sin esperar a que termine)
+        const visibles = [...document.querySelectorAll('.service-option:not(.oculto-por-filtro)')];
+        visibles.forEach((c, i) => {
+            const final = c.classList.contains('selected') ? 'translateY(-4px)' : 'none';
+            c.animate(
+                [{ opacity: 0, transform: 'translateY(16px) scale(0.96)' }, { opacity: 1, transform: final }],
+                { duration: 450, delay: Math.min(i * 45, 540), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }
+            );
+        });
+        animandoSeleccion = false;
     }
 
     // Filtro por categoría: solo oculta/muestra tarjetas, no toca la selección.
