@@ -25,7 +25,8 @@
 (function () {
     const header = document.querySelector('body > header');
     if (!header) return;
-    if (location.pathname.endsWith('promociones.html')) return;
+    // Cloudflare sirve la página como /promociones (sin .html), así que se aceptan las dos formas
+    if (/\/promociones(\.html)?\/?$/.test(location.pathname)) return;
     // En el inicio el aviso va como cápsula dentro del hero
     if (document.body.classList.contains('pagina-inicio')) return;
 
