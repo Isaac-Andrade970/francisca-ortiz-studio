@@ -391,6 +391,20 @@
             </div>
 
             <div class="form-grupo">
+                <label>Días en que vale la promo</label>
+                <div class="dias-promo" id="promocion-dias">
+                    <label><input type="checkbox" value="1"> Lun</label>
+                    <label><input type="checkbox" value="2"> Mar</label>
+                    <label><input type="checkbox" value="3"> Mié</label>
+                    <label><input type="checkbox" value="4"> Jue</label>
+                    <label><input type="checkbox" value="5"> Vie</label>
+                    <label><input type="checkbox" value="6"> Sáb</label>
+                    <label><input type="checkbox" value="0"> Dom</label>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-soft); margin-top:0.4rem;">Si no marcas ninguno, vale todos los días. Si marcas alguno, al reservar con esta promo solo se podrán elegir esos días.</p>
+            </div>
+
+            <div class="form-grupo">
                 <label for="promocion-imagen-file">Foto (opcional)</label>
                 <input type="file" id="promocion-imagen-file" accept="image/*">
                 <p id="promocion-imagen-estado" style="font-size:0.8rem; color:var(--text-soft); margin-top:0.4rem;"></p>

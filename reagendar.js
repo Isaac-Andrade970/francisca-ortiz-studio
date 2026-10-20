@@ -33,6 +33,13 @@ let horaSeleccionada = null;
 
 // UTILIDADES \\
 
+// [2, 4] -> "martes y jueves"
+const NOMBRES_DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function textoDias(dias) {
+    const nombres = dias.map((d) => NOMBRES_DIAS[d]).filter(Boolean);
+    return nombres.length <= 1 ? nombres.join('') : `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`;
+}
+
 function obtenerToken() {
     const params = new URLSearchParams(window.location.search);
     return params.get('token');
@@ -90,8 +97,18 @@ async function verificar() {
         // Mostrar formulario
         document.getElementById('cliente-nombre').textContent = datosReserva.cliente;
         document.getElementById('servicio-nombre').textContent = datosReserva.servicio;
-        document.getElementById('fecha-actual').textContent = 
+        document.getElementById('fecha-actual').textContent =
             `${formatearFecha(datosReserva.fechaActual)} a las ${formatearHora(datosReserva.fechaActual)}`;
+
+        // Si reservó con una promo de ciertos días, solo puede moverse a esos días
+        const diasPromo = datosReserva.promocionDias || [];
+        if (datosReserva.promocion) {
+            const aviso = document.getElementById('promo-reagendar');
+            aviso.textContent = diasPromo.length
+                ? `🏷️ Tu reserva tiene la promo "${datosReserva.promocion}", válida solo los ${textoDias(diasPromo)}. Solo puedes elegir esos días.`
+                : `🏷️ Tu reserva tiene la promo "${datosReserva.promocion}".`;
+            aviso.hidden = false;
+        }
 
         await cargarHorarios();
         mostrarEstado('estado-formulario');
@@ -150,8 +167,10 @@ function renderCalendario() {
         const horasDia = HORARIOS[diaSemana] || [];
         const fechaTexto = `${año}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
         const bloqueado = BLOQUEOS.includes(fechaTexto);
+        const diasPromo = datosReserva.promocionDias || [];
+        const fueraDePromo = diasPromo.length > 0 && !diasPromo.includes(diaSemana);
 
-        if (fechaDia < minFecha || horasDia.length === 0 || bloqueado) {
+        if (fechaDia < minFecha || horasDia.length === 0 || bloqueado || fueraDePromo) {
             cell.classList.add('disabled');
         } else {
             cell.classList.add('has-availability');

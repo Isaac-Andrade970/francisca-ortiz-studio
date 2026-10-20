@@ -43,7 +43,8 @@ if (document.querySelector('.booking-page')) {
     const reserva = {
         servicios: [], // { id, nombre, precio, duracion }
         fecha: null,
-        hora: null
+        hora: null,
+        promocion: null // { id, texto } si llegó desde "Reservar con esta promo"
     };
 
     function duracionTotal() {
@@ -194,6 +195,7 @@ if (document.querySelector('.booking-page')) {
                     </li>
                 `).join('')}
             </ul>
+            ${reserva.promocion ? `<p class="ticket-promo">🏷️ Con la promo: <strong>${escaparTexto(reserva.promocion.texto)}</strong>${reserva.promocion.dias.length ? ` · solo ${textoDiasReserva(reserva.promocion.dias)}` : ''}</p>` : ''}
             <div class="ticket-perforado" aria-hidden="true"></div>
             <div class="ticket-total">
                 <div>
@@ -445,6 +447,71 @@ if (document.querySelector('.booking-page')) {
 
     cargarServiciosReserva();
 
+    // PROMOCIÓN ELEGIDA (reservar.html?promo=ID) \\
+    // Solo se muestra si la promo sigue activa y vigente. Al pagar se manda solo el id:
+    // el backend vuelve a verificarla y arma el texto que va al correo y al calendario.
+
+    // [2, 4] -> "martes y jueves"
+    const NOMBRES_DIAS_RESERVA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    function textoDiasReserva(dias) {
+        const nombres = dias.map((d) => NOMBRES_DIAS_RESERVA[d]).filter(Boolean);
+        return nombres.length <= 1 ? nombres.join('') : `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`;
+    }
+
+    function quitarPromocion() {
+        reserva.promocion = null;
+        document.getElementById('promo-elegida').hidden = true;
+        const url = new URL(location.href);
+        url.searchParams.delete('promo');
+        history.replaceState(null, '', url);
+        actualizarSidebar();
+    }
+
+    async function cargarPromoElegida() {
+        const promoId = new URLSearchParams(location.search).get('promo');
+        if (!promoId) return;
+
+        try {
+            const respuesta = await fetch(API_URL + '/promociones');
+            if (!respuesta.ok) return;
+            const { promociones = [] } = await respuesta.json();
+            const promo = promociones.find((p) => p.id === promoId);
+            const aviso = document.getElementById('promo-elegida');
+
+            if (!promo) {
+                aviso.innerHTML = `<p class="promo-elegida-vencida">La promoción que elegiste ya no está vigente, pero igual puedes reservar tu hora.</p>`;
+                aviso.hidden = false;
+                return;
+            }
+
+            reserva.promocion = {
+                id: promo.id,
+                texto: [promo.etiqueta, promo.titulo].filter(Boolean).join(' · '),
+                dias: promo.diasValidos || [] // [] = todos los días
+            };
+            const notaDias = reserva.promocion.dias.length
+                ? ` Válida solo los <strong>${textoDiasReserva(reserva.promocion.dias)}</strong>: en el calendario solo podrás elegir esos días.`
+                : '';
+            aviso.innerHTML = `
+                <span class="promo-elegida-icono" aria-hidden="true">🏷️</span>
+                <div class="promo-elegida-texto">
+                    <p class="promo-elegida-titulo">Estás reservando con la promo</p>
+                    <p class="promo-elegida-nombre"></p>
+                    <p class="promo-elegida-nota">El descuento se aplica al pagar en el estudio.${notaDias}</p>
+                </div>
+                <button type="button" class="promo-elegida-quitar">Quitar</button>
+            `;
+            aviso.querySelector('.promo-elegida-nombre').textContent = reserva.promocion.texto;
+            aviso.querySelector('.promo-elegida-quitar').addEventListener('click', quitarPromocion);
+            aviso.hidden = false;
+            actualizarSidebar();
+        } catch (error) {
+            console.error('No se pudo cargar la promoción elegida:', error);
+        }
+    }
+
+    cargarPromoElegida();
+
     function irAPaso(numeroPaso) {
         document.querySelectorAll('.booking-step').forEach((s) => s.classList.remove('active'));
         document.querySelector(`.booking-step-${numeroPaso}`).classList.add('active');
@@ -515,9 +582,15 @@ if (document.querySelector('.booking-page')) {
             const horasDia = HORARIOS[diaSemana] || [];
             const fechaTexto = `${año}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const bloqueado = BLOQUEOS.includes(fechaTexto);
+            // Con una promo de ciertos días, el resto queda bloqueado
+            const fueraDePromo = reserva.promocion && reserva.promocion.dias.length > 0
+                && !reserva.promocion.dias.includes(diaSemana);
 
-            if (fechaDia < hoy || horasDia.length === 0 || bloqueado) {
-                cell.classList.add('disabled'); 
+            if (fechaDia < hoy || horasDia.length === 0 || bloqueado || fueraDePromo) {
+                cell.classList.add('disabled');
+                if (fueraDePromo && !(fechaDia < hoy || horasDia.length === 0 || bloqueado)) {
+                    cell.title = 'Este día no aplica la promoción';
+                }
             }    else {
                 cell.classList.add('has-availability');
 
@@ -661,6 +734,8 @@ if (document.querySelector('.booking-page')) {
             ? reserva.fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })
             : 'Por elegir';
         document.getElementById('sidebar-time').textContent = reserva.hora || 'Por elegir';
+        document.getElementById('sidebar-promo-fila').hidden = !reserva.promocion;
+        document.getElementById('sidebar-promo').textContent = reserva.promocion ? reserva.promocion.texto : '';
         // El precio final depende del largo del cabello, por eso siempre es "Desde"
         document.getElementById('sidebar-total').textContent = reserva.servicios.length
             ? 'Desde ' + formatearPrecioReserva(precioTotal())
@@ -694,7 +769,8 @@ if (document.querySelector('.booking-page')) {
             notas: document.getElementById('client-notes').value,
             inicio: fechaInicio.toISOString(),
             fin: fechaFin.toISOString(),
-            website: document.getElementById('client-website').value
+            website: document.getElementById('client-website').value,
+            promocionId: reserva.promocion ? reserva.promocion.id : undefined
         };
 
         try {

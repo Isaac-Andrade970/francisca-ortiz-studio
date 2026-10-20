@@ -1328,6 +1328,15 @@ function formatearFechaPromocion(fechaTexto) {
     return new Date(año, mes - 1, dia).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// [2, 4] -> "Solo martes y jueves" · [] -> "Todos los días"
+const NOMBRES_DIAS_PROMO = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function textoDiasPromocion(dias) {
+    const nombres = (dias || []).map(d => NOMBRES_DIAS_PROMO[d]).filter(Boolean);
+    if (nombres.length === 0) return 'Todos los días';
+    if (nombres.length === 1) return `Solo ${nombres[0]}`;
+    return `Solo ${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`;
+}
+
 function promocionVencida(p) {
     if (!p.validaHasta) return false;
     const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
@@ -1343,9 +1352,9 @@ function crearCardPromocion(p) {
     const img = p.imagen
         ? `<img src="${p.imagen}" alt="${p.titulo}" style="width:72px;height:56px;object-fit:cover;border-radius:0.5rem;flex-shrink:0;">`
         : '';
-    const vigencia = p.validaHasta
+    const vigencia = (p.validaHasta
         ? `${vencida ? 'Venció el' : 'Válida hasta el'} ${formatearFechaPromocion(p.validaHasta)}`
-        : 'Sin fecha de término';
+        : 'Sin fecha de término') + ` · ${textoDiasPromocion(p.diasValidos)}`;
 
     card.innerHTML = `
         <div style="display:flex; gap:1rem; align-items:flex-start;">
@@ -1466,6 +1475,8 @@ function abrirFormPromocion(promo = null) {
     document.getElementById('promocion-orden').value = promo && promo.orden !== 99 ? promo.orden : '';
     document.getElementById('promocion-descripcion').value = promo ? (promo.descripcion || '') : '';
     document.getElementById('promocion-valida-hasta').value = promo ? (promo.validaHasta || '') : '';
+    const diasPromo = promo ? (promo.diasValidos || []) : [];
+    document.querySelectorAll('#promocion-dias input').forEach(c => { c.checked = diasPromo.includes(Number(c.value)); });
     mostrarImagenPromocion(promo ? promo.imagen : '');
 
     document.getElementById('modal-promocion').style.display = 'flex';
@@ -1486,6 +1497,7 @@ async function guardarPromocion() {
         orden: document.getElementById('promocion-orden').value,
         descripcion: document.getElementById('promocion-descripcion').value.trim(),
         validaHasta: document.getElementById('promocion-valida-hasta').value,
+        diasValidos: [...document.querySelectorAll('#promocion-dias input:checked')].map(c => Number(c.value)),
         imagen: document.getElementById('promocion-imagen-url').value
     };
 

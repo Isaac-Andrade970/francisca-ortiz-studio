@@ -83,6 +83,9 @@
                     <h2 class="step-title">Elige tu servicio</h2>
                     <p class="step-description">Selecciona hasta 3 servicios que deseas reservar.</p>
 
+                    <!-- Aviso cuando la clienta llega desde "Reservar con esta promo" -->
+                    <div class="promo-elegida" id="promo-elegida" hidden></div>
+
                     <div class="category-filter" id="category-filter"></div>
 
                     <div class="seleccion-contador" id="seleccion-contador" aria-live="polite">
@@ -209,6 +212,10 @@
                     <li>
                         <span class="summary-label">Hora</span>
                         <span class="summary-value" id="sidebar-time">Por elegir</span>
+                    </li>
+                    <li id="sidebar-promo-fila" hidden>
+                        <span class="summary-label">Promoción</span>
+                        <span class="summary-value" id="sidebar-promo"></span>
                     </li>
                     <li class="summary-total">
                         <span class="summary-label">Total</span>

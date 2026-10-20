@@ -4156,6 +4156,121 @@ body.modal-abierto {
     margin-bottom: 1rem;
 }
 
+/* RESERVAR: PROMOCIÓN ELEGIDA (llega desde "Reservar con esta promo") */
+
+.promo-elegida{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    border: 1.5px solid var(--rose-mauve);
+    background: linear-gradient(135deg, #F4E1EA 0%, var(--cream-light) 100%);
+    box-shadow: 0 8px 24px rgba(139, 74, 107, 0.12);
+}
+
+.promo-elegida-icono{
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.promo-elegida-texto{
+    flex: 1;
+    min-width: 0;
+}
+
+.promo-elegida-titulo{
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 600;
+}
+
+.promo-elegida-nombre{
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--rose-mauve-dark);
+    line-height: 1.3;
+}
+
+.promo-elegida-nota{
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    margin-top: 0.15rem;
+}
+
+.promo-elegida-quitar{
+    flex-shrink: 0;
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    border: 1px solid var(--nude);
+    background-color: var(--white);
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s;
+}
+
+.promo-elegida-quitar:hover{
+    border-color: var(--rose-mauve);
+    color: var(--rose-mauve-dark);
+}
+
+.promo-elegida-vencida{
+    flex: 1;
+    font-size: 0.88rem;
+    color: var(--text-soft);
+}
+
+.promo-elegida:has(.promo-elegida-vencida){
+    border-color: var(--nude);
+    background: var(--white);
+    box-shadow: none;
+}
+
+#sidebar-promo-fila[hidden],
+.promo-reagendar[hidden]{
+    display: none;
+}
+
+.promo-reagendar{
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 0.6rem;
+    background-color: #F4E1EA;
+    color: var(--rose-mauve-dark);
+}
+
+#sidebar-promo{
+    color: var(--rose-mauve-dark);
+    font-weight: 500;
+}
+
+.ticket-promo{
+    margin: 0.25rem 1.5rem 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.6rem;
+    background-color: #F4E1EA;
+    color: var(--rose-mauve-dark);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 600px){
+    .promo-elegida{
+        flex-wrap: wrap;
+        gap: 0.6rem 0.9rem;
+    }
+
+    .promo-elegida-quitar{
+        margin-left: auto;
+    }
+}
+
 /* RESERVAR: CONTADOR DE SERVICIOS ELEGIDOS */
 
 .booking-step-1 [hidden]{
@@ -5009,6 +5124,45 @@ body.modal-abierto {
     margin: 0;
     padding: 0;
     accent-color: var(--rose-mauve);
+}
+
+/* PANEL: DÍAS EN QUE VALE UNA PROMO (cápsulas que se pintan al marcarlas) */
+
+.servicio-modal-box .dias-promo{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.servicio-modal-box .dias-promo label{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.45rem 0.85rem;
+    border: 1.5px solid var(--nude);
+    border-radius: 50px;
+    background-color: var(--white);
+    color: var(--text-dark);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.servicio-modal-box .dias-promo input{
+    width: auto;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--rose-mauve);
+}
+
+.servicio-modal-box .dias-promo label:has(input:checked){
+    border-color: var(--rose-mauve);
+    background-color: #F4E1EA;
+    color: var(--rose-mauve-dark);
 }
 
 /* PANEL: PROMOCIONES */

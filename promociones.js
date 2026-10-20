@@ -13,6 +13,13 @@
         return div.innerHTML;
     }
 
+    // [2, 4] -> "martes y jueves"
+    const NOMBRES_DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    function textoDiasPromo(dias) {
+        const nombres = dias.map((d) => NOMBRES_DIAS[d]).filter(Boolean);
+        return nombres.length <= 1 ? nombres.join('') : `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`;
+    }
+
     // "2026-11-30" -> "30 de noviembre"
     function formatearFechaPromo(fechaTexto) {
         const [año, mes, dia] = fechaTexto.split('-').map(Number);
@@ -29,9 +36,11 @@
         const etiqueta = promo.etiqueta
             ? `<span class="promo-card-etiqueta">${escaparHTML(promo.etiqueta)}</span>`
             : '';
-        const vigencia = promo.validaHasta
-            ? `<p class="promo-card-vigencia">Válida hasta el ${formatearFechaPromo(promo.validaHasta)}</p>`
-            : '';
+        // "Válida los martes · hasta el 31 de diciembre"
+        const partes = [];
+        if (promo.diasValidos && promo.diasValidos.length) partes.push(`Válida los ${textoDiasPromo(promo.diasValidos)}`);
+        if (promo.validaHasta) partes.push(`${partes.length ? 'hasta' : 'Válida hasta'} el ${formatearFechaPromo(promo.validaHasta)}`);
+        const vigencia = partes.length ? `<p class="promo-card-vigencia">${partes.join(' · ')}</p>` : '';
 
         card.innerHTML = `
             ${imagen}
@@ -40,7 +49,7 @@
                 <h3>${escaparHTML(promo.titulo)}</h3>
                 ${promo.descripcion ? `<p class="promo-card-desc">${escaparHTML(promo.descripcion)}</p>` : ''}
                 ${vigencia}
-                <a href="reservar.html" class="promo-card-link">Reservar con esta promo →</a>
+                <a href="reservar.html?promo=${encodeURIComponent(promo.id)}" class="promo-card-link">Reservar con esta promo →</a>
             </div>
         `;
         if (!promo.imagen) card.classList.add('promo-card-sin-imagen');
