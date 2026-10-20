@@ -60,7 +60,56 @@
             <div id="tab-resenas" class="admin-tab-content active">
                 <section class="admin-section">
                     <div class="admin-section-header">
-                        <h2>Pendientes de aprobación</h2>
+                        <div class="admin-section-titulo">
+                        <h2>Reseñas de Google</h2>
+                        <span class="badge" id="count-google">0</span>
+                        </div>
+                        <button id="btn-nueva-resena-google" class="btn btn-primary btn-small">+ Agregar reseña</button>
+                    </div>
+                    <p class="admin-ayuda">Copia tus reseñas desde Google Maps y pégalas aquí. Con <strong>Mostrar / Ocultar</strong> eliges cuáles aparecen en la página de inicio, y con el número de <strong>orden</strong> cuál va primero. El texto se copia tal cual lo escribió la clienta.</p>
+                    <div id="loading-google" class="admin-loading">Cargando reseñas...</div>
+                    <div id="lista-google" class="servicios-admin-list"></div>
+                    <div id="empty-google" class="admin-empty" style="display: none;"><p>Aún no agregas reseñas de Google. Usa "+ Agregar reseña".</p></div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>Enlaces y promedio de Google</h2>
+                    </div>
+                    <div class="admin-form">
+                        <div class="form-fila">
+                            <div class="form-grupo">
+                                <label for="google-enlace-resena">Enlace para dejar reseña</label>
+                                <input type="url" id="google-enlace-resena" placeholder="https://g.page/r/.../review">
+                                <p class="admin-ayuda-campo">Va en el correo después de la cita y en el botón "Deja tu reseña". Está en tu perfil de empresa de Google → <strong>Pedir reseñas</strong>.</p>
+                            </div>
+                            <div class="form-grupo">
+                                <label for="google-enlace-perfil">Enlace de tu perfil en Google</label>
+                                <input type="url" id="google-enlace-perfil" placeholder="https://maps.app.goo.gl/...">
+                                <p class="admin-ayuda-campo">Para el botón "Ver todas en Google". Búscate en Google Maps → <strong>Compartir</strong> → Copiar enlace.</p>
+                            </div>
+                        </div>
+                        <div class="form-fila">
+                            <div class="form-grupo">
+                                <label for="google-promedio">Promedio de estrellas</label>
+                                <input type="text" id="google-promedio" placeholder="4,9" inputmode="decimal">
+                            </div>
+                            <div class="form-grupo">
+                                <label for="google-total">Total de reseñas</label>
+                                <input type="number" id="google-total" placeholder="37" min="0">
+                            </div>
+                        </div>
+                        <p class="admin-ayuda-campo">El promedio y el total los ves en tu perfil de Google. Actualízalos de vez en cuando.</p>
+                        <p id="google-config-msg" style="display:none; margin:1rem 0 0;"></p>
+                        <div class="admin-form-acciones">
+                            <button id="btn-guardar-google-config" class="btn btn-primary">Guardar enlaces y promedio</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>Pendientes de aprobación (web)</h2>
                         <span class="badge" id="count-pendientes">0</span>
                     </div>
                     <div id="loading-pendientes" class="admin-loading">Cargando reseñas...</div>
@@ -70,7 +119,7 @@
 
                 <section class="admin-section">
                     <div class="admin-section-header">
-                        <h2>Reseñas publicadas</h2>
+                        <h2>Reseñas antiguas de la web</h2>
                         <span class="badge" id="count-publicadas">0</span>
                     </div>
                     <div id="loading-publicadas" class="admin-loading">Cargando reseñas...</div>
@@ -356,6 +405,64 @@
             <div class="modal-acciones">
                 <button id="btn-cancelar-promocion" class="btn btn-secondary">Cancelar</button>
                 <button id="btn-guardar-promocion" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar reseña de Google -->
+    <div id="modal-resena-google" class="servicio-modal-overlay" style="display: none;">
+        <div class="servicio-modal-box">
+            <h2 id="modal-resena-google-titulo">Nueva reseña</h2>
+            <input type="hidden" id="resena-google-id">
+
+            <div class="form-fila">
+                <div class="form-grupo">
+                    <label for="resena-google-autor">Nombre de la clienta</label>
+                    <input type="text" id="resena-google-autor" placeholder="Tal como aparece en Google" maxlength="80">
+                </div>
+                <div class="form-grupo">
+                    <label for="resena-google-estrellas">Estrellas</label>
+                    <select id="resena-google-estrellas">
+                        <option value="5">★★★★★ (5)</option>
+                        <option value="4">★★★★☆ (4)</option>
+                        <option value="3">★★★☆☆ (3)</option>
+                        <option value="2">★★☆☆☆ (2)</option>
+                        <option value="1">★☆☆☆☆ (1)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label for="resena-google-texto">Texto de la reseña</label>
+                <textarea id="resena-google-texto" rows="5" placeholder="Pega aquí el comentario, tal cual está en Google"></textarea>
+            </div>
+
+            <div class="form-fila">
+                <div class="form-grupo">
+                    <label for="resena-google-fecha">Mes de la reseña (opcional)</label>
+                    <input type="month" id="resena-google-fecha">
+                </div>
+                <div class="form-grupo">
+                    <label for="resena-google-orden">Orden</label>
+                    <input type="number" id="resena-google-orden" placeholder="1" min="1">
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label for="resena-google-enlace">Enlace de esta reseña (opcional)</label>
+                <input type="url" id="resena-google-enlace" placeholder="https://maps.app.goo.gl/...">
+                <p class="admin-ayuda-campo">En Google Maps abre la reseña → <strong>Compartir</strong> → Copiar enlace. Así, al tocar el logo de Google se abre justo esta reseña. Si lo dejas vacío, lleva a todas tus reseñas.</p>
+            </div>
+
+            <label class="admin-check">
+                <input type="checkbox" id="resena-google-visible" checked> Mostrar en la página de inicio
+            </label>
+
+            <p id="modal-resena-google-error" class="login-error" style="display:none;"></p>
+
+            <div class="modal-acciones">
+                <button id="btn-cancelar-resena-google" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-guardar-resena-google" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>

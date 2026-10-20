@@ -4,6 +4,7 @@ const API_RESENAS = API_URL + '/resenas';
 const API_SERVICIOS = API_URL + '/servicios';
 const API_PRODUCTOS = API_URL + '/productos';
 const API_PROMOCIONES = API_URL + '/promociones';
+const API_RESENAS_GOOGLE = API_URL + '/resenas-google';
 const CLOUDINARY_CLOUD_NAME = 'dgq8ohuko';        // 👈 tu cloud name
 const CLOUDINARY_UPLOAD_PRESET = 's2a10wum';  // 👈 el nombre de tu preset (unsigned)
 const API_AUTH = API_URL + '/auth';
@@ -19,6 +20,7 @@ let productosActuales = [];
 let horariosCargados = false;
 let promocionesCargadas = false;
 let promocionesActuales = [];
+let resenasGoogleActuales = [];
 let clientesCargados = false;
 let clientesActuales = [];
 let clientaAbiertaEmail = null;
@@ -72,6 +74,7 @@ async function hacerLogin() {
         sessionStorage.setItem('adminRol', rolSesion);
 
         mostrarPanel();
+        cargarResenasGoogle();
         cargarPendientes();
         cargarPublicadas();
 
@@ -908,8 +911,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'modal-clienta') cerrarClienta();
     });
 
+    document.getElementById('btn-nueva-resena-google').addEventListener('click', () => abrirFormResenaGoogle(null));
+    document.getElementById('btn-cancelar-resena-google').addEventListener('click', cerrarFormResenaGoogle);
+    document.getElementById('btn-guardar-resena-google').addEventListener('click', guardarResenaGoogle);
+    document.getElementById('btn-guardar-google-config').addEventListener('click', guardarConfigGoogle);
+    document.getElementById('modal-resena-google').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-resena-google') cerrarFormResenaGoogle();
+    });
+
     if (tokenSesion) {
         mostrarPanel();
+        cargarResenasGoogle();
         cargarPendientes();
         cargarPublicadas();
     }
@@ -1546,5 +1558,241 @@ async function eliminarPromocion(id) {
     } catch (e) {
         console.error('Error:', e);
         alert('Hubo un problema al eliminar la promoción');
+    }
+}
+
+// RESEÑAS DE GOOGLE \\
+
+function escaparAdmin(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto || '';
+    return div.innerHTML.replace(/"/g, '&quot;');
+}
+
+// "2026-03" -> "marzo de 2026"
+function formatearMesResena(fecha) {
+    if (!fecha) return 'Sin fecha';
+    const [año, mes] = fecha.split('-').map(Number);
+    return new Date(año, mes - 1, 1).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+}
+
+function crearCardResenaGoogle(r) {
+    const card = document.createElement('div');
+    card.classList.add('servicio-card');
+    if (!r.visible) card.classList.add('servicio-inactivo');
+
+    card.innerHTML = `
+        <div class="servicio-titulo">
+            <h3>${escaparAdmin(r.autor)}</h3>
+            <span class="servicio-categoria" style="color:#F4B400;">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</span>
+            ${!r.visible ? '<span class="servicio-badge-off">Oculta</span>' : ''}
+        </div>
+        <p class="servicio-desc" style="white-space:pre-line; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;">${escaparAdmin(r.texto)}</p>
+        <p class="servicio-meta">${formatearMesResena(r.fecha)} · Orden ${r.orden === 99 ? '—' : r.orden}${r.enlace ? ' · 🔗 con enlace propio' : ''}</p>
+        <div class="servicio-acciones">
+            <button class="btn-editar-rg" data-id="${r.id}">Editar</button>
+            <button class="btn-toggle-rg" data-id="${r.id}" data-visible="${r.visible}">${r.visible ? 'Ocultar' : 'Mostrar'}</button>
+            <button class="btn-eliminar-servicio btn-eliminar-rg" data-id="${r.id}">Eliminar</button>
+        </div>
+    `;
+    return card;
+}
+
+async function cargarResenasGoogle() {
+    const lista = document.getElementById('lista-google');
+    const loading = document.getElementById('loading-google');
+    const empty = document.getElementById('empty-google');
+    const count = document.getElementById('count-google');
+
+    loading.style.display = 'block';
+
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/admin/todas`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        const datos = await respuesta.json();
+        loading.style.display = 'none';
+        lista.innerHTML = '';
+
+        // Configuración (enlaces y promedio)
+        const config = datos.config || {};
+        document.getElementById('google-enlace-resena').value = config.enlaceResena || '';
+        document.getElementById('google-enlace-perfil').value = config.enlacePerfil || '';
+        document.getElementById('google-promedio').value = config.promedio ? String(config.promedio).replace('.', ',') : '';
+        document.getElementById('google-total').value = config.total || '';
+
+        resenasGoogleActuales = datos.resenas || [];
+        const visibles = resenasGoogleActuales.filter(r => r.visible).length;
+        count.textContent = resenasGoogleActuales.length ? `${visibles} de ${resenasGoogleActuales.length} visibles` : '0';
+
+        if (resenasGoogleActuales.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        resenasGoogleActuales.forEach(r => lista.appendChild(crearCardResenaGoogle(r)));
+
+        lista.querySelectorAll('.btn-editar-rg').forEach(b => {
+            b.addEventListener('click', () => abrirFormResenaGoogle(resenasGoogleActuales.find(r => r.id === b.getAttribute('data-id'))));
+        });
+        lista.querySelectorAll('.btn-toggle-rg').forEach(b => {
+            b.addEventListener('click', () => cambiarVisibilidadResenaGoogle(b.getAttribute('data-id'), b.getAttribute('data-visible') !== 'true'));
+        });
+        lista.querySelectorAll('.btn-eliminar-rg').forEach(b => {
+            b.addEventListener('click', () => eliminarResenaGoogle(b.getAttribute('data-id')));
+        });
+
+    } catch (error) {
+        console.error('Error al cargar reseñas de Google:', error);
+        loading.textContent = 'Error al cargar reseñas de Google';
+    }
+}
+
+function abrirFormResenaGoogle(r = null) {
+    document.getElementById('modal-resena-google-error').style.display = 'none';
+    document.getElementById('modal-resena-google-titulo').textContent = r ? 'Editar reseña' : 'Nueva reseña';
+    document.getElementById('resena-google-id').value = r ? r.id : '';
+    document.getElementById('resena-google-autor').value = r ? r.autor : '';
+    document.getElementById('resena-google-estrellas').value = r ? String(r.estrellas) : '5';
+    document.getElementById('resena-google-texto').value = r ? r.texto : '';
+    document.getElementById('resena-google-fecha').value = r && r.fecha ? r.fecha.slice(0, 7) : '';
+    document.getElementById('resena-google-orden').value = r && r.orden !== 99 ? r.orden : '';
+    document.getElementById('resena-google-enlace').value = r ? (r.enlace || '') : '';
+    document.getElementById('resena-google-visible').checked = r ? r.visible : true;
+    document.getElementById('modal-resena-google').style.display = 'flex';
+    document.getElementById('resena-google-autor').focus();
+}
+
+function cerrarFormResenaGoogle() {
+    document.getElementById('modal-resena-google').style.display = 'none';
+}
+
+async function guardarResenaGoogle() {
+    const id = document.getElementById('resena-google-id').value;
+    const error = document.getElementById('modal-resena-google-error');
+    const boton = document.getElementById('btn-guardar-resena-google');
+
+    const datos = {
+        autor: document.getElementById('resena-google-autor').value.trim(),
+        estrellas: Number(document.getElementById('resena-google-estrellas').value),
+        texto: document.getElementById('resena-google-texto').value.trim(),
+        fecha: document.getElementById('resena-google-fecha').value,
+        orden: document.getElementById('resena-google-orden').value,
+        enlace: document.getElementById('resena-google-enlace').value.trim(),
+        visible: document.getElementById('resena-google-visible').checked
+    };
+
+    if (!datos.autor || !datos.texto) {
+        error.textContent = 'Escribe el nombre de la clienta y el texto de la reseña';
+        error.style.display = 'block';
+        return;
+    }
+    if (datos.enlace && !/^https:\/\//i.test(datos.enlace)) {
+        error.textContent = 'El enlace debe empezar con https:// (cópialo desde "Compartir" en Google Maps)';
+        error.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    error.style.display = 'none';
+
+    const esEdicion = id !== '';
+    try {
+        const respuesta = await fetch(esEdicion ? `${API_RESENAS_GOOGLE}/${id}` : API_RESENAS_GOOGLE, {
+            method: esEdicion ? 'PATCH' : 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify(datos)
+        });
+        if (!respuesta.ok) {
+            const d = await respuesta.json();
+            throw new Error(d.error || 'Error al guardar');
+        }
+        cerrarFormResenaGoogle();
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error al guardar reseña de Google:', e);
+        error.textContent = e.message || 'Hubo un problema al guardar';
+        error.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar';
+    }
+}
+
+async function cambiarVisibilidadResenaGoogle(id, visible) {
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify({ visible })
+        });
+        if (!respuesta.ok) throw new Error('Error al cambiar visibilidad');
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al cambiar la reseña');
+    }
+}
+
+async function eliminarResenaGoogle(id) {
+    if (!confirm('¿Quitar esta reseña de tu panel?\n\nEn Google sigue publicada; solo se borra de aquí. Si solo quieres que no se vea en la página, usa "Ocultar".')) return;
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) throw new Error('Error al eliminar');
+        cargarResenasGoogle();
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Hubo un problema al eliminar la reseña');
+    }
+}
+
+async function guardarConfigGoogle() {
+    const msg = document.getElementById('google-config-msg');
+    const boton = document.getElementById('btn-guardar-google-config');
+    const datos = {
+        enlaceResena: document.getElementById('google-enlace-resena').value.trim(),
+        enlacePerfil: document.getElementById('google-enlace-perfil').value.trim(),
+        promedio: document.getElementById('google-promedio').value.trim(),
+        total: document.getElementById('google-total').value
+    };
+
+    const malo = [datos.enlaceResena, datos.enlacePerfil].find(e => e && !/^https:\/\//i.test(e));
+    if (malo) {
+        msg.textContent = 'Los enlaces deben empezar con https:// (cópialos tal cual desde Google)';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    msg.style.display = 'none';
+
+    try {
+        const respuesta = await fetch(`${API_RESENAS_GOOGLE}/config`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenSesion}` },
+            body: JSON.stringify(datos)
+        });
+        const d = await respuesta.json();
+        if (!respuesta.ok) throw new Error(d.error || 'No se pudo guardar');
+        msg.textContent = d.config.enlaceResena
+            ? '✅ Guardado. Desde ahora el correo después de la cita invita a dejar la reseña en Google.'
+            : '✅ Guardado. (Mientras no pongas el enlace para dejar reseña, el correo sigue usando la página propia.)';
+        msg.style.color = 'green';
+        msg.style.display = 'block';
+    } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = e.message || 'Error de conexión';
+        msg.style.color = '#b00020';
+        msg.style.display = 'block';
+    } finally {
+        boton.disabled = false;
+        boton.textContent = 'Guardar enlaces y promedio';
     }
 }

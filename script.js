@@ -805,46 +805,117 @@ if (carouselTrack && btnPrev && btnNext) {
     iniciarAutoScroll();
 }
 
-// CARGAR RESEÑAS APROBADAS EN EL HOME \\
+// RESEÑAS DE GOOGLE EN EL HOME \\
+// Francisca las copia desde Google en el panel admin y elige cuáles se muestran.
+
+const LOGO_GOOGLE = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>`;
+
+function escaparHTMLResena(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto || '';
+    return div.innerHTML.replace(/"/g, '&quot;'); // también sirve dentro de atributos (href)
+}
+
+// "2025-10" -> "Hace un año" (igual que Google, y se actualiza solo con el tiempo)
+function formatearFechaResena(fecha) {
+    if (!fecha) return '';
+    const [año, mes] = fecha.split('-').map(Number);
+    const hoy = new Date();
+    const meses = (hoy.getFullYear() - año) * 12 + (hoy.getMonth() + 1 - mes);
+
+    if (meses <= 0) return 'Este mes';
+    if (meses === 1) return 'Hace un mes';
+    if (meses < 12) return `Hace ${meses} meses`;
+    const años = Math.floor(meses / 12);
+    return años === 1 ? 'Hace un año' : `Hace ${años} años`;
+}
+
+function dibujarResumenGoogle(config) {
+    const resumen = document.getElementById('google-resumen');
+    if (!resumen) return;
+
+    // Siempre con un decimal, como Google: 5 -> "5,0", 4.9 -> "4,9"
+    const promedio = config.promedio
+        ? Number(config.promedio).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+        : '';
+    const llenas = config.promedio ? Math.round(config.promedio) : 5;
+    const botones = [
+        config.enlacePerfil ? `<a href="${escaparHTMLResena(config.enlacePerfil)}" class="btn btn-secondary" target="_blank" rel="noopener">Ver todas en Google</a>` : '',
+        config.enlaceResena ? `<a href="${escaparHTMLResena(config.enlaceResena)}" class="btn btn-primary" target="_blank" rel="noopener">Deja tu reseña</a>` : ''
+    ].join('');
+
+    resumen.innerHTML = `
+        <div class="google-resumen-nota">
+            <span class="google-logo">${LOGO_GOOGLE}</span>
+            ${promedio ? `<span class="google-promedio">${promedio}</span>` : ''}
+            <div>
+                <p class="google-estrellas" aria-label="${promedio || 5} de 5 estrellas">${'★'.repeat(llenas)}${'☆'.repeat(5 - llenas)}</p>
+                <p class="google-total">${config.total ? `${config.total} reseñas en Google` : 'Reseñas en Google'}</p>
+            </div>
+        </div>
+        ${botones ? `<div class="google-resumen-botones">${botones}</div>` : ''}
+    `;
+}
+
+function crearCardResenaGoogle(resena, enlacePerfil) {
+    const card = document.createElement('article');
+    card.className = 'resena-google';
+    const enlace = resena.enlace || enlacePerfil;
+    const inicial = (resena.autor || '?').trim().charAt(0).toUpperCase();
+    const icono = enlace
+        ? `<a href="${escaparHTMLResena(enlace)}" class="resena-google-icono" target="_blank" rel="noopener" aria-label="Ver esta reseña en Google" title="Ver en Google">${LOGO_GOOGLE}</a>`
+        : `<span class="resena-google-icono">${LOGO_GOOGLE}</span>`;
+
+    card.innerHTML = `
+        <div class="resena-google-cabecera">
+            <span class="resena-google-avatar" aria-hidden="true">${escaparHTMLResena(inicial)}</span>
+            <div>
+                <p class="resena-google-autor">${escaparHTMLResena(resena.autor)}</p>
+                ${resena.fecha ? `<p class="resena-google-fecha">${formatearFechaResena(resena.fecha)}</p>` : ''}
+            </div>
+            ${icono}
+        </div>
+        <p class="resena-google-estrellas" aria-label="${resena.estrellas} de 5 estrellas">${'★'.repeat(resena.estrellas)}${'☆'.repeat(5 - resena.estrellas)}</p>
+        <p class="resena-google-texto">${escaparHTMLResena(resena.texto)}</p>
+        <button type="button" class="resena-google-mas" hidden>Leer más</button>
+    `;
+    return card;
+}
+
+// Muestra "Leer más" solo en las reseñas largas que quedaron cortadas
+function activarLeerMas(grid) {
+    grid.querySelectorAll('.resena-google').forEach((card) => {
+        const texto = card.querySelector('.resena-google-texto');
+        const boton = card.querySelector('.resena-google-mas');
+        if (texto.scrollHeight > texto.clientHeight + 2) {
+            boton.hidden = false;
+            boton.addEventListener('click', () => {
+                const abierta = card.classList.toggle('abierta');
+                boton.textContent = abierta ? 'Leer menos' : 'Leer más';
+            });
+        }
+    });
+}
 
 async function cargarResenas() {
     const grid = document.getElementById('resenas-grid');
     if (!grid) return; // No estamos en el home
 
     try {
-        const respuesta = await fetch(API_URL + '/resenas');
+        const respuesta = await fetch(API_URL + '/resenas-google');
         if (!respuesta.ok) throw new Error('Error al cargar');
+        const { resenas = [], config = {} } = await respuesta.json();
 
-        const datos = await respuesta.json();
+        dibujarResumenGoogle(config);
 
-        if (datos.resenas.length === 0) {
-            grid.innerHTML = '<p class="resenas-loading">Aún no tenemos reseñas publicadas. ¡Sé la primera!</p>';
+        if (resenas.length === 0) {
+            grid.innerHTML = '<p class="resenas-loading">Muy pronto verás aquí lo que dicen nuestras clientas en Google.</p>';
             return;
         }
 
         grid.innerHTML = '';
-
-        datos.resenas.forEach((resena) => {
-            const card = document.createElement('article');
-            card.classList.add('resena-publica');
-
-            // Generar estrellas
-            let estrellas = '';
-            for (let i = 1; i <= 5; i++) {
-                estrellas += i <= resena.calificacion ? '★' : '☆';
-            }
-
-            card.innerHTML = `
-                <div class="stars">${estrellas}</div>
-                <p class="comentario">${resena.comentario}</p>
-                <div class="footer-resena">
-                    <p class="cliente">${resena.cliente}</p>
-                    <p class="servicio">${resena.servicio}</p>
-                </div>
-            `;
-
-            grid.appendChild(card);
-        });
+        resenas.forEach((r) => grid.appendChild(crearCardResenaGoogle(r, config.enlacePerfil)));
+        activarLeerMas(grid);
 
     } catch (error) {
         console.error('Error al cargar reseñas:', error);
