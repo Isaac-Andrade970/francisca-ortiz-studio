@@ -68,6 +68,11 @@
 
             grid.innerHTML = '';
             promociones.forEach((p) => grid.appendChild(crearCardPromo(p)));
+            grid.querySelectorAll('.promo-card-link').forEach((enlace) => {
+                enlace.addEventListener('click', () => {
+                    if (window.registrarEstadistica) window.registrarEstadistica('promo_click');
+                });
+            });
             bloque.hidden = false;
         } catch (error) {
             console.error('Error al cargar promociones:', error);

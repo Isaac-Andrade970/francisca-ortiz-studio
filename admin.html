@@ -54,6 +54,7 @@
                 <button class="admin-tab" data-tab="promociones">Promociones</button>
                 <button class="admin-tab" data-tab="horarios">Horarios</button>
                 <button class="admin-tab" data-tab="clientas">Clientas</button>
+                <button class="admin-tab" data-tab="estadisticas">Estadísticas</button>
             </div>
 
             <!-- PESTAÑA: RESEÑAS -->
@@ -233,6 +234,91 @@
                     <div id="lista-clientas" class="servicios-admin-list servicios-admin-list-clientas"></div>
                     <div id="empty-clientas" class="admin-empty" style="display: none;"><p>No se encontraron clientas</p></div>
                 </section>
+            </div>
+
+            <!-- PESTAÑA: ESTADÍSTICAS -->
+            <div id="tab-estadisticas" class="admin-tab-content">
+                <!-- Filtro de período: una sola fila, arriba de todo -->
+                <div class="est-barra">
+                    <div class="est-periodos" role="group" aria-label="Período">
+                        <button type="button" class="est-periodo" data-dias="1">Hoy</button>
+                        <button type="button" class="est-periodo activo" data-dias="7">7 días</button>
+                        <button type="button" class="est-periodo" data-dias="30">30 días</button>
+                    </div>
+                    <p class="est-rango" id="est-rango"></p>
+                </div>
+
+                <div id="est-cargando" class="admin-loading">Cargando estadísticas...</div>
+                <div id="est-error" class="admin-empty" hidden><p>No se pudieron cargar las estadísticas. Intenta de nuevo en un momento.</p></div>
+
+                <div id="est-cuerpo" class="est-cuerpo" hidden>
+                    <!-- Tarjetas de resumen -->
+                    <div class="est-kpis">
+                        <article class="est-kpi est-kpi-principal">
+                            <p class="est-kpi-label">Personas que visitaron tu página</p>
+                            <p class="est-kpi-valor" id="kpi-visitas">0</p>
+                            <p class="est-kpi-delta" id="kpi-visitas-delta"></p>
+                        </article>
+                        <article class="est-kpi">
+                            <p class="est-kpi-label">Visitas a Promociones</p>
+                            <p class="est-kpi-valor" id="kpi-promos">0</p>
+                            <p class="est-kpi-sub" id="kpi-promos-sub"></p>
+                        </article>
+                        <article class="est-kpi">
+                            <p class="est-kpi-label">Reservas pagadas</p>
+                            <p class="est-kpi-valor" id="kpi-reservas">0</p>
+                            <p class="est-kpi-sub" id="kpi-reservas-sub"></p>
+                        </article>
+                        <article class="est-kpi">
+                            <p class="est-kpi-label">Terminan de reservar</p>
+                            <p class="est-kpi-valor" id="kpi-conversion">—</p>
+                            <p class="est-kpi-sub">de las que entran a Reservar</p>
+                        </article>
+                    </div>
+
+                    <!-- Embudo de reserva -->
+                    <section class="est-card">
+                        <div class="est-card-cabecera">
+                            <h3>¿En qué paso se quedan al reservar?</h3>
+                            <p>Cuántas personas llegaron a cada paso de la reserva.</p>
+                        </div>
+                        <div class="est-embudo" id="est-embudo"></div>
+                        <p class="est-hallazgo" id="est-hallazgo" hidden></p>
+                    </section>
+
+                    <div class="est-dos-columnas">
+                        <!-- Visitas por día -->
+                        <section class="est-card" id="est-card-dias">
+                            <div class="est-card-cabecera">
+                                <h3>Visitas por día</h3>
+                                <p>Pasa el dedo o el mouse por una barra para ver el detalle.</p>
+                            </div>
+                            <div class="est-columnas-envoltorio">
+                                <div class="est-columnas" id="est-columnas"></div>
+                                <div class="est-tooltip" id="est-tooltip" role="status" hidden></div>
+                            </div>
+                        </section>
+
+                        <!-- Páginas más vistas -->
+                        <section class="est-card">
+                            <div class="est-card-cabecera">
+                                <h3>Páginas más vistas</h3>
+                                <p>Personas que entraron a cada página.</p>
+                            </div>
+                            <div class="est-paginas" id="est-paginas"></div>
+                        </section>
+                    </div>
+
+                    <!-- Los mismos números como tabla (para quien prefiera leerlos así) -->
+                    <details class="est-tabla-detalle">
+                        <summary>Ver todos los números en una tabla</summary>
+                        <div class="est-tabla-envoltorio">
+                            <table class="est-tabla" id="est-tabla"></table>
+                        </div>
+                    </details>
+
+                    <p class="est-nota" id="est-nota"></p>
+                </div>
             </div>
 
             <!-- Solo visible para superadmin: cambiar contraseña de Francisca -->

@@ -530,13 +530,17 @@ if (document.querySelector('.booking-page')) {
     }
 
     document.getElementById('next-to-step-2')?.addEventListener('click', async () => {
+        if (window.registrarEstadistica) window.registrarEstadistica('paso_servicio');
         await cargarHorarios();
         irAPaso(2);
         renderCalendario();
     });
 
     document.getElementById('back-to-step-1')?.addEventListener('click', () => irAPaso(1));
-    document.getElementById('next-to-step-3')?.addEventListener('click', () => irAPaso(3));
+    document.getElementById('next-to-step-3')?.addEventListener('click', () => {
+        if (window.registrarEstadistica) window.registrarEstadistica('paso_fecha');
+        irAPaso(3);
+    });
     document.getElementById('back-to-step-2')?.addEventListener('click', () => irAPaso(2));
 
     function renderCalendario() {
