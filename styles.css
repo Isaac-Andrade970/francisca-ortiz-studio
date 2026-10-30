@@ -3867,9 +3867,31 @@ body.modal-abierto {
     gap: 0.5rem;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--nude);
+    /* Si no caben (celular), se deslizan hacia el lado en vez de cortarse */
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    /* Desvanecido en el borde derecho: avisa que hay más pestañas */
+    .admin-tabs {
+        -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent 100%);
+        mask-image: linear-gradient(90deg, #000 85%, transparent 100%);
+        padding-right: 2rem;
+    }
+
+    .admin-tabs .admin-tab {
+        padding: 0.85rem 1rem;
+    }
 }
 
 .admin-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
     background: none;
     border: none;
     padding: 0.85rem 1.5rem;
@@ -5124,6 +5146,565 @@ body.modal-abierto {
     margin: 0;
     padding: 0;
     accent-color: var(--rose-mauve);
+}
+
+/* PANEL: ESTADÍSTICAS (dashboard)
+   Un solo tono para los datos (#A8587F: el malva de la marca con la saturación justa para que
+   no se lea gris en un gráfico; validado en contraste y croma). Textos siempre en tonos de texto. */
+
+#tab-estadisticas {
+    --est-dato: #A8587F;
+    --est-dato-hover: #BC6E93;
+    --est-pista: #F6E8EE;
+    --est-linea: #EFE3DB;
+    --est-sube: #2E7D5B;
+    --est-baja: #B4473A;
+}
+
+#tab-estadisticas [hidden] {
+    display: none !important;
+}
+
+/* Filtro de período: una sola fila arriba */
+.est-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.est-periodos {
+    display: inline-flex;
+    padding: 4px;
+    gap: 2px;
+    border-radius: 50px;
+    background-color: var(--white);
+    border: 1px solid var(--nude);
+}
+
+.est-periodo {
+    padding: 0.5rem 1.15rem;
+    border: none;
+    border-radius: 50px;
+    background: none;
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.25s, color 0.25s;
+}
+
+.est-periodo:hover {
+    color: var(--rose-mauve-dark);
+}
+
+.est-periodo.activo {
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
+    color: var(--white);
+}
+
+.est-rango {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.est-rango::first-letter {
+    text-transform: uppercase;
+}
+
+/* Mientras llegan datos nuevos se mantiene lo dibujado, más tenue (sin saltos) */
+.est-cuerpo {
+    transition: opacity 0.25s ease;
+}
+
+.est-cuerpo.est-actualizando {
+    opacity: 0.5;
+}
+
+/* Tarjetas de resumen */
+.est-kpis {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.est-kpi {
+    margin: 0;
+    padding: 1.25rem 1.35rem;
+    background-color: var(--white);
+    border: 1px solid var(--nude);
+    border-radius: 1.1rem;
+    box-shadow: 0 6px 20px rgba(139, 74, 107, 0.06);
+}
+
+.est-kpi-principal {
+    background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-mauve-dark) 100%);
+    border-color: transparent;
+    box-shadow: 0 12px 30px rgba(139, 74, 107, 0.25);
+}
+
+.est-kpi-label {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    line-height: 1.35;
+}
+
+.est-kpi-valor {
+    margin: 0.35rem 0 0.2rem;
+    font-family: var(--font-sans);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--text-dark);
+}
+
+.est-kpi-principal .est-kpi-label {
+    color: rgba(251, 243, 236, 0.85);
+}
+
+.est-kpi-principal .est-kpi-valor {
+    font-size: 3rem;
+    color: var(--white);
+}
+
+.est-kpi-sub,
+.est-kpi-delta {
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    line-height: 1.4;
+}
+
+/* En la tarjeta principal (fondo malva) el cambio va en una cápsula clara para que se lea */
+.est-kpi-principal .est-kpi-delta {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+}
+
+.est-kpi-delta.sube { color: var(--est-sube); }
+.est-kpi-delta.baja { color: var(--est-baja); }
+.est-kpi-delta.igual { color: var(--text-soft); }
+
+/* Tarjetas de gráficos */
+.est-card {
+    margin: 0 0 1rem;
+    padding: 1.5rem;
+    background-color: var(--white);
+    border: 1px solid var(--nude);
+    border-radius: 1.25rem;
+    box-shadow: 0 6px 20px rgba(139, 74, 107, 0.06);
+}
+
+.est-card-cabecera {
+    margin-bottom: 1.25rem;
+}
+
+.est-card-cabecera h3 {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.est-card-cabecera p {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    margin-top: 0.2rem;
+}
+
+.est-dos-columnas {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1rem;
+}
+
+.est-dos-columnas.una-columna {
+    grid-template-columns: 1fr;
+}
+
+.est-sin-datos {
+    padding: 1.5rem 0;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+/* Embudo de reserva: barras horizontales, punta redondeada, base recta */
+.est-embudo {
+    display: flex;
+    flex-direction: column;
+}
+
+.est-paso {
+    display: grid;
+    grid-template-columns: minmax(170px, 15rem) 1fr 5.5rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.35rem 0;
+}
+
+.est-paso-texto {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.est-paso-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--est-pista);
+    color: var(--rose-mauve-dark);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.est-paso-pista {
+    height: 22px;
+    background-color: var(--est-pista);
+    border-radius: 0 4px 4px 0;
+    overflow: hidden;
+}
+
+.est-paso-barra {
+    height: 100%;
+    min-width: 2px;
+    background-color: var(--est-dato);
+    border-radius: 0 4px 4px 0;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.est-paso-valor {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.est-paso-valor strong {
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.est-paso-valor span {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+}
+
+.est-caida {
+    margin: 0.1rem 0 0.1rem calc(24px + 0.6rem);
+    font-size: 0.75rem;
+    color: var(--text-soft);
+}
+
+.est-hallazgo {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-top: 1.25rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 0.9rem;
+    background-color: var(--cream-light);
+    border: 1px solid var(--nude);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-dark);
+}
+
+.est-hallazgo-icono {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+/* Visitas por día: columnas */
+.est-columnas-envoltorio {
+    position: relative;
+    padding-top: 0.5rem;
+}
+
+.est-columnas {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    height: 210px;
+    padding-bottom: 1.75rem;
+}
+
+.est-eje {
+    position: relative;
+}
+
+.est-eje span {
+    position: absolute;
+    right: 0.5rem;
+    transform: translateY(50%);
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.est-area {
+    position: relative;
+}
+
+.est-guia {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--est-linea);
+}
+
+.est-guia-base {
+    background-color: var(--nude);
+}
+
+.est-barras {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.est-col {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.est-col:hover,
+.est-col.activa,
+.est-col:focus-visible {
+    background-color: rgba(168, 88, 127, 0.07);
+    outline: none;
+}
+
+.est-col-barra {
+    width: 100%;
+    max-width: 24px;
+    min-height: 2px;
+    background-color: var(--est-dato);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s;
+}
+
+.est-col.activa .est-col-barra,
+.est-col:hover .est-col-barra {
+    background-color: var(--est-dato-hover);
+}
+
+.est-col-fecha {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.45rem;
+    font-size: 0.68rem;
+    color: var(--text-soft);
+    white-space: nowrap;
+}
+
+.est-tooltip {
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.6rem;
+    background-color: var(--text-dark);
+    color: var(--white);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    z-index: 2;
+}
+
+.est-tooltip strong {
+    font-size: 0.95rem;
+}
+
+.est-tooltip span {
+    opacity: 0.8;
+}
+
+.est-tooltip span::first-letter {
+    text-transform: uppercase;
+}
+
+/* Páginas más vistas */
+.est-paginas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.est-pagina {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr 2.5rem;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.est-pagina-nombre {
+    font-size: 0.88rem;
+    color: var(--text-dark);
+}
+
+.est-pagina .est-paso-pista {
+    height: 16px;
+}
+
+.est-pagina-valor {
+    text-align: right;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabla con todos los números */
+.est-tabla-detalle {
+    margin: 0 0 1rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--white);
+    border: 1px solid var(--nude);
+    border-radius: 1.25rem;
+}
+
+.est-tabla-detalle summary {
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--rose-mauve-dark);
+}
+
+.est-tabla-envoltorio {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.est-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.est-tabla th,
+.est-tabla td {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--est-linea);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.est-tabla th:first-child {
+    text-align: left;
+}
+
+.est-tabla thead th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.est-tabla tbody th {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.est-tabla tfoot th,
+.est-tabla tfoot td {
+    font-weight: 600;
+    border-bottom: none;
+    color: var(--text-dark);
+}
+
+.est-nota {
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .est-kpis {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* La principal arriba y la última abajo ocupan todo el ancho: 1 + 2 + 1, sin tarjetas sueltas */
+    .est-kpi-principal,
+    .est-kpi:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .est-dos-columnas {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .est-card {
+        padding: 1.15rem;
+    }
+
+    .est-kpi-valor {
+        font-size: 1.6rem;
+    }
+
+    .est-kpi-principal .est-kpi-valor {
+        font-size: 2.6rem;
+    }
+
+    /* El embudo pasa a dos líneas: texto arriba, barra y número abajo */
+    .est-paso {
+        grid-template-columns: 1fr auto;
+        gap: 0.35rem 0.75rem;
+        padding: 0.4rem 0;
+    }
+
+    .est-paso-texto {
+        grid-column: 1 / -1;
+    }
+
+    .est-caida {
+        margin-left: 0;
+    }
+
+    .est-columnas {
+        height: 180px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .est-paso-barra,
+    .est-col-barra {
+        transition: none;
+    }
 }
 
 /* PANEL: DÍAS EN QUE VALE UNA PROMO (cápsulas que se pintan al marcarlas) */

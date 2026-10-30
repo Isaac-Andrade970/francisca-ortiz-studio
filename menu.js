@@ -1,3 +1,36 @@
+// ESTADÍSTICAS (contador anónimo para la pestaña Estadísticas del panel) \\
+// Cada evento se cuenta una vez por sesión (sessionStorage, no cookies) y no se manda nada de la persona.
+// Los dispositivos donde Francisca entró al panel quedan marcados y no se cuentan.
+
+window.registrarEstadistica = function (...eventos) {
+    try {
+        if (typeof API_URL === 'undefined') return;
+        if (localStorage.getItem('fo_no_contar') === '1') return;
+
+        const nuevos = eventos.filter((e) => !sessionStorage.getItem('fo_est_' + e));
+        if (nuevos.length === 0) return;
+        nuevos.forEach((e) => sessionStorage.setItem('fo_est_' + e, '1'));
+
+        // keepalive: el aviso llega aunque la persona se vaya de la página justo después
+        fetch(`${API_URL}/estadisticas/evento`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventos: nuevos }),
+            keepalive: true
+        }).catch(() => {});
+    } catch (error) {
+        // Sin sessionStorage (modo privado estricto) simplemente no se cuenta
+    }
+};
+
+(function () {
+    // Cloudflare sirve las páginas con y sin ".html": se aceptan las dos formas
+    const ruta = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/index';
+    const PAGINAS = { '/index': 'pag_inicio', '/servicios': 'pag_servicios', '/tienda': 'pag_tienda', '/promociones': 'pag_promociones', '/reservar': 'pag_reservar' };
+    const pagina = PAGINAS[ruta];
+    if (pagina) window.registrarEstadistica('visita_sitio', pagina);
+})();
+
 // MENÚ HAMBURGUESA (compartido por todas las páginas) \\
 
 (function () {

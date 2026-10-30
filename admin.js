@@ -21,6 +21,7 @@ let horariosCargados = false;
 let promocionesCargadas = false;
 let promocionesActuales = [];
 let resenasGoogleActuales = [];
+let estadisticasDias = 7;
 let clientesCargados = false;
 let clientesActuales = [];
 let clientaAbiertaEmail = null;
@@ -30,6 +31,8 @@ let clientaAbiertaEmail = null;
 function mostrarPanel() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-content').style.display = 'block';
+    // Este dispositivo es de Francisca: sus visitas al sitio no se cuentan en Estadísticas
+    try { localStorage.setItem('fo_no_contar', '1'); } catch (e) { /* sin almacenamiento: no pasa nada */ }
     if (rolSesion === 'superadmin') {
         const sec = document.getElementById('superadmin-password');
         if (sec) sec.style.display = 'block';
@@ -320,6 +323,15 @@ function cambiarTab(nombre) {
         cargarHorariosAdmin();
         horariosCargados = true;
     }
+
+    // Las estadísticas se recargan cada vez que se abre la pestaña (siempre al día)
+    if (nombre === 'estadisticas') {
+        cargarEstadisticas(estadisticasDias);
+    }
+
+    // En celular la pestaña elegida puede quedar fuera de vista: la traemos al centro
+    const botonActivo = document.querySelector(`.admin-tab[data-tab="${nombre}"]`);
+    if (botonActivo) botonActivo.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
 
     if (nombre === 'clientas' && !clientesCargados) {
         cargarClientes();
@@ -909,6 +921,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-guardar-observaciones').addEventListener('click', guardarObservacionesClienta);
     document.getElementById('modal-clienta').addEventListener('click', (e) => {
         if (e.target.id === 'modal-clienta') cerrarClienta();
+    });
+
+    document.querySelectorAll('.est-periodo').forEach(boton => {
+        boton.addEventListener('click', () => {
+            estadisticasDias = Number(boton.getAttribute('data-dias'));
+            document.querySelectorAll('.est-periodo').forEach(b => b.classList.toggle('activo', b === boton));
+            cargarEstadisticas(estadisticasDias);
+        });
     });
 
     document.getElementById('btn-nueva-resena-google').addEventListener('click', () => abrirFormResenaGoogle(null));
@@ -1807,4 +1827,297 @@ async function guardarConfigGoogle() {
         boton.disabled = false;
         boton.textContent = 'Guardar enlaces y promedio';
     }
+}
+
+// ESTADÍSTICAS \\
+// Todo se dibuja con HTML/CSS (sin librerías). Un solo tono (malva) porque cada gráfico tiene una sola serie.
+
+const API_ESTADISTICAS = API_URL + '/estadisticas';
+
+function numeroEst(n) {
+    return Number(n || 0).toLocaleString('es-CL');
+}
+
+function porcentajeEst(parte, total) {
+    return total > 0 ? Math.round((parte / total) * 100) : null;
+}
+
+// "2026-10-24" -> fecha local sin desfase de zona horaria
+function fechaEst(texto) {
+    const [a, m, d] = texto.split('-').map(Number);
+    return new Date(a, m - 1, d);
+}
+
+function fechaCortaEst(texto) {
+    return fechaEst(texto).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }).replace('.', '');
+}
+
+function fechaLargaEst(texto) {
+    return fechaEst(texto).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// Redondea el máximo del eje a un número "limpio" (5, 10, 20, 50, 100...)
+function maximoLimpio(valor) {
+    if (valor <= 5) return 5;
+    const potencia = Math.pow(10, Math.floor(Math.log10(valor)));
+    const paso = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(p => p * potencia >= valor);
+    return paso * potencia;
+}
+
+async function cargarEstadisticas(dias) {
+    const cuerpo = document.getElementById('est-cuerpo');
+    const cargando = document.getElementById('est-cargando');
+    const error = document.getElementById('est-error');
+
+    // Al cambiar de período se mantiene lo dibujado (más tenue) mientras llegan los datos nuevos
+    if (cuerpo.hidden) cargando.hidden = false;
+    else cuerpo.classList.add('est-actualizando');
+    error.hidden = true;
+
+    try {
+        const respuesta = await fetch(`${API_ESTADISTICAS}?dias=${dias}`, {
+            headers: { 'Authorization': `Bearer ${tokenSesion}` }
+        });
+        if (!respuesta.ok) throw new Error('Respuesta ' + respuesta.status);
+        const datos = await respuesta.json();
+        if (dias !== estadisticasDias) return; // llegó tarde una respuesta de otro período
+
+        dibujarEstadisticas(datos);
+        cuerpo.hidden = false;
+    } catch (e) {
+        console.error('Error al cargar estadísticas:', e);
+        if (cuerpo.hidden) error.hidden = false;
+    } finally {
+        cargando.hidden = true;
+        cuerpo.classList.remove('est-actualizando');
+    }
+}
+
+function dibujarEstadisticas(d) {
+    const t = d.totales;
+
+    document.getElementById('est-rango').textContent = d.dias === 1
+        ? `Hoy, ${fechaLargaEst(d.hasta)}`
+        : `${fechaCortaEst(d.desde)} – ${fechaCortaEst(d.hasta)}`;
+
+    // Tarjetas
+    document.getElementById('kpi-visitas').textContent = numeroEst(t.visita_sitio);
+    const delta = document.getElementById('kpi-visitas-delta');
+    const anterior = d.anteriores ? d.anteriores.visita_sitio : 0;
+    const nombreAnterior = d.dias === 1 ? 'ayer' : `los ${d.dias} días anteriores`;
+    if (anterior > 0) {
+        const cambio = Math.round(((t.visita_sitio - anterior) / anterior) * 100);
+        delta.className = 'est-kpi-delta ' + (cambio > 0 ? 'sube' : cambio < 0 ? 'baja' : 'igual');
+        delta.textContent = cambio === 0
+            ? `= Igual que ${nombreAnterior}`
+            : `${cambio > 0 ? '▲' : '▼'} ${Math.abs(cambio)}% vs. ${nombreAnterior}`;
+    } else {
+        delta.className = 'est-kpi-delta igual';
+        delta.textContent = d.anteriores ? `Sin visitas ${nombreAnterior}` : 'Aún no hay período anterior para comparar';
+    }
+
+    document.getElementById('kpi-promos').textContent = numeroEst(t.pag_promociones);
+    document.getElementById('kpi-promos-sub').textContent =
+        `${numeroEst(t.promo_click)} ${t.promo_click === 1 ? 'tocó' : 'tocaron'} "Reservar con esta promo"`;
+
+    document.getElementById('kpi-reservas').textContent = numeroEst(t.reserva_pagada);
+    document.getElementById('kpi-reservas-sub').textContent =
+        `${numeroEst(t.reserva_pagada_promo)} con promoción`;
+
+    const conversion = porcentajeEst(t.reserva_pagada, t.pag_reservar);
+    document.getElementById('kpi-conversion').textContent = conversion === null ? '—' : `${Math.min(conversion, 100)}%`;
+
+    dibujarEmbudo(t);
+    dibujarColumnas(d);
+    dibujarPaginas(t);
+    dibujarTablaEst(d);
+
+    document.getElementById('est-nota').textContent = (d.inicioConteo
+        ? `Contando desde el ${fechaLargaEst(d.inicioConteo)}. `
+        : 'Todavía no hay datos: la página empieza a contar desde hoy. ')
+        + 'Las visitas desde este dispositivo no se cuentan, porque aquí entras a tu panel. Solo se guardan números: nada de nombres ni datos de las personas.';
+}
+
+const PASOS_EMBUDO = [
+    { clave: 'pag_reservar', texto: 'Entraron a Reservar' },
+    { clave: 'paso_servicio', texto: 'Eligieron servicio' },
+    { clave: 'paso_fecha', texto: 'Eligieron día y hora' },
+    { clave: 'pago_iniciado', texto: 'Fueron a pagar el abono' },
+    { clave: 'reserva_pagada', texto: 'Pagaron y quedó la reserva' }
+];
+
+// Qué puede significar que la gente se vaya en cada paso (para el aviso de abajo)
+const CONSEJOS_EMBUDO = {
+    paso_servicio: 'Puede que no encuentren el servicio que buscan o que los precios las hagan dudar.',
+    paso_fecha: 'Puede que falten horas disponibles o que los días no les acomoden.',
+    pago_iniciado: 'Puede que el formulario de datos o el abono las haga dudar.',
+    reserva_pagada: 'Puede que tengan problemas al pagar en Mercado Pago.'
+};
+
+function dibujarEmbudo(t) {
+    const contenedor = document.getElementById('est-embudo');
+    const hallazgo = document.getElementById('est-hallazgo');
+    contenedor.innerHTML = '';
+    hallazgo.hidden = true;
+
+    const base = t.pag_reservar || 0;
+    if (base === 0) {
+        contenedor.innerHTML = '<p class="est-sin-datos">Todavía nadie entró a Reservar en este período.</p>';
+        return;
+    }
+
+    let mayorCaida = null;
+    PASOS_EMBUDO.forEach((paso, i) => {
+        const valor = t[paso.clave] || 0;
+
+        if (i > 0) {
+            const previo = t[PASOS_EMBUDO[i - 1].clave] || 0;
+            const perdidos = previo - valor;
+            if (perdidos > 0 && previo > 0) {
+                const pct = Math.round((perdidos / previo) * 100);
+                const caida = document.createElement('p');
+                caida.className = 'est-caida';
+                caida.textContent = `↓ ${numeroEst(perdidos)} no ${perdidos === 1 ? 'siguió' : 'siguieron'} (${pct}%)`;
+                contenedor.appendChild(caida);
+                // Solo cuenta como "hallazgo" si hay suficientes personas para que no sea casualidad
+                if (previo >= 3 && (!mayorCaida || pct > mayorCaida.pct)) mayorCaida = { pct, paso };
+            }
+        }
+
+        const ancho = Math.min(100, (valor / base) * 100);
+        const fila = document.createElement('div');
+        fila.className = 'est-paso';
+        fila.innerHTML = `
+            <p class="est-paso-texto"><span class="est-paso-num">${i + 1}</span><span class="est-paso-label"></span></p>
+            <div class="est-paso-pista"><div class="est-paso-barra" style="width:${ancho}%"></div></div>
+            <p class="est-paso-valor"><strong>${numeroEst(valor)}</strong><span>${Math.min(100, porcentajeEst(valor, base))}%</span></p>
+        `;
+        fila.querySelector('.est-paso-label').textContent = paso.texto;
+        fila.setAttribute('aria-label', `${paso.texto}: ${valor} personas, ${porcentajeEst(valor, base)}% de las que entraron`);
+        contenedor.appendChild(fila);
+    });
+
+    if (mayorCaida) {
+        hallazgo.innerHTML = '';
+        const icono = document.createElement('span');
+        icono.className = 'est-hallazgo-icono';
+        icono.textContent = '💡';
+        const texto = document.createElement('span');
+        texto.append('Donde más personas se van es al pasar a ');
+        const fuerte = document.createElement('strong');
+        fuerte.textContent = `"${mayorCaida.paso.texto}"`;
+        texto.append(fuerte, ` (${mayorCaida.pct}% no siguió). ${CONSEJOS_EMBUDO[mayorCaida.paso.clave] || ''}`);
+        hallazgo.append(icono, texto);
+        hallazgo.hidden = false;
+    }
+}
+
+function dibujarColumnas(d) {
+    const tarjeta = document.getElementById('est-card-dias');
+    const contenedor = document.getElementById('est-columnas');
+    const tooltip = document.getElementById('est-tooltip');
+    tooltip.hidden = true;
+
+    // Con "Hoy" hay un solo día: el gráfico por día no aporta
+    tarjeta.hidden = d.dias === 1;
+    tarjeta.parentElement.classList.toggle('una-columna', d.dias === 1);
+    if (d.dias === 1) return;
+
+    const valores = d.serie.map(dia => dia.visita_sitio || 0);
+    const maximo = maximoLimpio(Math.max(...valores, 1));
+    const cadaCuanto = d.dias <= 7 ? 1 : 5; // etiquetas del eje: todas con 7 días, una cada 5 con 30
+
+    contenedor.innerHTML = `
+        <div class="est-eje">
+            <span style="bottom:100%">${numeroEst(maximo)}</span>
+            <span style="bottom:50%">${numeroEst(Math.round(maximo / 2))}</span>
+            <span style="bottom:0%">0</span>
+        </div>
+        <div class="est-area">
+            <div class="est-guia" style="bottom:100%"></div>
+            <div class="est-guia" style="bottom:50%"></div>
+            <div class="est-guia est-guia-base" style="bottom:0%"></div>
+            <div class="est-barras"></div>
+        </div>
+    `;
+
+    const barras = contenedor.querySelector('.est-barras');
+    d.serie.forEach((dia, i) => {
+        const valor = dia.visita_sitio || 0;
+        const ultimo = i === d.serie.length - 1;
+        const columna = document.createElement('button');
+        columna.type = 'button';
+        columna.className = 'est-col';
+        columna.setAttribute('aria-label', `${fechaLargaEst(dia.fecha)}: ${valor} visitas`);
+        columna.innerHTML = `
+            <span class="est-col-barra" style="height:${(valor / maximo) * 100}%"></span>
+            <span class="est-col-fecha">${i % cadaCuanto === 0 || ultimo ? (d.dias <= 7
+                ? fechaEst(dia.fecha).toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '') + ' ' + fechaEst(dia.fecha).getDate()
+                : fechaCortaEst(dia.fecha)) : ''}</span>
+        `;
+
+        const mostrar = () => {
+            tooltip.innerHTML = '';
+            const fuerte = document.createElement('strong');
+            fuerte.textContent = `${numeroEst(valor)} ${valor === 1 ? 'visita' : 'visitas'}`;
+            const fecha = document.createElement('span');
+            fecha.textContent = fechaLargaEst(dia.fecha) + (ultimo ? ' (hoy, en curso)' : '');
+            tooltip.append(fuerte, fecha);
+            tooltip.hidden = false;
+            const caja = contenedor.parentElement.getBoundingClientRect();
+            const col = columna.getBoundingClientRect();
+            const izquierda = Math.min(Math.max(col.left - caja.left + col.width / 2, 70), caja.width - 70);
+            tooltip.style.left = `${izquierda}px`;
+            columna.classList.add('activa');
+        };
+        const ocultar = () => { tooltip.hidden = true; columna.classList.remove('activa'); };
+        columna.addEventListener('pointerenter', mostrar);
+        columna.addEventListener('focus', mostrar);
+        columna.addEventListener('click', mostrar);
+        columna.addEventListener('pointerleave', ocultar);
+        columna.addEventListener('blur', ocultar);
+        barras.appendChild(columna);
+    });
+}
+
+function dibujarPaginas(t) {
+    const contenedor = document.getElementById('est-paginas');
+    const paginas = [
+        { texto: 'Inicio', valor: t.pag_inicio },
+        { texto: 'Servicios', valor: t.pag_servicios },
+        { texto: 'Reservar', valor: t.pag_reservar },
+        { texto: 'Promociones', valor: t.pag_promociones },
+        { texto: 'Tienda', valor: t.pag_tienda }
+    ].sort((a, b) => b.valor - a.valor);
+    const maximo = Math.max(...paginas.map(p => p.valor), 1);
+
+    contenedor.innerHTML = '';
+    paginas.forEach(p => {
+        const fila = document.createElement('div');
+        fila.className = 'est-pagina';
+        fila.innerHTML = `
+            <span class="est-pagina-nombre"></span>
+            <div class="est-paso-pista"><div class="est-paso-barra" style="width:${(p.valor / maximo) * 100}%"></div></div>
+            <strong class="est-pagina-valor">${numeroEst(p.valor)}</strong>
+        `;
+        fila.querySelector('.est-pagina-nombre').textContent = p.texto;
+        contenedor.appendChild(fila);
+    });
+}
+
+function dibujarTablaEst(d) {
+    const tabla = document.getElementById('est-tabla');
+    const columnas = [
+        ['Visitas', 'visita_sitio'], ['Promociones', 'pag_promociones'], ['Entraron a Reservar', 'pag_reservar'],
+        ['Eligieron servicio', 'paso_servicio'], ['Eligieron día y hora', 'paso_fecha'],
+        ['Fueron a pagar', 'pago_iniciado'], ['Pagaron', 'reserva_pagada']
+    ];
+    const filas = [...d.serie].reverse().map(dia => `
+        <tr><th scope="row">${fechaCortaEst(dia.fecha)}</th>${columnas.map(([, c]) => `<td>${numeroEst(dia[c])}</td>`).join('')}</tr>
+    `).join('');
+    tabla.innerHTML = `
+        <thead><tr><th scope="col">Día</th>${columnas.map(([nombre]) => `<th scope="col">${nombre}</th>`).join('')}</tr></thead>
+        <tbody>${filas}</tbody>
+        <tfoot><tr><th scope="row">Total</th>${columnas.map(([, c]) => `<td>${numeroEst(d.totales[c])}</td>`).join('')}</tr></tfoot>
+    `;
 }
